@@ -1,4 +1,5 @@
 #!/bin/bash
+# joriordan@alienvault.com
 function usage
 {
     echo "usage: organization_new_acc.sh [-h] 
