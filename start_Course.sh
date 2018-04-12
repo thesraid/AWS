@@ -1,40 +1,29 @@
 #!/bin/bash
 function usage
 {
-    echo "usage: organization_new_acc.sh [-h] 
-				      --account_name [-n] ACCOUNT_NAME
-				      --user_name [-u] USER_NAME
-                        	      --password [-p] PASSWORD
-                        	      --group_name [-g] GROUP_NAME
-                        	      --policy [-y] POLICY
-                                      [--region [-r] AWS_REGION]"
+    echo "usage: start_Course.sh [-h] 
+				      --account_name [-a] ACCOUNT_NAME
+				      --region [r] REGION
+				      --course [-c] COURSE"
 }
 
 accName=""
 role="OrganizationAccountAccessRole"
 destinationOUname="Students"
 region=""
+course=""
 url=""
 
 while [ "$1" != "" ]; do
     case $1 in
-        -n | --account_name )   shift
+        -a | --account_name )   shift
                                 accName=$1
                                 ;;
         -r | --region )        shift
                                 region=$1
                                 ;;
-        -u | --user_name )      shift
-                                userName=$1
-                                ;;
-        -p | --password)        shift
-                                userPassword=$1
-                                ;;
-        -g | --group_name )     shift
-                                groupName=$1
-                                ;;
-        -y | --policy )         shift
-                                policy=$1
+        -c | --course )         shift
+                                course=$1
                                 ;;
         -h | --help )           usage
                                 exit
@@ -42,12 +31,6 @@ while [ "$1" != "" ]; do
     esac
     shift
 done
-
-#if [ "$profile" = "" ] || [ "$destinationOUname" = "" ] || [ "$region" = "" ] || [ "$userName" = "" ] || [ "$userPassword" = "" ] || [ "$groupName" = "" ] || [ "$policy" = "" ]
-#then
-#  usage
-#  exit
-#fi
 
 if [ "$accName" = "" ]
 then
@@ -97,7 +80,7 @@ then
   exit 1
 fi
 
-printf "Connected valid to $accName until $expiry\n"
+printf "Connection valid to $accName until $expiry\n"
 
 aws configure set region eu-west-1 --profile $profile
 if [ $? -ne 0 ]
@@ -121,13 +104,16 @@ then
 fi
 
 
-printf "\nAvailable courses\n"
-printf "   ANYSA\n"
-printf "\nChoose the course : "
-read course
-printf "You chose $course\n"
+if [ "$course" = "" ]
+then
+   printf "\nAvailable courses\n"
+   printf "   ANYSA\n"
+   printf "\nChoose the course : "
+   read course
+   printf "You chose $course\n"
+fi
 
-if ! [ $course = "ANYSA" ]
+if ! [ "$course" = "ANYSA" ]
 then
    printf "Invalid course\n"
    exit
@@ -138,7 +124,7 @@ url="https://s3-eu-west-1.amazonaws.com/deploy-student-env/ANYSA_VPC.json"
 
 
 cfcntr=0
-printf "Waiting for CF Service ..."
+printf "Waiting for CloudFormation Service ..."
 aws cloudformation list-stacks --profile $profile > /dev/null 2>&1
 actOut=$?
 while [[ $actOut -ne 0 && $cfcntr -le 10 ]]
@@ -156,32 +142,33 @@ done
 
 if [ $cfcntr -gt 10 ]
 then
-  printf "\nCF Service not available\n"
+  printf "\nCloudFormation Service not available\n"
   exit 1
 fi
 
-printf "\nCreate VPC Under New Account\n"
+printf "\nCreating Student Lab Under New Account\n"
 aws cloudformation create-stack --stack-name VPC --template-url $url --parameters ParameterKey=JEOSName,ParameterValue=JEOS ParameterKey=WinVictName,ParameterValue=WinVict ParameterKey=PTName,ParameterValue=PTest ParameterKey=WinJumpboxName,ParameterValue=JumpBox --profile $profile > /dev/null 2>&1
 if [ $? -ne 0 ]
 then
-  printf "CF VPC Stack Failed to Create\n"
+  printf "Student Lab Failed to Create\n"
   exit 1
 fi
 
-printf "Waiting for CF Stack to Finish ..."
+printf "Waiting for Student Lab to start ..."
 cfStat=$(aws cloudformation describe-stacks --stack-name VPC --profile $profile --query 'Stacks[0].[StackStatus]' --output text)
 while [ $cfStat != "CREATE_COMPLETE" ]
 do
   sleep 5
   printf "."
   cfStat=$(aws cloudformation describe-stacks --stack-name VPC --profile $profile --query 'Stacks[0].[StackStatus]' --output text)
-  if [ $cfStat = "CREATE_FAILED" ]
+  if [ $cfStat = "CREATE_FAILED" ] || [ $cfStat = "ROLLBACK_COMPLETE"  ]
   then
-    printf "\nVPC Failed to Create\n"
+    printf "\nStudent Lab failed to start\n"
+    printf "ERROR : $cfStat\n"
     exit 1
   fi
 done
-printf "\nVPC Created\n"
+printf "\nStudent Lab started\n"
 
 userName=$accName
 groupName=$accName
@@ -230,8 +217,8 @@ fi
 
 printf "Students can now log into\n"
 printf "URL  : https://$accID.signin.aws.com\n"
-printf "USER : $user\n"
-printf "PASS : $password\n"
+printf "USER : $userName\n"
+printf "PASS : $userPassword\n"
 printf "REG  : $region  < Remind the student to switch to this region to see his lab\n"
-
+aws cloudformation describe-stacks --stack-name VPC --profile $profile --query 'Stacks[0].[Outputs]' --output text
 

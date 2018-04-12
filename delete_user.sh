@@ -3,35 +3,25 @@ function usage
 {
     echo "
 usage: new_user.sh [-h]	--user_name [-u] USER_NAME
-		      	--password [-p] PASSWORD
                         --group_name [-g] GROUP_NAME
-		      	--policy [-o] POLICY
                         --cl_profile_name [-c] CLI_PROFILE_NAME
 "
 }
 
 userName=""
-userPassword=""
 groupName=""
-policy=""
-newProfile=""
+profile=""
 
 while [ "$1" != "" ]; do
     case $1 in
         -u | --user_name )   	shift
                                 userName=$1
                                 ;;
-        -p | --password)  	shift
-                                userPassword=$1
-                                ;;
         -g | --group_name ) 	shift
                                 groupName=$1
                                 ;;
-        -o | --policy )        	shift
-                                policy=$1
-                                ;;
         -c | --cl_profile_name ) shift
-                                newProfile=$1
+                                profile=$1
                                 ;;
         -h | --help )           usage
                                 exit
@@ -40,21 +30,19 @@ while [ "$1" != "" ]; do
     shift
 done
 
-if [ "$userName" = "" ] || [ "$userPassword" = "" ] || [ "$groupName" = "" ] || [ "$policy" = "" ] || [ "$newProfile" = "" ]
+if [ "$userName" = "" ] || [ "$groupName" = "" ] || [ "$profile" = "" ]
 then
   usage
   exit
 fi
 
 echo USER : $userName
-echo PASS : $userPassword
 echo GRP  : $groupName
-echo POL  : $policy
-echo PROF : $newProfile
+echo PROF : $profile
 
 
 
-aws iam delete-user-policy --user-name $userName --policy-name StudentPowerUserRole --profile $newProfile
+aws iam delete-user-policy --user-name $userName --policy-name StudentPowerUserRole --profile $profile
 if [ $? -ne 0 ]
 then
   printf "Error occured deleting a policy\n"
@@ -62,7 +50,7 @@ then
 fi
 printf "Removed policy from user\n"
 
-aws iam remove-user-from-group --group-name $groupName --user-name $userName --profile $newProfile
+aws iam remove-user-from-group --group-name $groupName --user-name $userName --profile $profile
 if [ $? -ne 0 ]
 then
   printf "Error occured removing the user from a group\n"
@@ -70,7 +58,7 @@ then
 fi
 printf "Removed user from group\n"
 
-aws iam delete-group --group-name $groupName --profile $newProfile
+aws iam delete-group --group-name $groupName --profile $profile
 if [ $? -ne 0 ]
 then
   printf "Error occured deleting the group\n"
@@ -78,7 +66,7 @@ then
 fi
 printf "Deleted group\n"
 
-aws iam delete-login-profile --user-name $userName --profile $newProfile
+aws iam delete-login-profile --user-name $userName --profile $profile
 if [ $? -ne 0 ]
 then
   printf "Error occured remving the users login permissions (profile) \n"
@@ -86,7 +74,7 @@ then
 fi
 printf "Removed user login permissions\n"
 
-aws iam delete-user --user-name $userName --profile $newProfile
+aws iam delete-user --user-name $userName --profile $profile
 if [ $? -ne 0 ]
 then
   printf "Error occured deleting the user\n"
