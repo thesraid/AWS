@@ -42,7 +42,7 @@ echo PROF : $profile
 
 
 
-aws iam delete-user-policy --user-name $userName --policy-name StudentPowerUserRole --profile $profile
+aws iam delete-user-policy --user-name $userName --policy-name StudentRole --profile $profile
 if [ $? -ne 0 ]
 then
   printf "Error occured deleting a policy\n"

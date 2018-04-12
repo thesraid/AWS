@@ -42,8 +42,10 @@ userName=$accName
 groupName=$accName
 
 
+# LOOP ALL VPCS HERE
+
 printf "\nDeleting Lab Under Account\n"
-aws cloudformation delete-stack --stack-name VPC --profile cliaccount
+aws cloudformation delete-stack --stack-name VPC --profile $profile
 if [ $? -ne 0 ]
 then
   printf "Student Lab FAILED to Delete\n"
@@ -68,7 +70,7 @@ printf "Any errors above regarding the VPC no longer being present is due to the
 printf "\nStudent Lab VPC deleted\n"
 
 
-aws iam delete-user-policy --user-name $userName --policy-name StudentPowerUserRole --profile $profile
+aws iam delete-user-policy --user-name $userName --policy-name StudentRole --profile $profile
 if [ $? -ne 0 ]
 then
   printf "Error occured deleting a policy\n"

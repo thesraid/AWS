@@ -3,6 +3,7 @@ function usage
 {
     echo "usage: start_Course.sh [-h] 
 				      --account_name [-a] ACCOUNT_NAME
+				      --password [-p] PASSWORD
 				      --region [r] REGION
 				      --course [-c] COURSE"
 }
@@ -19,7 +20,10 @@ while [ "$1" != "" ]; do
         -a | --account_name )   shift
                                 accName=$1
                                 ;;
-        -r | --region )        shift
+	-p | --password)	shift
+				userPassword=$1
+				;;
+        -r | --region )         shift
                                 region=$1
                                 ;;
         -c | --course )         shift
@@ -52,6 +56,14 @@ printf "The account ID for $accName is $accID\n"
 
 profile=$accName"Profile"
 printf "Profile name is now $profile\n"
+
+if [ "$userPassword" = "" ]
+then
+   printf "\nEnter desired user password : "
+   read userPassword
+   printf "\n"
+fi
+
 
 if [ "$region" = "" ]
 then
@@ -172,8 +184,7 @@ printf "\nStudent Lab started\n"
 
 userName=$accName
 groupName=$accName
-userPassword="AL13NTRA1N1NGAW55tud3ntAcc0untPaSSw0rd"
-policy="https://s3-eu-west-1.amazonaws.com/deploy-student-env/PowerUserPolicy.json"
+policy="file://StudentRole.json"
 
 printf "Creating a new user\n"
 aws iam create-user --user-name $userName --profile $profile > /dev/null 2>&1
@@ -200,7 +211,7 @@ then
 fi
 
 printf "Making the user a poweruser\n"
-aws iam put-user-policy --user-name $userName --policy-name StudentPowerUserRole --policy-document $policy --profile $profile > /dev/null 2>&1
+aws iam put-user-policy --user-name $userName --policy-name StudentRole --policy-document $policy --profile $profile > /dev/null 2>&1
 if [ $? -ne 0 ]
 then
   printf "Error occured assigning the policy to the user\n"
@@ -216,7 +227,7 @@ then
 fi
 
 printf "Students can now log into\n"
-printf "URL  : https://$accID.signin.aws.com\n"
+printf "URL  : https://$accID.signin.aws.amazon.com\n"
 printf "USER : $userName\n"
 printf "PASS : $userPassword\n"
 printf "REG  : $region  < Remind the student to switch to this region to see his lab\n"
