@@ -42,33 +42,36 @@ userName=$accName
 groupName=$accName
 
 
-# LOOP ALL VPCS HERE
+STACKS=($(aws cloudformation describe-stacks --query Stacks[*].StackName --output text --profile cliaccount))
 
-printf "\nDeleting Lab Under Account\n"
-aws cloudformation delete-stack --stack-name VPC --profile $profile
-if [ $? -ne 0 ]
-then
-  printf "Student Lab FAILED to Delete\n"
-  exit 1
-fi
-
-printf "Waiting for Student Lab to delete ..."
-cfStat=$(aws cloudformation describe-stacks --stack-name VPC --profile $profile --query 'Stacks[0].[StackStatus]' --output text)
-while [ "$cfStat" = "DELETE_IN_PROGRESS" ]
+for STACK in "${STACKS[@]}"
 do
-  sleep 5
-  printf "."
-  cfStat=$(aws cloudformation describe-stacks --stack-name VPC --profile $profile --query 'Stacks[0].[StackStatus]' --output text)
-  if [ "$cfStat" = "DELETE_FAILED" ]
-  then
-    printf "\nStudent Lab FAILED to delete\n"
-    printf "MANUAL CLEANUP REQUIRED\n"
-    exit 1
-  fi
-done
-printf "Any errors above regarding the VPC no longer being present is due to the deletion and can be ignored\n"
-printf "\nStudent Lab VPC deleted\n"
 
+   printf "\nDeleting $STACK \n"
+   aws cloudformation delete-stack --stack-name $STACK --profile $profile
+   if [ $? -ne 0 ]
+   then
+     printf "$STACK FAILED to Delete\n"
+     exit 1
+   fi
+
+   printf "Waiting for $STACK to delete ..."
+   cfStat=$(aws cloudformation describe-stacks --stack-name $STACK --profile $profile --query 'Stacks[0].[StackStatus]' --output text)
+   while [ "$cfStat" = "DELETE_IN_PROGRESS" ]
+   do
+     sleep 5
+     printf "."
+     cfStat=$(aws cloudformation describe-stacks --stack-name $STACK --profile $profile --query 'Stacks[0].[StackStatus]' --output text)
+     if [ "$cfStat" = "DELETE_FAILED" ]
+     then
+       printf "\n$STACK FAILED to delete\n"
+       printf "MANUAL CLEANUP REQUIRED\n"
+       exit 1
+     fi
+   done
+   printf "An error occurred (ValidationError) when calling the DescribeStacks operation: Stack with id $STACK does not exist << IGNORE THIS ERROR\n"
+   printf "\n$STACK deleted\n"
+done
 
 aws iam delete-user-policy --user-name $userName --policy-name StudentRole --profile $profile
 if [ $? -ne 0 ]
