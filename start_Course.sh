@@ -227,9 +227,9 @@ then
 fi
 
 printf "Students can now log into\n"
-printf "URL  : https://$accID.signin.aws.amazon.com\n"
+printf "URL  : https://$region.signin.aws.amazon.com\n"
+printf "ACC  : $accID\n"
 printf "USER : $userName\n"
 printf "PASS : $userPassword\n"
-printf "REG  : $region  < Remind the student to switch to this region to see his lab\n"
 aws cloudformation describe-stacks --stack-name VPC --profile $profile --query 'Stacks[0].[Outputs]' --output text
 

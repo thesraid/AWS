@@ -94,6 +94,52 @@ aws configure set region $region --profile $newProfile
 aws configure set role_arn $accARN --profile $newProfile
 aws configure set source_profile default --profile $newProfile
 
+cfcntr=0
+printf "Waiting for CF Service ..."
+aws cloudformation list-stacks --profile $newProfile > /dev/null 2>&1
+actOut=$?
+while [[ $actOut -ne 0 && $cfcntr -le 10 ]]
+do
+  sleep 5
+  aws cloudformation list-stacks --profile $newProfile > /dev/null 2>&1
+  actOut=$?
+  if [ $actOut -eq 0 ]
+  then
+    break
+  fi
+  printf "."
+  cfcntr=$[$cfcntr +1]
+done
+
+if [ $cfcntr -gt 10 ]
+then
+  printf "\nCF Service not available\n"
+  exit 1
+fi
+
+printf "\nCreate VPC Under New Account\n"
+aws cloudformation create-stack --stack-name VPC --template-url file://VPC.json --parameters ParameterKey=JEOSName,ParameterValue=JEOS ParameterKey=WinVictName,ParameterValue=WinVict ParameterKey=PTName,ParameterValue=PTest ParameterKey=WinJumpboxName,ParameterValue=JumpBox --profile $newProfile > /dev/null 2>&1
+if [ $? -ne 0 ]
+then
+  printf "CF VPC Stack Failed to Create\n"
+  exit 1
+fi
+
+printf "Waiting for CF Stack to Finish ..."
+cfStat=$(aws cloudformation describe-stacks --stack-name VPC --profile $newProfile --query 'Stacks[0].[StackStatus]' --output text)
+while [ $cfStat != "CREATE_COMPLETE" ]
+do
+  sleep 5
+  printf "."
+  cfStat=$(aws cloudformation describe-stacks --stack-name VPC --profile $newProfile --query 'Stacks[0].[StackStatus]' --output text)
+  if [ $cfStat = "CREATE_FAILED" ]
+  then
+    printf "\nVPC Failed to Create\n"
+    exit 1
+  fi
+done
+printf "\nVPC Created\n"
+
 printf "Creating User Login Profile\n"
 printf "Creating a new user\n"
 aws iam create-user --user-name $userName --profile $newProfile > /dev/null 2>&1
@@ -120,7 +166,7 @@ then
 fi
 
 printf "Making the user a poweruser\n"
-aws iam put-user-policy --user-name $userName --policy-name StudentRole --policy-document $policy --profile $newProfile > /dev/null 2>&1
+aws iam put-user-policy --user-name $userName --policy-name StudentPowerUserRole --policy-document $policy --profile $newProfile > /dev/null 2>&1
 if [ $? -ne 0 ]
 then
   printf "Error occured assigning the policy to the user\n"

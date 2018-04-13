@@ -59,34 +59,35 @@ then
   exit
 fi
 
-printf "Create New Account\n"
-ReqID=$(aws organizations create-account --email $newAccEmail --account-name "$newAccName" --role-name $roleName \
---query 'CreateAccountStatus.[Id]' \
---output text)
+#printf "Create New Account\n"
+#ReqID=$(aws organizations create-account --email $newAccEmail --account-name "$newAccName" --role-name $roleName \
+#--query 'CreateAccountStatus.[Id]' \
+#--output text)
+#
+#printf "Waiting for New Account ..."
+#orgStat=$(aws organizations describe-create-account-status --create-account-request-id $ReqID \
+#--query 'CreateAccountStatus.[State]' \
+#--output text)
+#
+#while [ $orgStat != "SUCCEEDED" ]
+#do
+#  if [ $orgStat = "FAILED" ]
+#  then
+#    printf "\nAccount Failed to Create\n"
+#    exit 1
+#  fi
+#  printf "."
+#  sleep 10
+#  orgStat=$(aws organizations describe-create-account-status --create-account-request-id $ReqID \
+#  --query 'CreateAccountStatus.[State]' \
+#  --output text)
+#done
+#
+#accID=$(aws organizations describe-create-account-status --create-account-request-id $ReqID \
+#--query 'CreateAccountStatus.[AccountId]' \
+#--output text)
 
-printf "Waiting for New Account ..."
-orgStat=$(aws organizations describe-create-account-status --create-account-request-id $ReqID \
---query 'CreateAccountStatus.[State]' \
---output text)
-
-while [ $orgStat != "SUCCEEDED" ]
-do
-  if [ $orgStat = "FAILED" ]
-  then
-    printf "\nAccount Failed to Create\n"
-    exit 1
-  fi
-  printf "."
-  sleep 10
-  orgStat=$(aws organizations describe-create-account-status --create-account-request-id $ReqID \
-  --query 'CreateAccountStatus.[State]' \
-  --output text)
-done
-
-accID=$(aws organizations describe-create-account-status --create-account-request-id $ReqID \
---query 'CreateAccountStatus.[AccountId]' \
---output text)
-
+accID=275422901773
 accARN="arn:aws:iam::$accID:role/$roleName"
 
 printf "\nCreate New CLI Profile\n"

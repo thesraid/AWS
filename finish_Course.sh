@@ -42,7 +42,33 @@ userName=$accName
 groupName=$accName
 
 
-STACKS=($(aws cloudformation describe-stacks --query Stacks[*].StackName --output text --profile cliaccount))
+
+INSTANCES=($(aws ec2 describe-instance-status --query InstanceStatuses[*].InstanceId --output text --profile $profile))
+
+
+INSTANCES_STRING=""
+for i in "${INSTANCES[@]}"
+do
+   INSTANCES_STRING+=" $i"
+done
+
+if [ -n "$INSTANCES_STRING" ]
+then
+   printf "\nTerminating Instances"
+   aws ec2 terminate-instances --instance-ids $INSTANCES_STRING --profile $profile
+   if [ $? -ne 0 ]
+   then
+     printf "FAILED to terminate all Instancese\n"
+     exit 1
+   fi
+
+   # Give instances time to shut down - This should really be iplemented to wait until all instances show as terminated
+   sleep 10 && printf "." && sleep 10 && printf "." && sleep 10 && printf "." && sleep 10 && printf "." && sleep 10 && printf "."
+   sleep 10 && printf "." && sleep 10 && printf "." && sleep 10 && printf "." && sleep 10 && printf "." && sleep 10 && printf "."
+   sleep 10 && printf "." && sleep 10 && printf "." && sleep 10 && printf "." && sleep 10 && printf "." && sleep 10 && printf ".\n"
+fi
+
+STACKS=($(aws cloudformation describe-stacks --query Stacks[*].StackName --output text --profile $profile))
 
 for STACK in "${STACKS[@]}"
 do
@@ -72,6 +98,7 @@ do
    printf "An error occurred (ValidationError) when calling the DescribeStacks operation: Stack with id $STACK does not exist << IGNORE THIS ERROR\n"
    printf "\n$STACK deleted\n"
 done
+
 
 aws iam delete-user-policy --user-name $userName --policy-name StudentRole --profile $profile
 if [ $? -ne 0 ]
