@@ -131,8 +131,12 @@ then
    exit
 fi
 
-url="https://s3-eu-west-1.amazonaws.com/deploy-student-env/ANYSA_VPC.json"
 
+if [ "$course" = "ANYSA" ]
+then
+  url="https://s3-eu-west-1.amazonaws.com/deploy-student-env/ANYSA.json"
+  printf "URL is now $url\n"
+fi
 
 
 cfcntr=0
@@ -159,7 +163,8 @@ then
 fi
 
 printf "\nCreating Student Lab Under New Account\n"
-aws cloudformation create-stack --stack-name VPC --template-url $url --parameters ParameterKey=JEOSName,ParameterValue=JEOS ParameterKey=WinVictName,ParameterValue=WinVict ParameterKey=PTName,ParameterValue=PTest ParameterKey=WinJumpboxName,ParameterValue=JumpBox --profile $profile > /dev/null 2>&1
+vpcid=$(aws ec2 describe-vpcs --filters Name=isDefault,Values=false --query Vpcs[*].VpcId --output=text --profile $profile)
+aws cloudformation create-stack --stack-name $course --template-url $url --parameters ParameterKey=JEOSName,ParameterValue=JEOS ParameterKey=WinVictName,ParameterValue=WinVict ParameterKey=PTName,ParameterValue=PTest ParameterKey=WinJumpboxName,ParameterValue=JumpBox ParameterKey=TrainingVPC,ParameterValue=$vpcid --profile $profile > /dev/null 2>&1
 if [ $? -ne 0 ]
 then
   printf "Student Lab Failed to Create\n"
@@ -167,12 +172,12 @@ then
 fi
 
 printf "Waiting for Student Lab to start ..."
-cfStat=$(aws cloudformation describe-stacks --stack-name VPC --profile $profile --query 'Stacks[0].[StackStatus]' --output text)
+cfStat=$(aws cloudformation describe-stacks --stack-name $course --profile $profile --query 'Stacks[0].[StackStatus]' --output text)
 while [ $cfStat != "CREATE_COMPLETE" ]
 do
   sleep 5
   printf "."
-  cfStat=$(aws cloudformation describe-stacks --stack-name VPC --profile $profile --query 'Stacks[0].[StackStatus]' --output text)
+  cfStat=$(aws cloudformation describe-stacks --stack-name $course --profile $profile --query 'Stacks[0].[StackStatus]' --output text)
   if [ $cfStat = "CREATE_FAILED" ] || [ $cfStat = "ROLLBACK_COMPLETE"  ]
   then
     printf "\nStudent Lab failed to start\n"
@@ -231,5 +236,5 @@ printf "URL  : https://$region.signin.aws.amazon.com\n"
 printf "ACC  : $accID\n"
 printf "USER : $userName\n"
 printf "PASS : $userPassword\n"
-aws cloudformation describe-stacks --stack-name VPC --profile $profile --query 'Stacks[0].[Outputs]' --output text
+aws cloudformation describe-stacks --stack-name $course --profile $profile --query 'Stacks[0].[Outputs]' --output text
 

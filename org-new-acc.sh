@@ -15,7 +15,7 @@ function usage
 
 newAccName=""
 newAccEmail=""
-newProfile=""
+profile=""
 roleName="OrganizationAccountAccessRole"
 destinationOUname="Students"
 region="eu-west-1"
@@ -29,7 +29,7 @@ while [ "$1" != "" ]; do
                                 newAccEmail=$1
                                 ;;
         -c | --cl_profile_name ) shift
-                                newProfile=$1
+                                profile=$1
                                 ;;
         -r | --region )        shift
                                 region=$1
@@ -53,7 +53,7 @@ while [ "$1" != "" ]; do
     shift
 done
 
-if [ "$newAccName" = "" ] || [ "$newAccEmail" = "" ] || [ "$newProfile" = "" ] || [ "$destinationOUname" = "" ] || [ "$region" = "" ] || [ "$userName" = "" ] || [ "$userPassword" = "" ] || [ "$groupName" = "" ] || [ "$policy" = "" ]
+if [ "$newAccName" = "" ] || [ "$newAccEmail" = "" ] || [ "$profile" = "" ] || [ "$destinationOUname" = "" ] || [ "$region" = "" ] || [ "$userName" = "" ] || [ "$userPassword" = "" ] || [ "$groupName" = "" ] || [ "$policy" = "" ]
 then
   usage
   exit
@@ -90,13 +90,13 @@ accID=$(aws organizations describe-create-account-status --create-account-reques
 accARN="arn:aws:iam::$accID:role/$roleName"
 
 printf "\nCreate New CLI Profile\n"
-aws configure set region $region --profile $newProfile
-aws configure set role_arn $accARN --profile $newProfile
-aws configure set source_profile default --profile $newProfile
+aws configure set region $region --profile $profile
+aws configure set role_arn $accARN --profile $profile
+aws configure set source_profile default --profile $profile
 
 printf "Creating User Login Profile\n"
 printf "Creating a new user\n"
-aws iam create-user --user-name $userName --profile $newProfile > /dev/null 2>&1
+aws iam create-user --user-name $userName --profile $profile > /dev/null 2>&1
 if [ $? -ne 0 ]
 then
   printf "Error occured creating a user\n"
@@ -104,7 +104,7 @@ then
 fi
 
 printf "Creating a new group\n"
-aws iam create-group --group-name $groupName --profile $newProfile > /dev/null 2>&1
+aws iam create-group --group-name $groupName --profile $profile > /dev/null 2>&1
 if [ $? -ne 0 ]
 then
   printf "Error occured creating a group\n"
@@ -112,15 +112,15 @@ then
 fi
 
 printf "Adding the user to the group\n"
-aws iam add-user-to-group --user-name $userName --group-name $groupName --profile $newProfile > /dev/null 2>&1
+aws iam add-user-to-group --user-name $userName --group-name $groupName --profile $profile > /dev/null 2>&1
 if [ $? -ne 0 ]
 then
   printf "Error occured adding the user to the group\n"
   exit 1
 fi
 
-printf "Making the user a poweruser\n"
-aws iam put-user-policy --user-name $userName --policy-name StudentRole --policy-document $policy --profile $newProfile > /dev/null 2>&1
+printf "Applying the Policy\n"
+aws iam put-user-policy --user-name $userName --policy-name StudentRole --policy-document $policy --profile $profile > /dev/null 2>&1
 if [ $? -ne 0 ]
 then
   printf "Error occured assigning the policy to the user\n"
@@ -128,7 +128,7 @@ then
 fi
 
 printf "Giving user a login password\n"
-aws iam create-login-profile --user-name $userName --password $userPassword --profile $newProfile > /dev/null 2>&1
+aws iam create-login-profile --user-name $userName --password $userPassword --profile $profile > /dev/null 2>&1
 if [ $? -ne 0 ]
 then
   printf "Error occured setting the users login and password\n"
@@ -136,6 +136,27 @@ then
 fi
 
 printf "Created User\n"
+
+printf "Creating VPC\n"
+sleep 20
+
+aws ec2 create-vpc --cidr-block 192.168.250.0/24 --profile $profile  > /dev/null 2>&1
+if [ $? -ne 0 ]
+then
+  printf "Error occured creating VPC\n"
+  exit 1
+fi
+
+vpcid=$(aws ec2 describe-vpcs --filters Name=isDefault,Values=false --query Vpcs[*].VpcId --output=text --profile $profile)
+aws ec2 create-tags --resources $vpcid --tags Key=Name,Value=TrainingVPC --profile $profile > /dev/null 2>&1 
+if [ $? -ne 0 ]
+then
+  printf "Error occured naming VPC\n"
+  exit 1
+fi
+
+printf "VPC Created\n"
+
 
 printf "Adding to Parent Org\n"
 if [ "$destinationOUname" != "" ]

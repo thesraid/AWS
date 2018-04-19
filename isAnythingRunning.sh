@@ -1,6 +1,6 @@
 #!/bin/bash
 
-for accounts in {01..11}
+for accounts in {01..17}
 do
    s="AVStudent$accounts"
    p="Profile"
