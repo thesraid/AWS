@@ -33,6 +33,9 @@ done
 if [ "$account" = "" ] || [ "$cliProfile" = "" ]
 then
   usage
+  printf "Account         "
+  printf "ID\n"
+  aws organizations list-accounts-for-parent --parent-id ou-yus6-1nrdvs4m --output text --query 'Accounts[*].[Name,Id]'
   exit
 fi
 

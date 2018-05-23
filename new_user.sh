@@ -78,8 +78,8 @@ then
   exit 1
 fi
 
-printf "Making the user a poweruser\n"
-aws iam put-user-policy --user-name $userName --policy-name StudentRole --policy-document $policy --profile $newProfile > /dev/null 2>&1
+printf "Assigning policy to user\n"
+aws iam put-user-policy --user-name $userName --policy-name StudentRole --policy-document $policy --profile $newProfile
 if [ $? -ne 0 ]
 then
   printf "Error occured assigning the policy to the user\n"

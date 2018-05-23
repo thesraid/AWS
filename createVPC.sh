@@ -48,3 +48,6 @@ then
 fi
 
 printf "VPC Created\n"
+
+printf "These are the VPCs in this Account in $region\n"
+aws ec2 describe-vpcs --filters Name=isDefault,Values=false --query Vpcs[*].Tags[*].Value --output=text --profile $profile

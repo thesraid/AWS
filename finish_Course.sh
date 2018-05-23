@@ -1,7 +1,8 @@
 #!/bin/bash
 function usage
 {
-    echo "usage: finsih_Course.sh [-h] 
+    echo "usage: finish_Course.sh [-h]
+				      --region [-r] REGION 
 				      --account_name [-a] ACCOUNT_NAME"
 }
 
@@ -12,6 +13,9 @@ while [ "$1" != "" ]; do
         -a | --account_name )   shift
                                 accName=$1
                                 ;;
+	-r | --region )		shift
+				region=$1
+				;;
         -h | --help )           usage
                                 exit
                                 ;;
@@ -41,7 +45,30 @@ profile=$accName"Profile"
 userName=$accName
 groupName=$accName
 
+if [ "$region" = "" ]
+then
+   printf "\nAvailable Regions\n"
+   printf "   eu-west-1\n"
+   printf "   us-east-1\n"
+   printf "\n"
+   printf "Please choose a region : "
+   read region
+   region=$(sed -e 's/^"//' -e 's/"$//' <<< $region)
+   printf "You chose $region\n"
+fi
 
+if [ "$region" != "eu-west-1" ] && [ "$region" != "us-east-1" ]
+then
+   printf "Invalid region\n"
+   exit
+fi
+
+aws configure set region $region --profile $profile
+if [ $? -ne 0 ]
+then
+  printf "Error occured connecting to the account\n"
+  exit 1
+fi
 
 INSTANCES=($(aws ec2 describe-instance-status --query InstanceStatuses[*].InstanceId --output text --profile $profile))
 
@@ -95,10 +122,22 @@ do
        exit 1
      fi
    done
-   printf "An error occurred (ValidationError) when calling the DescribeStacks operation: Stack with id $STACK does not exist << IGNORE THIS ERROR\n"
+   printf "An error occurred (ValidationError) when calling the DescribeStacks operation: Stack with id $STACK does not exist << IGNORE THIS ERROR IF SEEN ABOVE\n"
    printf "\n$STACK deleted\n"
 done
 
+KEYS=($(aws ec2 describe-key-pairs --query KeyPairs[*].KeyName --output text --profile $profile))
+
+printf "\nDeleting Keys\n"
+
+for KEY in "${KEYS[@]}"
+do
+	aws ec2 delete-key-pair --key-name $KEY --profile $profile
+	if [ $? -ne 0 ]
+   	then
+     		printf "$KEY FAILED to Delete\n"
+   	fi
+done
 
 aws iam delete-user-policy --user-name $userName --policy-name StudentRole --profile $profile
 if [ $? -ne 0 ]
@@ -139,3 +178,4 @@ then
   exit 1
 fi
 printf "Deleted user\n"
+

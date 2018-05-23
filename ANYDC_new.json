@@ -12,38 +12,30 @@
 	},
 
 	"Mappings": {
-		"JEOSRegionMap": {
+		"Linux1RegionMap": {
 			"us-east-1": {
-				"AMI": "ami-fe8e2281"
+				"AMI": "ami-478f3b38"
 			},
 			"eu-west-1": {
-				"AMI": "ami-3be4b442"
+				"AMI": "ami-ec143995"
 			}
 		},
-	        "PTRegionMap": {
-        		"us-east-1": {
-                		"AMI": "ami-e28e229d"
-            		},
-            		"eu-west-1": {
-                		"AMI": "ami-c3e8b8ba"
-            		}
-        	},
-        	"WinVictRegionMap": {
-            		"us-east-1": {
-                		"AMI": "ami-b08428cf"
-            		},
-                	"eu-west-1": {
-                    		"AMI": "ami-3ffeae46"
-            		}
-        	},
-        	"WinJumpboxRegionMap": {
-            		"us-east-1": {
-                		"AMI": "ami-8c8824f3"
-            		},
-            		"eu-west-1": {
-                		"AMI": "ami-b9e2b2c0"
-            		}
-        	}
+        "Linux2RegionMap": {
+            "us-east-1": {
+                "AMI": "ami-e38d399c"
+            },
+            "eu-west-1": {
+                "AMI": "ami-8b1a37f2"
+            }
+        },
+        "WindowsRegionMap": {
+            "us-east-1": {
+                "AMI": "ami-8ca211f3"
+            },
+            "eu-west-1": {
+		"AMI": "ami-ad1a35d4"
+            }
+        }
 
 	},
 
@@ -55,6 +47,13 @@
 				"MapPublicIpOnLaunch" : "true",
 				"CidrBlock" : "192.168.250.0/25",
 				"Tags" : [ {"Key" : "Name", "Value" : "TrainingSubnet"} ]
+			}
+		},
+		"TrainingDHCPOptions" : {
+			"Type" : "AWS::EC2::DHCPOptions",
+			"Properties" : {
+				"DomainName" : "training.lab",
+				"DomainNameServers" : [ "192.168.250.14" ]
 			}
 		},
 		"TrainingGateway" : {
@@ -93,30 +92,37 @@
 				"RouteTableId" : { "Ref" : "RTableTraining" }
 			}
 		},
-		"JEOSInstance": {
+		"Linux1Instance": {
 			"Type": "AWS::EC2::Instance",
 			"Properties": {
-                "ImageId": {
-				"Fn::FindInMap": [
-					"JEOSRegionMap", {
-						"Ref": "AWS::Region"
-					},
-					"AMI"
-				]
-			   },
-		"InstanceType": "t2.micro",
+                		"ImageId": {
+					"Fn::FindInMap": [
+						"Linux1RegionMap", {
+							"Ref": "AWS::Region"
+						},
+						"AMI"
+					]
+				},
+				"InstanceType": "t2.micro",
 				"SecurityGroupIds" : [ {"Ref" : "LinuxSecurityGroup"} ],
 				"SubnetId": { "Ref" : "TrainingSubnet" },
-				"Tags" : [{"Key" : "Name", "Value" : "JEOS" }],
-				"PrivateIpAddress" : "192.168.250.30"
+				"Tags" : [{"Key" : "Name", "Value" : "Linux1"}],
+				"PrivateIpAddress" : "192.168.250.30",
+				"UserData"       : { "Fn::Base64" : { "Fn::Join" : ["", [
+             				"#!/bin/bash -xe\n",
+             				"echo linux1 > /etc/hostname\n",
+             				"echo nameserver 192.168.250.14 > /etc/resolv.conf\n",
+             				"echo search training.lab >> /etc/resolv.conf\n",
+					"hostname -F /etc/hostname\n"
+					]]}}			
 			}
 		},
-		"PTInstance": {
+		"Linux2Instance": {
 			"Type": "AWS::EC2::Instance",
 			"Properties": {
                 "ImageId": {
                                 "Fn::FindInMap": [
-                                        "PTRegionMap", {
+                                        "Linux2RegionMap", {
                                                 "Ref": "AWS::Region"
                                         },
                                         "AMI"
@@ -125,34 +131,23 @@
 		"InstanceType": "t2.micro",
 				"SecurityGroupIds" : [ {"Ref" : "LinuxSecurityGroup"} ],
 				"SubnetId": { "Ref" : "TrainingSubnet" },
-				"Tags" : [{"Key" : "Name", "Value" : "PT"}],
-				"PrivateIpAddress" : "192.168.250.100"
+				"Tags" : [{"Key" : "Name", "Value" : "Linux2"}],
+				"PrivateIpAddress" : "192.168.250.31",
+                                "UserData"       : { "Fn::Base64" : { "Fn::Join" : ["", [
+                                        "#!/bin/bash -xe\n",
+                                        "echo linux2 > /etc/hostname\n",
+                                        "echo nameserver 192.168.250.14 > /etc/resolv.conf\n",
+                                        "echo search training.lab >> /etc/resolv.conf\n",
+                                        "hostname -F /etc/hostname\n"
+                                        ]]}}
 			}
 		},
-		"WinVictInstance": {
+		"WindowsInstance": {
 			"Type": "AWS::EC2::Instance",
 			"Properties": {
                 "ImageId": {
                                 "Fn::FindInMap": [
-                                        "WinVictRegionMap", {
-                                                "Ref": "AWS::Region"
-                                        },
-                                        "AMI"
-                                ]
-                           },
-		"InstanceType": "t2.micro",
-				"SecurityGroupIds" : [ {"Ref" : "WindowsSecurityGroup"} ],
-				"SubnetId": { "Ref" : "TrainingSubnet" },
-				"PrivateIpAddress" : "192.168.250.17",
-				"Tags" : [{"Key" : "Name", "Value" : "WinVictim" }]
-			}
-		},
-		"WinJumpboxInstance": {
-			"Type": "AWS::EC2::Instance",
-			"Properties": {
-                "ImageId": {
-                                "Fn::FindInMap": [
-                                        "WinJumpboxRegionMap", {
+                                        "WindowsRegionMap", {
                                                 "Ref": "AWS::Region"
                                         },
                                         "AMI"
@@ -162,7 +157,7 @@
 				"SecurityGroupIds" : [ {"Ref" : "WindowsSecurityGroup"} ],
 				"SubnetId": { "Ref" : "TrainingSubnet" },
 				"PrivateIpAddress" : "192.168.250.14",
-				"Tags" : [{"Key" : "Name", "Value" : "WinJumpbox" }]
+				"Tags" : [{"Key" : "Name", "Value" : "Windows"}]
 			}
 		},
 		"LinuxSecurityGroup" : {
@@ -176,31 +171,26 @@
 		"WindowsSecurityGroup" : {
 			"Type" : "AWS::EC2::SecurityGroup",
 			"Properties" : {
-				"GroupDescription" : "Enable RDP access via port 3389 to the Linux Instance",
+				"GroupDescription" : "Enable RDP access via port 3389/443 to the Windows Instance",
 				"VpcId" : { "Ref" : "TrainingVPC" },
-				"SecurityGroupIngress" : [{"IpProtocol" : "tcp", "FromPort" : "3389", "ToPort" : "3389", "CidrIp" : "0.0.0.0/0"}]
+				"SecurityGroupIngress" : [{"IpProtocol" : "tcp", "FromPort" : "3389", "ToPort" : "3389", "CidrIp" : "0.0.0.0/0"},{"IpProtocol" : "tcp", "FromPort" : "443", "ToPort" : "443", "CidrIp" : "0.0.0.0/0"},{"IpProtocol" : "tcp", "FromPort" : "53", "ToPort" : "53", "CidrIp": "192.168.250.0/24"},{"IpProtocol" : "udp", "FromPort" : "53", "ToPort" : "53", "CidrIp": "192.168.250.0/24"}]
 			}
 		}
 	},
 	"Outputs" : {
-		"JEOSIP" : {
-			"Description" : "IP for JEOS",
-			"Value" : { "Fn::Join" : ["", [{ "Fn::GetAtt" : [ "JEOSInstance", "PublicIp" ]}]] }
+		"Linux1IP" : {
+			"Description" : "IP for Linux1",
+			"Value" : { "Fn::Join" : ["", [{ "Fn::GetAtt" : [ "Linux1Instance", "PublicIp" ]}]] }
 		},
-		"PTIP" : {
-			"Description" : "IP for PT",
-			"Value" : { "Fn::Join" : ["", [{ "Fn::GetAtt" : [ "PTInstance", "PublicIp" ]}]] }
+		"Linux2IP" : {
+			"Description" : "IP for Linux2",
+			"Value" : { "Fn::Join" : ["", [{ "Fn::GetAtt" : [ "Linux2Instance", "PublicIp" ]}]] }
 		},
-		"WinVictIP" : {
-			"Description" : "IP for Windows Victim",
-			"Value" : { "Fn::Join" : ["", [{ "Fn::GetAtt" : [ "WinVictInstance", "PublicIp" ]}]] }
-		},
-		"WinJumpboxIP" : {
+		"WindowsIP" : {
 			"Description" : "IP for Windows Jumpbox",
-			"Value" : { "Fn::Join" : ["", [{ "Fn::GetAtt" : [ "WinJumpboxInstance", "PublicIp" ]}]] }
+			"Value" : { "Fn::Join" : ["", [{ "Fn::GetAtt" : [ "WindowsInstance", "PublicIp" ]}]] }
 		}
 	}
 	
 }
-
 

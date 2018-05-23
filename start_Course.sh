@@ -69,6 +69,7 @@ if [ "$region" = "" ]
 then
    printf "\nAvailable Regions\n"
    printf "   eu-west-1\n"
+   printf "   us-east-1\n"
    printf "\n"
    printf "Please choose a region : "
    read region
@@ -76,14 +77,11 @@ then
    printf "You chose $region\n"
 fi
 
-if ! [ "$region" = "eu-west-1" ]
+if [ "$region" != "eu-west-1" ] && [ "$region" != "us-east-1" ]
 then
    printf "Invalid region\n"
    exit
 fi
-
-printf "Region is now $region\n"
-
 
 expiry=$(aws sts assume-role --role-arn arn:aws:iam::$accID:role/$role --query 'Credentials.Expiration' --role-session-name $profile)
 if [ $? -ne 0 ]
@@ -94,7 +92,7 @@ fi
 
 printf "Connection valid to $accName until $expiry\n"
 
-aws configure set region eu-west-1 --profile $profile
+aws configure set region $region --profile $profile
 if [ $? -ne 0 ]
 then
   printf "Error occured connecting to the account\n"
@@ -119,24 +117,29 @@ fi
 if [ "$course" = "" ]
 then
    printf "\nAvailable courses\n"
+   printf "   ANYDC\n"
    printf "   ANYSA\n"
    printf "\nChoose the course : "
    read course
    printf "You chose $course\n"
 fi
 
-if ! [ "$course" = "ANYSA" ]
+if [ "$course" != "ANYDC" ] && [ "$course" != "ANYSA" ]
 then
    printf "Invalid course\n"
    exit
 fi
 
+if [ "$course" = "ANYDC" ]
+then
+  url="https://s3-eu-west-1.amazonaws.com/deploy-student-env/ANYDC_new.json"
+fi
 
 if [ "$course" = "ANYSA" ]
 then
   url="https://s3-eu-west-1.amazonaws.com/deploy-student-env/ANYSA.json"
-  printf "URL is now $url\n"
 fi
+
 
 
 cfcntr=0
@@ -164,7 +167,7 @@ fi
 
 printf "\nCreating Student Lab Under New Account\n"
 vpcid=$(aws ec2 describe-vpcs --filters Name=isDefault,Values=false --query Vpcs[*].VpcId --output=text --profile $profile)
-aws cloudformation create-stack --stack-name $course --template-url $url --parameters ParameterKey=JEOSName,ParameterValue=JEOS ParameterKey=WinVictName,ParameterValue=WinVict ParameterKey=PTName,ParameterValue=PTest ParameterKey=WinJumpboxName,ParameterValue=JumpBox ParameterKey=TrainingVPC,ParameterValue=$vpcid --profile $profile > /dev/null 2>&1
+aws cloudformation create-stack --stack-name $course --template-url $url --parameters ParameterKey=TrainingVPC,ParameterValue=$vpcid --profile $profile > /dev/null 2>&1
 if [ $? -ne 0 ]
 then
   printf "Student Lab Failed to Create\n"
@@ -182,6 +185,7 @@ do
   then
     printf "\nStudent Lab failed to start\n"
     printf "ERROR : $cfStat\n"
+    aws cloudformation describe-stacks --stack-name $course --profile $profile
     exit 1
   fi
 done
@@ -189,10 +193,11 @@ printf "\nStudent Lab started\n"
 
 userName=$accName
 groupName=$accName
-policy="file://StudentRole.json"
+#policy="file://DBPolicy.json"
+policy="file://StudentPolicy.json"
 
 printf "Creating a new user\n"
-aws iam create-user --user-name $userName --profile $profile > /dev/null 2>&1
+aws iam create-user --user-name $userName --profile $profile 
 if [ $? -ne 0 ]
 then
   printf "Error occured creating a user\n"
@@ -200,7 +205,7 @@ then
 fi
 
 printf "Creating a new group\n"
-aws iam create-group --group-name $groupName --profile $profile > /dev/null 2>&1
+aws iam create-group --group-name $groupName --profile $profile > /dev/null 
 if [ $? -ne 0 ]
 then
   printf "Error occured creating a group\n"
@@ -208,15 +213,15 @@ then
 fi
 
 printf "Adding the user to the group\n"
-aws iam add-user-to-group --user-name $userName --group-name $groupName --profile $profile > /dev/null 2>&1
+aws iam add-user-to-group --user-name $userName --group-name $groupName --profile $profile 
 if [ $? -ne 0 ]
 then
   printf "Error occured adding the user to the group\n"
   exit 1
 fi
 
-printf "Making the user a poweruser\n"
-aws iam put-user-policy --user-name $userName --policy-name StudentRole --policy-document $policy --profile $profile > /dev/null 2>&1
+printf "Assigning a policy\n"
+aws iam put-user-policy --user-name $userName --policy-name StudentRole --policy-document $policy --profile $profile 
 if [ $? -ne 0 ]
 then
   printf "Error occured assigning the policy to the user\n"
@@ -224,7 +229,7 @@ then
 fi
 
 printf "Giving user a login password\n"
-aws iam create-login-profile --user-name $userName --password $userPassword --profile $profile > /dev/null 2>&1
+aws iam create-login-profile --user-name $userName --password $userPassword --profile $profile
 if [ $? -ne 0 ]
 then
   printf "Error occured setting the users login and password\n"

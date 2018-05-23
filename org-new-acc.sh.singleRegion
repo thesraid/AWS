@@ -9,7 +9,8 @@ function usage
 				      --user_name [-u] USER_NAME
                         	      --password [-p] PASSWORD
                         	      --group_name [-g] GROUP_NAME
-                        	      --policy [-y] POLICY"
+                        	      --policy [-y] POLICY
+                                      [--region [-r] AWS_REGION]"
 }
 
 newAccName=""
@@ -17,7 +18,7 @@ newAccEmail=""
 profile=""
 roleName="OrganizationAccountAccessRole"
 destinationOUname="Students"
-regions=(eu-west-1 us-east-1)
+region="eu-west-1"
 
 while [ "$1" != "" ]; do
     case $1 in
@@ -52,7 +53,7 @@ while [ "$1" != "" ]; do
     shift
 done
 
-if [ "$newAccName" = "" ] || [ "$newAccEmail" = "" ] || [ "$profile" = "" ] || [ "$destinationOUname" = "" ] || [ "$userName" = "" ] || [ "$userPassword" = "" ] || [ "$groupName" = "" ] || [ "$policy" = "" ]
+if [ "$newAccName" = "" ] || [ "$newAccEmail" = "" ] || [ "$profile" = "" ] || [ "$destinationOUname" = "" ] || [ "$region" = "" ] || [ "$userName" = "" ] || [ "$userPassword" = "" ] || [ "$groupName" = "" ] || [ "$policy" = "" ]
 then
   usage
   exit
@@ -89,37 +90,9 @@ accID=$(aws organizations describe-create-account-status --create-account-reques
 accARN="arn:aws:iam::$accID:role/$roleName"
 
 printf "\nCreate New CLI Profile\n"
+aws configure set region $region --profile $profile
 aws configure set role_arn $accARN --profile $profile
 aws configure set source_profile default --profile $profile
-
-
-for region in "${regions[@]}"
-do
-
-   aws configure set region $region --profile $profile
-
-
-   printf "Creating VPC in $region \n"
-   sleep 20
-
-   aws ec2 create-vpc --cidr-block 192.168.250.0/24 --profile $profile  > /dev/null 2>&1
-   if [ $? -ne 0 ]
-   then
-      printf "Error occured creating VPC\n"
-      exit 1
-   fi
-
-   vpcid=$(aws ec2 describe-vpcs --filters Name=isDefault,Values=false --query Vpcs[*].VpcId --output=text --profile $profile)
-   aws ec2 create-tags --resources $vpcid --tags Key=Name,Value=TrainingVPC --profile $profile > /dev/null 2>&1
-   if [ $? -ne 0 ]
-   then
-      printf "Error occured naming VPC\n"
-      exit 1
-   fi
-
-   printf "VPC Created in $region \n"
-done
-
 
 printf "Creating User Login Profile\n"
 printf "Creating a new user\n"
@@ -163,6 +136,26 @@ then
 fi
 
 printf "Created User\n"
+
+printf "Creating VPC\n"
+sleep 20
+
+aws ec2 create-vpc --cidr-block 192.168.250.0/24 --profile $profile  > /dev/null 2>&1
+if [ $? -ne 0 ]
+then
+  printf "Error occured creating VPC\n"
+  exit 1
+fi
+
+vpcid=$(aws ec2 describe-vpcs --filters Name=isDefault,Values=false --query Vpcs[*].VpcId --output=text --profile $profile)
+aws ec2 create-tags --resources $vpcid --tags Key=Name,Value=TrainingVPC --profile $profile > /dev/null 2>&1 
+if [ $? -ne 0 ]
+then
+  printf "Error occured naming VPC\n"
+  exit 1
+fi
+
+printf "VPC Created\n"
 
 
 printf "Adding to Parent Org\n"
