@@ -47,6 +47,7 @@
                 "ec2:DeleteKeyPair",
                 "ec2:CreateSecurityGroup",
                 "ec2:Describe*",
+		"ec2:AssociateIamInstanceProfile",
                 "ec2:DeleteSecurityGroup"
             ],
             "Resource": "*"
@@ -72,6 +73,13 @@
                 "iam:DeleteRolePolicy",
                 "iam:DeleteInstanceProfile",
                 "iam:ListRoles",
+		"iam:CreatePolicy",
+                "iam:ListPolicies",
+		"iam:GetPolicyVersion",
+		"iam:AttachRolePolicy",
+		"iam:ListRolePolicies",
+		"iam:ListAttachedRolePolicies",
+		"iam:ListInstanceProfiles",
                 "sns:ListTopics"
             ],
             "Resource": "*"

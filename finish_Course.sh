@@ -139,6 +139,33 @@ do
    	fi
 done
 
+printf "\nDeleting EC2 Roles\n"
+
+ROLES=($(aws iam list-roles --query Roles[*].RoleName --profile $profile --output text))
+
+string=""
+for role in "${ROLES[@]}"
+do
+   if [ "$role" != "AWSServiceRoleForOrganizations" ] && [ "$role" != "OrganizationAccountAccessRole" ]
+   then
+     PROFS=($(aws iam list-instance-profiles-for-role --role-name $role --query InstanceProfiles[*].InstanceProfileName --output text --profile $profile))
+     for prof in "${PROFS[@]}"
+     do
+        aws iam remove-role-from-instance-profile --instance-profile-name $prof --role-name $role --profile $profile
+     done
+     POLICIES=($(aws iam list-attached-role-policies --query AttachedPolicies[*].PolicyArn --role-name $role --output text --profile $profile))
+     for policy in "${POLICIES[@]}"
+     do
+        aws iam detach-role-policy --role-name $role --policy-arn $policy --profile $profile
+     done
+     aws iam delete-role --role-name $role --profile $profile
+     echo " "
+   fi
+done
+
+
+printf "\nRemoving the specified user account\n"
+
 aws iam delete-user-policy --user-name $userName --policy-name StudentRole --profile $profile
 if [ $? -ne 0 ]
 then

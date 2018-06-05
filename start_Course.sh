@@ -132,7 +132,7 @@ fi
 
 if [ "$course" = "ANYDC" ]
 then
-  url="https://s3-eu-west-1.amazonaws.com/deploy-student-env/ANYDC_new.json"
+  url="https://s3-eu-west-1.amazonaws.com/deploy-student-env/ANYDC.json"
 fi
 
 if [ "$course" = "ANYSA" ]
@@ -167,7 +167,7 @@ fi
 
 printf "\nCreating Student Lab Under New Account\n"
 vpcid=$(aws ec2 describe-vpcs --filters Name=isDefault,Values=false --query Vpcs[*].VpcId --output=text --profile $profile)
-aws cloudformation create-stack --stack-name $course --template-url $url --parameters ParameterKey=TrainingVPC,ParameterValue=$vpcid --profile $profile > /dev/null 2>&1
+aws cloudformation create-stack --stack-name $course --template-url $url --parameters ParameterKey=TrainingVPC,ParameterValue=$vpcid --profile $profile > /dev/null 
 if [ $? -ne 0 ]
 then
   printf "Student Lab Failed to Create\n"
@@ -194,10 +194,10 @@ printf "\nStudent Lab started\n"
 userName=$accName
 groupName=$accName
 #policy="file://DBPolicy.json"
-policy="file://StudentPolicy.json"
+UserPolicy="file://StudentPolicy.json"
 
 printf "Creating a new user\n"
-aws iam create-user --user-name $userName --profile $profile 
+aws iam create-user --user-name $userName --profile $profile > /dev/null 
 if [ $? -ne 0 ]
 then
   printf "Error occured creating a user\n"
@@ -213,7 +213,7 @@ then
 fi
 
 printf "Adding the user to the group\n"
-aws iam add-user-to-group --user-name $userName --group-name $groupName --profile $profile 
+aws iam add-user-to-group --user-name $userName --group-name $groupName --profile $profile > /dev/null
 if [ $? -ne 0 ]
 then
   printf "Error occured adding the user to the group\n"
@@ -221,7 +221,7 @@ then
 fi
 
 printf "Assigning a policy\n"
-aws iam put-user-policy --user-name $userName --policy-name StudentRole --policy-document $policy --profile $profile 
+aws iam put-user-policy --user-name $userName --policy-name StudentRole --policy-document $UserPolicy --profile $profile > /dev/null
 if [ $? -ne 0 ]
 then
   printf "Error occured assigning the policy to the user\n"
@@ -229,7 +229,7 @@ then
 fi
 
 printf "Giving user a login password\n"
-aws iam create-login-profile --user-name $userName --password $userPassword --profile $profile
+aws iam create-login-profile --user-name $userName --password $userPassword --profile $profile > /dev/null
 if [ $? -ne 0 ]
 then
   printf "Error occured setting the users login and password\n"
