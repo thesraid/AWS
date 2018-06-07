@@ -27,7 +27,15 @@
                 "cloudwatch:GetMetricStatistics",
                 "cloudwatch:ListMetrics"
 		],
-	     "Resource": "*"
+	     "Resource": "*",
+	     "Condition": {
+                "StringEquals": {
+                    "aws:RequestedRegion": [
+                        "--Global--",
+                        "us-east-1"
+                    ]
+                }
+            }
 	},
 {
            "Sid": "EC2",
@@ -50,7 +58,15 @@
 		"ec2:AssociateIamInstanceProfile",
                 "ec2:DeleteSecurityGroup"
             ],
-            "Resource": "*"
+            "Resource": "*",
+	    "Condition": {
+                "StringEquals": {
+                    "aws:RequestedRegion": [
+                        "--Global--",
+                        "us-east-1"
+                    ]
+                }
+            }
         },
 	{
            "Sid": "OtherPermissions",
@@ -82,7 +98,15 @@
 		"iam:ListInstanceProfiles",
                 "sns:ListTopics"
             ],
-            "Resource": "*"
+            "Resource": "*",
+	    "Condition": {
+                "StringEquals": {
+                    "aws:RequestedRegion": [
+                        "--Global--",
+                        "us-east-1"
+                    ]
+                }
+            }
         },
         {
             "Sid": "AllowedInstances",

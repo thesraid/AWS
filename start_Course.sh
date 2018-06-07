@@ -195,6 +195,7 @@ userName=$accName
 groupName=$accName
 #policy="file://DBPolicy.json"
 UserPolicy="file://StudentPolicy.json"
+LocationPolicy="file://$region.json"
 
 printf "Creating a new user\n"
 aws iam create-user --user-name $userName --profile $profile > /dev/null 
@@ -221,7 +222,8 @@ then
 fi
 
 printf "Assigning a policy\n"
-aws iam put-user-policy --user-name $userName --policy-name StudentRole --policy-document $UserPolicy --profile $profile > /dev/null
+aws iam put-group-policy --group-name $groupName --policy-name StudentRole --policy-document $UserPolicy --profile $profile > /dev/null
+aws iam put-group-policy --group-name $groupName --policy-name LocationRole --policy-document $LocationPolicy --profile $profile > /dev/null
 if [ $? -ne 0 ]
 then
   printf "Error occured assigning the policy to the user\n"

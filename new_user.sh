@@ -6,6 +6,7 @@ usage: new_user.sh [-h]	--user_name [-u] USER_NAME
 		      	--password [-p] PASSWORD
                         --group_name [-g] GROUP_NAME
 		      	--policy [-o] POLICY
+		      	--region [-r] REGION
                         --cl_profile_name [-c] CLI_PROFILE_NAME
 "
 }
@@ -30,6 +31,9 @@ while [ "$1" != "" ]; do
         -o | --policy )        	shift
                                 policy=$1
                                 ;;
+	-r | --region )         shift
+                                region=$1
+                                ;;
         -c | --cl_profile_name ) shift
                                 newProfile=$1
                                 ;;
@@ -49,6 +53,7 @@ fi
 echo USER : $userName
 echo PASS : $userPassword
 echo GRP  : $groupName
+echo REG  : $region
 echo POL  : $policy
 echo PROF : $newProfile
 
@@ -79,7 +84,8 @@ then
 fi
 
 printf "Assigning policy to user\n"
-aws iam put-user-policy --user-name $userName --policy-name StudentRole --policy-document $policy --profile $newProfile
+aws iam put-group-policy --group-name $groupName --policy-name StudentRole --policy-document $policy --profile $newProfile
+aws iam put-group-policy --group-name $groupName --policy-name LocationRole --policy-document file://$region.json --profile $newProfile
 if [ $? -ne 0 ]
 then
   printf "Error occured assigning the policy to the user\n"
