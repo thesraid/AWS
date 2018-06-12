@@ -48,7 +48,11 @@
                 "ec2:CreateSecurityGroup",
                 "ec2:Describe*",
 		"ec2:AssociateIamInstanceProfile",
-                "ec2:DeleteSecurityGroup"
+                "ec2:DeleteSecurityGroup",
+		"ec2:ReplaceIamInstanceProfileAssociation",
+		"ec2:DeleteFlowLogs",
+                "ec2:CreateFlowLogs",
+                "ec2:DescribeFlowLogs"
             ],
             "Resource": "*"
         },
@@ -80,6 +84,12 @@
 		"iam:ListRolePolicies",
 		"iam:ListAttachedRolePolicies",
 		"iam:ListInstanceProfiles",
+		"logs:Describe*",
+		"logs:Get*",
+		"logs:FilterLogEvents",
+		"logs:CreateLogGroup",
+        	"logs:CreateLogStream",
+        	"logs:PutLogEvents",
                 "sns:ListTopics"
             ],
             "Resource": "*"

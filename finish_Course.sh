@@ -118,27 +118,55 @@ do
    	aws ec2 delete-key-pair --key-name $KEY --profile $profile
    	if [ $? -ne 0 ]
       	then
-        		printf "$KEY FAILED to Delete in $region\n"
+           printf "$KEY FAILED to Delete in $region\n"
       	fi
    done
+
+   FLOWS=($(aws ec2 describe-flow-logs --query FlowLogs[*].FlowLogId --output text  --profile $profile))
+
+   for flow  in "${FLOWS[@]}"
+   do
+      printf "\nDeleting VPC Flow called $flow\n"
+      aws ec2 delete-flow-logs --flow-log-ids $flow  --profile $profile > /dev/null 2>&1
+   done
+
+   LOGGROUPS=($(aws logs describe-log-groups --query logGroups[*].logGroupName --output text --profile $profile))
+  
+   for group in "${LOGGROUPS[@]}"
+   do
+      printf "\nDeleting Log Group called called $group\n"
+      aws logs delete-log-group --log-group-name $group --output text --profile $profile
+      if [ $? -ne 0 ]
+      then
+         printf "Error occured removing the Log Group $group\n"
+         exit 1
+      fi
+   done
+
    
    ROLES=($(aws iam list-roles --query Roles[*].RoleName --profile $profile --output text))
    
    string=""
    for role in "${ROLES[@]}"
    do
-      if [ "$role" != "AWSServiceRoleForOrganizations" ] && [ "$role" != "OrganizationAccountAccessRole" ]
+      if [ "$role" != "AWSServiceRoleForOrganizations" ] && [ "$role" != "OrganizationAccountAccessRole" ] && [[ "$role" != Sensor-ReadOnlyRoleWithCloudTrailManagement* ]]
       then
-        printf "\nDeleting EC2 Roles in $region\n"
+        printf "\nDeleting Role called $role\n"
         PROFS=($(aws iam list-instance-profiles-for-role --role-name $role --query InstanceProfiles[*].InstanceProfileName --output text --profile $profile))
         for prof in "${PROFS[@]}"
         do
            aws iam remove-role-from-instance-profile --instance-profile-name $prof --role-name $role --profile $profile
+           aws iam delete-instance-profile --instance-profile-name $prof --profile $profile
         done
-        POLICIES=($(aws iam list-attached-role-policies --query AttachedPolicies[*].PolicyArn --role-name $role --output text --profile $profile))
-        for policy in "${POLICIES[@]}"
+        ATTACHEDPOLICIES=($(aws iam list-attached-role-policies --query AttachedPolicies[*].PolicyArn --role-name $role --output text --profile $profile))
+        for policy in "${ATTACHEDPOLICIES[@]}"
         do
            aws iam detach-role-policy --role-name $role --policy-arn $policy --profile $profile
+        done
+        ROLEPOLICIES=($(aws iam list-role-policies --role-name $role --query PolicyNames[*] --output text --profile $profile))
+	for policy in "${ROLEPOLICIES[@]}"
+        do
+            aws iam delete-role-policy --role-name $role --policy-name $policy --profile $profile
         done
         aws iam delete-role --role-name $role --profile $profile
         echo " "
