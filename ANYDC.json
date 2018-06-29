@@ -14,28 +14,28 @@
 	"Mappings": {
 		"Linux1RegionMap": {
 			"us-east-1": {
-				"AMI": "ami-02197e7d"
+				"AMI": "ami-b5d49eca"
 			},
 			"eu-west-1": {
 				"AMI": "ami-ec143995"
 			}
 		},
-        "Linux2RegionMap": {
-            "us-east-1": {
-                "AMI": "ami-c86304b7"
-            },
-            "eu-west-1": {
-                "AMI": "ami-8b1a37f2"
-            }
-        },
-        "WindowsRegionMap": {
-            "us-east-1": {
-                "AMI": "ami-af6403d0"
-            },
-            "eu-west-1": {
-		"AMI": "ami-ad1a35d4"
-            }
-        }
+        	"Linux2RegionMap": {
+            		"us-east-1": {
+                		"AMI": "ami-06d69c79"
+            		},
+            		"eu-west-1": {
+                		"AMI": "ami-8b1a37f2"
+            		}
+        	},
+        	"WindowsRegionMap": {
+            		"us-east-1": {
+                		"AMI": "ami-bd80c7c2"
+            		},
+            		"eu-west-1": {
+				"AMI": "ami-ad1a35d4"
+            		}
+        	}
 
 	},
 
@@ -153,7 +153,7 @@
                                         "AMI"
                                 ]
                            },
-		"InstanceType": "t2.micro",
+		"InstanceType": "t2.medium",
 				"SecurityGroupIds" : [ {"Ref" : "WindowsSecurityGroup"} ],
 				"SubnetId": { "Ref" : "TrainingSubnet" },
 				"PrivateIpAddress" : "192.168.250.14",
