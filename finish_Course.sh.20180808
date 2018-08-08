@@ -143,48 +143,6 @@ do
       fi
    done
 
-   TRAILS=($(aws cloudtrail describe-trails --query trailList[*].Name --output text --profile $profile))
-   for trail in "${TRAILS[@]}"
-   do
-      # Silently delete trails as they error when you aren't in the right region when you try to delete them
-      #printf "\nDeleting the CloudTrail $trail\n"
-      aws cloudtrail delete-trail --name $trail --output text --profile $profile > /dev/null 2>&1
-      #if [ $? -ne 0 ]
-      #then
-      #   printf "Error occured removing the CloudTrail $trail\n"
-      #   exit 1
-      #fi
-   done
-
-   BUCKETS=($(aws s3 ls --profile $profile | awk '{print $3}'))
-   
-   for bucket in "${BUCKETS[@]}"
-   do
-      printf "\nDeleting the Bucket $bucket and its contents\n"
-      aws s3 rm s3://$bucket --recursive --profile $profile > /dev/null
-      aws s3api delete-bucket --bucket $bucket --profile $profile
-      if [ $? -ne 0 ]
-      then
-         printf "Error occured removing the Bucket $bucket\n"
-         exit 1
-      fi
-   done
-
-   SECGROUPS=($(aws ec2 describe-security-groups --query 'SecurityGroups[?GroupName!=`default`].GroupId' --output text --profile $profile))
-
-   for secgroup in "${SECGROUPS[@]}"
-   do
-      if [ $secgroup != "default" ]
-      then
-         printf "\nDeleting the Security Group $secgroup\n"
-         aws ec2 delete-security-group --group-id $secgroup --output text --profile $profile
-         if [ $? -ne 0 ]
-         then
-            printf "Error occured removing the Security Group $secgroup\n"
-            exit 1
-         fi
-      fi
-   done
    
    ROLES=($(aws iam list-roles --query Roles[*].RoleName --profile $profile --output text))
    

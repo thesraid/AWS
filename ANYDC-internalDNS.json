@@ -14,7 +14,7 @@
 	"Mappings": {
 		"Linux1RegionMap": {
 			"us-east-1": {
-				"AMI": "ami-adc7c9d2"
+				"AMI": "ami-a56c4eda"
 			},
 			"eu-west-1": {
 				"AMI": "ami-ec143995"
@@ -30,7 +30,7 @@
         	},
         	"WindowsRegionMap": {
             		"us-east-1": {
-                		"AMI": "ami-da1c12a5"
+                		"AMI": "ami-ad6d4fd2"
             		},
             		"eu-west-1": {
 				"AMI": "ami-ad1a35d4"
@@ -38,7 +38,7 @@
         	},
                 "HTML5RegionMap": {
                         "us-east-1": {
-                                "AMI": "ami-74131d0b"
+                                "AMI": "ami-853614fa"
                         },
                         "eu-west-1": {
                                 "AMI": "ami-12345678"
@@ -218,9 +218,9 @@
 		"WindowsSecurityGroup" : {
 			"Type" : "AWS::EC2::SecurityGroup",
 			"Properties" : {
-				"GroupDescription" : "Enable RDP access via port 3389 to the Windows Instance and DNS and WinRM internally",
+				"GroupDescription" : "Enable RDP access via port 3389 to the Windows Instance",
 				"VpcId" : { "Ref" : "TrainingVPC" },
-				"SecurityGroupIngress" : [{"IpProtocol" : "tcp", "FromPort" : "3389", "ToPort" : "3389", "CidrIp" : "0.0.0.0/0"},{"IpProtocol" : "tcp", "FromPort" : "53", "ToPort" : "53", "CidrIp": "192.168.250.0/24"},{"IpProtocol" : "udp", "FromPort" : "53", "ToPort" : "53", "CidrIp": "192.168.250.0/24"}, {"IpProtocol" : "tcp", "FromPort" : "5985", "ToPort" : "5985", "CidrIp": "192.168.250.0/24"}]
+				"SecurityGroupIngress" : [{"IpProtocol" : "tcp", "FromPort" : "3389", "ToPort" : "3389", "CidrIp" : "0.0.0.0/0"},{"IpProtocol" : "tcp", "FromPort" : "53", "ToPort" : "53", "CidrIp": "192.168.250.0/24"},{"IpProtocol" : "udp", "FromPort" : "53", "ToPort" : "53", "CidrIp": "192.168.250.0/24"}]
 			}
 		}
 	},

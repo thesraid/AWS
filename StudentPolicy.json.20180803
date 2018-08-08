@@ -29,7 +29,7 @@
 		],
 	     "Resource": "*"
 	},
-	{	
+{
            "Sid": "EC2",
             "Effect": "Allow",
             "Action": [
@@ -57,25 +57,6 @@
             "Resource": "*"
         },
 	{
-      	   "Effect": "Allow",
-           "Action": [
-               "s3:CreateBucket",
-               "s3:DeleteBucket",
-               "s3:GetObject",
-               "s3:ListAllMyBuckets",
-               "s3:PutBucketPolicy",
-               "s3:GetBucketLocation",
-               "s3:GetBucketPolicy",
-	       "cloudtrail:*",
-               "logs:CreateLogGroup",
-               "iam:GetRolePolicy",
-               "iam:GetUser",
-               "kms:ListKeys",
-               "kms:ListAliases"
-            ],
-            "Resource": "*"
-        },
-	{
            "Sid": "OtherPermissions",
             "Effect": "Allow",
             "Action": [
@@ -88,7 +69,6 @@
                 "events:TestEventPattern",
                 "iam:RemoveRoleFromInstanceProfile",
                 "iam:CreateRole",
-                "iam:GetRole",
                 "iam:PutRolePolicy",
                 "iam:AddRoleToInstanceProfile",
                 "iam:DeleteRole",
@@ -104,7 +84,6 @@
 		"iam:ListRolePolicies",
 		"iam:ListAttachedRolePolicies",
 		"iam:ListInstanceProfiles",
-		"iam:UpdateAssumeRolePolicy",
 		"logs:Describe*",
 		"logs:Get*",
 		"logs:FilterLogEvents",
