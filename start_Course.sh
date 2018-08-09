@@ -1,4 +1,8 @@
 #!/bin/bash
+
+# joriordan
+
+# Prints the script usage information
 function usage
 {
     echo "usage: start_Course.sh [-h] 
@@ -8,13 +12,18 @@ function usage
 				      --course [-c] COURSE"
 }
 
+# Set some variables
 accName=""
+
+# This is the name of the role in the Parent Org that has permissions to do things in the child orgs. It's set up in the child orgs when they are created. 
 role="OrganizationAccountAccessRole"
+# This is the directory into which all students orgs are organised. There are other OUs for partner demo environments and so on.
 destinationOUname="Students"
 region=""
 course=""
 url=""
 
+# Read the input from the command. 
 while [ "$1" != "" ]; do
     case $1 in
         -a | --account_name )   shift
@@ -36,6 +45,18 @@ while [ "$1" != "" ]; do
     shift
 done
 
+# Username and Group Name will match the sub Org name
+userName=$accName
+groupName=$accName
+# This policy specifies what resources the user can access. It should be in the same folder as the script
+UserPolicy="file://StudentPolicy.json"
+# This policy specifies what region the user can access. It should be in the same folder as the script
+LocationPolicy="file://$region.json"
+
+
+
+# If the accName was not specified then list the accounts and the user can choose one. 
+# The parent ID of the OUs is hard coded into this command. If we move to a different AWS root org it will need to be updated. 
 if [ "$accName" = "" ]
 then
   aws organizations list-accounts-for-parent --parent-id ou-yus6-1nrdvs4m --query 'Accounts[*].Name' 
@@ -46,6 +67,7 @@ then
   printf "You chose $accName \n"
 fi
 
+# Get the account ID for the Account
 accID=$(aws organizations list-accounts-for-parent --parent-id ou-yus6-1nrdvs4m --query 'Accounts[?Name==`'$accName'`].Id' --output text)
 if [ "$accID" = "" ] 
 then
@@ -54,9 +76,11 @@ then
 fi
 printf "The account ID for $accName is $accID\n"
 
+# Profiles are what the AWS CLI uses to identify which sub Org you want to run a command in. We will call the profile after the account name
 profile=$accName"Profile"
 printf "Profile name is now $profile\n"
 
+# If a password wasn't supplied when the script was run prompt for one
 if [ "$userPassword" = "" ]
 then
    printf "\nEnter desired user password : "
@@ -64,7 +88,7 @@ then
    printf "\n"
 fi
 
-
+# If a region wasn't supplied when the script was run prompt for one. Only prompt for regions where AMI Images for a course exist. 
 if [ "$region" = "" ]
 then
    printf "\nAvailable Regions\n"
@@ -77,12 +101,14 @@ then
    printf "You chose $region\n"
 fi
 
+# If the region doesn't match one of the choices above then error out
 if [ "$region" != "eu-west-1" ] && [ "$region" != "us-east-1" ]
 then
    printf "Invalid region\n"
    exit
 fi
 
+# Get a ticket to allow use to use the role that was created in the sub Orgs during their creation
 expiry=$(aws sts assume-role --role-arn arn:aws:iam::$accID:role/$role --query 'Credentials.Expiration' --role-session-name $profile)
 if [ $? -ne 0 ]
 then
@@ -92,6 +118,7 @@ fi
 
 printf "Connection valid to $accName until $expiry\n"
 
+# Set the region to the selected region. This ensures all following commands are run in the correct region. 
 aws configure set region $region --profile $profile
 if [ $? -ne 0 ]
 then
@@ -99,6 +126,7 @@ then
   exit 1
 fi
 
+# Assume the role created in the Sub Orgs for the following commands
 aws configure set role_arn arn:aws:iam::$accID:role/$role --profile $profile
 if [ $? -ne 0 ]
 then
@@ -106,6 +134,7 @@ then
   exit 1
 fi
 
+# Connect to the Sub Org
 aws configure set source_profile default --profile $profile
 if [ $? -ne 0 ]
 then
@@ -113,7 +142,7 @@ then
   exit 1
 fi
 
-
+# Prompt for a course to launch
 if [ "$course" = "" ]
 then
    printf "\nAvailable courses\n"
@@ -124,12 +153,14 @@ then
    printf "You chose $course\n"
 fi
 
+# Ensure it's a vaild choice
 if [ "$course" != "ANYDC" ] && [ "$course" != "ANYSA" ]
 then
    printf "Invalid course\n"
    exit
 fi
 
+# Choose the appropriate CloudFormation json
 if [ "$course" = "ANYDC" ]
 then
   url="https://s3-eu-west-1.amazonaws.com/deploy-student-env/ANYDC.json"
@@ -140,12 +171,15 @@ then
   url="https://s3-eu-west-1.amazonaws.com/deploy-student-env/ANYSA.json"
 fi
 
-
-
+# If you try and connect to the CloudFormation service immeditely it might fail. 
+# Run a read only command 10 times to see if it's up first
 cfcntr=0
 printf "Waiting for CloudFormation Service ..."
 aws cloudformation list-stacks --profile $profile > /dev/null 2>&1
+# Capture any errors as actOut
 actOut=$?
+# If there are errors then wait 5 seconds and try again
+#  We will do this 10 times
 while [[ $actOut -ne 0 && $cfcntr -le 10 ]]
 do
   sleep 5
@@ -159,14 +193,19 @@ do
   cfcntr=$[$cfcntr +1]
 done
 
+# If we tried 10 times and it's still not answering then we give up
 if [ $cfcntr -gt 10 ]
 then
   printf "\nCloudFormation Service not available\n"
   exit 1
 fi
 
+# If it is up then we will go ahead and deploy the lab using the CloudFormation template url that we set above
 printf "\nCreating Student Lab Under New Account\n"
+# Each Sub Org has a differnt VPC ID. The CLoudfomration tempalte needs to know which VPC to deploy into so we need to grab the VPC ID first
+# Each Sub Org only has one VPC called TrainingVPC. The default VPC has been removed from each subOrg for security reasons
 vpcid=$(aws ec2 describe-vpcs --filters Name=isDefault,Values=false --query Vpcs[*].VpcId --output=text --profile $profile)
+# Create the stack and pass the VPC id and URL from above. 
 aws cloudformation create-stack --stack-name $course --template-url $url --parameters ParameterKey=TrainingVPC,ParameterValue=$vpcid --profile $profile > /dev/null 
 if [ $? -ne 0 ]
 then
@@ -174,6 +213,7 @@ then
   exit 1
 fi
 
+# Loop until the stack status is CREATE_COMPLETE. If we get an error status then error out
 printf "Waiting for Student Lab to start ..."
 cfStat=$(aws cloudformation describe-stacks --stack-name $course --profile $profile --query 'Stacks[0].[StackStatus]' --output text)
 while [ $cfStat != "CREATE_COMPLETE" ]
@@ -191,11 +231,7 @@ do
 done
 printf "\nStudent Lab started\n"
 
-userName=$accName
-groupName=$accName
-#policy="file://DBPolicy.json"
-UserPolicy="file://StudentPolicy.json"
-LocationPolicy="file://$region.json"
+# Create a user to allow the students access the account
 
 printf "Creating a new user\n"
 aws iam create-user --user-name $userName --profile $profile > /dev/null 
@@ -221,7 +257,7 @@ then
   exit 1
 fi
 
-printf "Assigning a policy\n"
+printf "Assigning a policy to the Group\n"
 aws iam put-group-policy --group-name $groupName --policy-name StudentRole --policy-document $UserPolicy --profile $profile > /dev/null
 aws iam put-group-policy --group-name $groupName --policy-name LocationRole --policy-document $LocationPolicy --profile $profile > /dev/null
 if [ $? -ne 0 ]
@@ -239,7 +275,7 @@ then
 fi
 
 printf "Students can now log into\n"
-printf "URL  : https://$region.signin.aws.amazon.com\n"
+printf "URL  : https://console.aws.amazon.com/console/home?region=$region\n"
 printf "ACC  : $accID\n"
 printf "USER : $userName\n"
 printf "PASS : $userPassword\n"

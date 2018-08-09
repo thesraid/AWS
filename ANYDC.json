@@ -30,7 +30,7 @@
         	},
         	"WindowsRegionMap": {
             		"us-east-1": {
-                		"AMI": "ami-da1c12a5"
+                		"AMI": "ami-0bc252c70524e0520"
             		},
             		"eu-west-1": {
 				"AMI": "ami-ad1a35d4"

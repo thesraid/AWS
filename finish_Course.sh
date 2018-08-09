@@ -1,12 +1,19 @@
 #!/bin/bash
+
+# joriordan
+
+# Prints out the usage of the scipt
 function usage
 {
     echo "usage: finish_Course.sh [-h]
 				      --account_name [-a] ACCOUNT_NAME"
 }
 
+
+# Create a variable to store the account name
 accName=""
 
+# Reads the input switches and assigns the Account Name to the accName 
 while [ "$1" != "" ]; do
     case $1 in
         -a | --account_name )   shift
@@ -19,8 +26,10 @@ while [ "$1" != "" ]; do
     shift
 done
 
+# If an accName was not proivded when the script was run prompt the user to enter one. 
 if [ "$accName" = "" ]
 then
+  # List out the accounts so that the user can copy and paste to make it easier
   aws organizations list-accounts-for-parent --parent-id ou-yus6-1nrdvs4m --query 'Accounts[*].Name' 
   printf "Please enter the name of the account (with or without quotes) : "
   read accName
@@ -29,6 +38,7 @@ then
   printf "You chose $accName \n"
 fi
 
+# Find the accountID for the entered account.
 accID=$(aws organizations list-accounts-for-parent --parent-id ou-yus6-1nrdvs4m --query 'Accounts[?Name==`'$accName'`].Id' --output text)
 if [ "$accID" = "" ] 
 then
@@ -37,23 +47,28 @@ then
 fi
 printf "The account ID for $accName is $accID\n"
 
+# The profile is what aws cli uses to identify the account. For simplicity we will set this to the account name
+# We will also greate a user and group with the same name
 profile=$accName
 userName=$accName
 groupName=$accName
 
+# Iterate through each AWS region and remove any labs 
 ARRAY=($(aws ec2 describe-regions --query Regions[*].RegionName --output text --profile cliaccount))
 for region in "${ARRAY[@]}"
 do
 
    printf "."
 
+   # Tell the aws cli to use a region. The region is whichever region we are currently on in the array above. 
    aws configure set region $region --profile $profile
    if [ $? -ne 0 ]
    then
      printf "Error occured connecting to the account\n"
      exit 1
    fi
-   
+
+   # Get a list of instances running in this region and terminate them.   
    INSTANCES=($(aws ec2 describe-instance-status --query InstanceStatuses[*].InstanceId --output text --profile $profile))
    
    
@@ -73,12 +88,13 @@ do
         exit 1
       fi
    
-      # Give instances time to shut down - This should really be iplemented to wait until all instances show as terminated
+      # Give instances time to shut down - This should really be iplemented to wait until all instances show as terminated but it seems to work fine this way
       sleep 10 && printf "." && sleep 10 && printf "." && sleep 10 && printf "." && sleep 10 && printf "." && sleep 10 && printf "."
       sleep 10 && printf "." && sleep 10 && printf "." && sleep 10 && printf "." && sleep 10 && printf "." && sleep 10 && printf "."
       sleep 10 && printf "." && sleep 10 && printf "." && sleep 10 && printf "." && sleep 10 && printf "." && sleep 10 && printf ".\n"
    fi
    
+   # Get a list of stacks in the region and delete them. Deleting a stack will deelte all resources created by the stack, Networks, GWs, SecGrps etc. 
    STACKS=($(aws cloudformation describe-stacks --query Stacks[*].StackName --output text --profile $profile))
    
    for STACK in "${STACKS[@]}"
@@ -106,10 +122,41 @@ do
           exit 1
         fi
       done
+      
+      # In the loop above we run the desribe stack command to and pull out the current state. Once the Stack is deleted we will get the error below as it no longer exists. 
+      # There is no way to supporess this message unless we supress all output from he stack deletion which would be bad if something else when wrong
       printf "An error occurred (ValidationError) when calling the DescribeStacks operation: Stack with id $STACK does not exist << IGNORE THIS ERROR IF SEEN ABOVE\n"
       printf "\n$STACK deleted in $region\n"
+
+
+      # Cloudtrail will be deleted here as we know the region with the Stack is also the region with the trail
+      TRAILS=($(aws cloudtrail describe-trails --query trailList[*].Name --output text --profile $profile))
+      for trail in "${TRAILS[@]}"
+      do
+         printf "\nDeleting the CloudTrail $trail\n"
+         aws cloudtrail delete-trail --name $trail --output text --profile $profile 
+         if [ $? -ne 0 ]
+         then
+            printf "Error occured removing the CloudTrail $trail\n"
+            exit 1
+         fi
+      done
+
+      # VPC flows will be deleted here as we know the region with the Stack is also the region with the flow
+      FLOWS=($(aws ec2 describe-flow-logs --query FlowLogs[*].FlowLogId --output text  --profile $profile))
+      for flow  in "${FLOWS[@]}"
+      do
+         printf "\nDeleting VPC Flow called $flow\n"
+         aws ec2 delete-flow-logs --flow-log-ids $flow  --profile $profile > /dev/null
+         if [ $? -ne 0 ]
+         then
+            printf "Error occured removing the VPC Flow $flow\n"
+            exit 1
+         fi
+      done
    done
    
+   # Linux SSH keys created by the student will be deleted
    KEYS=($(aws ec2 describe-key-pairs --query KeyPairs[*].KeyName --output text --profile $profile))
    
    for KEY in "${KEYS[@]}"
@@ -122,14 +169,20 @@ do
       	fi
    done
 
-   FLOWS=($(aws ec2 describe-flow-logs --query FlowLogs[*].FlowLogId --output text  --profile $profile))
-
-   for flow  in "${FLOWS[@]}"
+   # Cloudtrails will be deleted
+   TRAILS=($(aws cloudtrail describe-trails --query trailList[*].Name --output text --profile $profile))
+   for trail in "${TRAILS[@]}"
    do
-      printf "\nDeleting VPC Flow called $flow\n"
-      aws ec2 delete-flow-logs --flow-log-ids $flow  --profile $profile > /dev/null 2>&1
+      printf "\nDeleting the CloudTrail $trail\n"
+      aws cloudtrail delete-trail --name $trail --output text --profile $profile
+      if [ $? -ne 0 ]
+      then
+         printf "Error occured removing the CloudTrail $trail\n"
+         exit 1
+      fi
    done
 
+   # Delete log groups
    LOGGROUPS=($(aws logs describe-log-groups --query logGroups[*].logGroupName --output text --profile $profile))
   
    for group in "${LOGGROUPS[@]}"
@@ -141,19 +194,6 @@ do
          printf "Error occured removing the Log Group $group\n"
          exit 1
       fi
-   done
-
-   TRAILS=($(aws cloudtrail describe-trails --query trailList[*].Name --output text --profile $profile))
-   for trail in "${TRAILS[@]}"
-   do
-      # Silently delete trails as they error when you aren't in the right region when you try to delete them
-      #printf "\nDeleting the CloudTrail $trail\n"
-      aws cloudtrail delete-trail --name $trail --output text --profile $profile > /dev/null 2>&1
-      #if [ $? -ne 0 ]
-      #then
-      #   printf "Error occured removing the CloudTrail $trail\n"
-      #   exit 1
-      #fi
    done
 
    BUCKETS=($(aws s3 ls --profile $profile | awk '{print $3}'))
@@ -170,6 +210,7 @@ do
       fi
    done
 
+   # Here we delete all Security Groups except for the default one as it can't be deleted and would cause an error
    SECGROUPS=($(aws ec2 describe-security-groups --query 'SecurityGroups[?GroupName!=`default`].GroupId' --output text --profile $profile))
 
    for secgroup in "${SECGROUPS[@]}"
@@ -186,6 +227,8 @@ do
       fi
    done
    
+   # Here we delete all roles except for the built in ones which can't eb deleted and would cause an error
+   # When delting a role you also have to detach/delete any policies or profiles it has 
    ROLES=($(aws iam list-roles --query Roles[*].RoleName --profile $profile --output text))
    
    string=""
@@ -216,6 +259,7 @@ do
    done
 done
 
+# Premissions are added to the gorup that the user is attached to rather than the user themselves. This is becuase you can add a greater amount of permissions to a group
 printf "\nRemoving the specified user account\n"
 
 aws iam delete-group-policy --group-name $groupName --policy-name StudentRole --profile $profile
