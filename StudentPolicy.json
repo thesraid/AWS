@@ -52,7 +52,8 @@
 		"ec2:ReplaceIamInstanceProfileAssociation",
 		"ec2:DeleteFlowLogs",
                 "ec2:CreateFlowLogs",
-                "ec2:DescribeFlowLogs"
+                "ec2:DescribeFlowLogs",
+		"ec2:RebootInstances"
             ],
             "Resource": "*"
         },

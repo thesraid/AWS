@@ -30,7 +30,7 @@
         	},
         	"WindowsRegionMap": {
             		"us-east-1": {
-                		"AMI": "ami-0bc252c70524e0520"
+                		"AMI": "ami-0b81e083d601b11a3"
             		},
             		"eu-west-1": {
 				"AMI": "ami-ad1a35d4"
@@ -38,7 +38,7 @@
         	},
                 "HTML5RegionMap": {
                         "us-east-1": {
-                                "AMI": "ami-74131d0b"
+                                "AMI": "ami-0487e4ebf02c2cba0"
                         },
                         "eu-west-1": {
                                 "AMI": "ami-12345678"
@@ -117,7 +117,7 @@
 						"AMI"
 					]
 				},
-				"InstanceType": "t2.micro",
+				"InstanceType": "t3.micro",
 				"SecurityGroupIds" : [ {"Ref" : "LinuxSecurityGroup"} ],
 				"SubnetId": { "Ref" : "TrainingSubnet" },
 				"Tags" : [{"Key" : "Name", "Value" : "Linux1"}],
@@ -142,7 +142,7 @@
                                         "AMI"
                                 ]
                            },
-		"InstanceType": "t2.micro",
+		"InstanceType": "t3.micro",
 				"SecurityGroupIds" : [ {"Ref" : "LinuxSecurityGroup"} ],
 				"SubnetId": { "Ref" : "TrainingSubnet" },
 				"Tags" : [{"Key" : "Name", "Value" : "Linux2"}],
@@ -167,7 +167,7 @@
                                         "AMI"
                                 ]
                            },
-                "InstanceType": "t2.small",
+                "InstanceType": "t3.small",
                                 "SecurityGroupIds" : [ {"Ref" : "HTML5SecurityGroup"} ],
                                 "SubnetId": { "Ref" : "TrainingSubnet" },
                                 "Tags" : [{"Key" : "Name", "Value" : "HTML5"}],
@@ -192,7 +192,7 @@
                                         "AMI"
                                 ]
                            },
-		"InstanceType": "t2.small",
+		"InstanceType": "t3.small",
 				"SecurityGroupIds" : [ {"Ref" : "WindowsSecurityGroup"} ],
 				"SubnetId": { "Ref" : "TrainingSubnet" },
 				"PrivateIpAddress" : "192.168.250.14",

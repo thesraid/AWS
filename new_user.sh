@@ -85,7 +85,7 @@ fi
 
 printf "Assigning policy to user\n"
 aws iam put-group-policy --group-name $groupName --policy-name StudentRole --policy-document $policy --profile $newProfile
-aws iam put-group-policy --group-name $groupName --policy-name LocationRole --policy-document file://$region.json --profile $newProfile
+#aws iam put-group-policy --group-name $groupName --policy-name LocationRole --policy-document file://$region.json --profile $newProfile
 if [ $? -ne 0 ]
 then
   printf "Error occured assigning the policy to the user\n"

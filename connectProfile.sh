@@ -2,7 +2,7 @@
 function usage
 {
     echo "
-usage: new_user.sh [-h]	--account_id [-a] ACCOUNTID
+usage: connect_profile.sh [-h]	--account_id [-a] ACCOUNTID
                         --cl_profile_name [-c] CLI_PROFILE_NAME
 			( --role [-r] ROLE )
 "
