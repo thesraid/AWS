@@ -14,7 +14,7 @@
 	"Mappings": {
 		"Linux1RegionMap": {
 			"us-east-1": {
-				"AMI": "ami-adc7c9d2"
+				"AMI": "ami-01f76ae14f32c9a7e"
 			},
 			"eu-west-1": {
 				"AMI": "ami-ec143995"
@@ -22,7 +22,7 @@
 		},
         	"Linux2RegionMap": {
             		"us-east-1": {
-                		"AMI": "ami-aa6d4fd5"
+                		"AMI": "ami-00b06fd687898b802"
             		},
             		"eu-west-1": {
                 		"AMI": "ami-8b1a37f2"
@@ -120,7 +120,7 @@
 				"InstanceType": "t3.micro",
 				"SecurityGroupIds" : [ {"Ref" : "LinuxSecurityGroup"} ],
 				"SubnetId": { "Ref" : "TrainingSubnet" },
-				"Tags" : [{"Key" : "Name", "Value" : "Linux1"}],
+				"Tags" : [{"Key" : "Name", "Value" : "linux1"}],
 				"PrivateIpAddress" : "192.168.250.30",
 				"UserData"       : { "Fn::Base64" : { "Fn::Join" : ["", [
              				"#!/bin/bash -xe\n",
@@ -145,7 +145,7 @@
 		"InstanceType": "t3.micro",
 				"SecurityGroupIds" : [ {"Ref" : "LinuxSecurityGroup"} ],
 				"SubnetId": { "Ref" : "TrainingSubnet" },
-				"Tags" : [{"Key" : "Name", "Value" : "Linux2"}],
+				"Tags" : [{"Key" : "Name", "Value" : "linux2"}],
 				"PrivateIpAddress" : "192.168.250.31",
                                 "UserData"       : { "Fn::Base64" : { "Fn::Join" : ["", [
                                         "#!/bin/bash -xe\n",
@@ -196,7 +196,7 @@
 				"SecurityGroupIds" : [ {"Ref" : "WindowsSecurityGroup"} ],
 				"SubnetId": { "Ref" : "TrainingSubnet" },
 				"PrivateIpAddress" : "192.168.250.14",
-				"Tags" : [{"Key" : "Name", "Value" : "Windows"}]
+				"Tags" : [{"Key" : "Name", "Value" : "windows"}]
 			}
 		},
 		"LinuxSecurityGroup" : {

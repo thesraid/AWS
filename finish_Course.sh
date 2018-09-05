@@ -53,6 +53,41 @@ profile=$accName
 userName=$accName
 groupName=$accName
 
+printf "\n"
+USERGROUPS=($(aws iam list-groups --output text --query 'Groups[*].GroupName' --profile $profile))
+for group in "${USERGROUPS[@]}"
+do
+   printf "\nThis is group $group\n"
+   GROUPPOLICIES=($(aws iam list-group-policies --output text --query 'PolicyNames[*]' --group-name $group --profile $profile))
+   for policy in "${GROUPPOLICIES[@]}"
+   do
+      printf "Deleting policy $policy\n"
+      aws iam delete-group-policy --group-name $group --policy-name $policy --profile $profile
+   done
+   USERS=($(aws iam get-group --group-name $group --query 'Users[*].UserName' --output text --profile $profile))
+   for user in "${USERS[@]}"
+   do
+      printf "Removing $user from $group\n"
+      aws iam remove-user-from-group --group-name $group --user-name $user --profile $profile
+   done
+   printf "Deleting $group\n"
+   aws iam delete-group --group-name $group --profile $profile
+done
+
+USERS=($(aws iam list-users --output text --query 'Users[*].UserName' --profile $profile))
+for user in "${USERS[@]}"
+do
+   USERPOLICIES=($(aws iam list-user-policies --output text --query 'PolicyNames[*]' --user-name $user --profile $profile))
+   for policy in "${USERPOLICIES[@]}"
+   do
+      printf "Removing policy $policy from $user\n"
+      aws iam delete-user-policy --user-name $user --policy-name $policy --profile $profile
+   done
+   printf "Deleting user: $user\n"
+   aws iam delete-login-profile --user-name $user --profile $profile
+   aws iam delete-user --user-name $user --profile $profile
+done
+
 # Iterate through each AWS region and remove any labs 
 ARRAY=($(aws ec2 describe-regions --query Regions[*].RegionName --output text --profile cliaccount))
 for region in "${ARRAY[@]}"
@@ -96,6 +131,12 @@ do
    
    # Get a list of stacks in the region and delete them. Deleting a stack will deelte all resources created by the stack, Networks, GWs, SecGrps etc. 
    STACKS=($(aws cloudformation describe-stacks --query Stacks[*].StackName --output text --profile $profile))
+
+   #printf "Found the following stacks : \n"
+   #for STACK in "${STACKS[@]}"
+   #do
+   #   echo $STACK
+   #done
    
    for STACK in "${STACKS[@]}"
    do
@@ -289,40 +330,4 @@ done
 #  exit 1
 #fi
 #printf "Deleted user $userName\n"
-
-printf "\nSearching user accounts to delete\n"
-
 printf "\n"
-USERGROUPS=($(aws iam list-groups --output text --query 'Groups[*].GroupName' --profile $profile))
-for group in "${USERGROUPS[@]}"
-do
-   printf "\nThis is group $group\n"
-   GROUPPOLICIES=($(aws iam list-group-policies --output text --query 'PolicyNames[*]' --group-name $group --profile $profile))
-   for policy in "${GROUPPOLICIES[@]}"
-   do
-      printf "Deleting policy $policy\n"
-      aws iam delete-group-policy --group-name $group --policy-name $policy --profile $profile
-   done
-   USERS=($(aws iam get-group --group-name $group --query 'Users[*].UserName' --output text --profile $profile))
-   for user in "${USERS[@]}"
-   do
-      printf "Removing $user from $group\n"
-      aws iam remove-user-from-group --group-name $group --user-name $user --profile $profile
-   done
-   printf "Deleting $group\n"
-   aws iam delete-group --group-name $group --profile $profile
-done
-
-USERS=($(aws iam list-users --output text --query 'Users[*].UserName' --profile $profile))
-for user in "${USERS[@]}"
-do
-   USERPOLICIES=($(aws iam list-user-policies --output text --query 'PolicyNames[*]' --user-name $user --profile $profile))
-   for policy in "${USERPOLICIES[@]}"
-   do
-      printf "Removing policy $policy from $user\n"
-      aws iam delete-user-policy --user-name $user --policy-name $policy --profile $profile
-   done
-   printf "Deleting user: $user\n"
-   aws iam delete-login-profile --user-name $user --profile $profile
-   aws iam delete-user --user-name $user --profile $profile
-done
