@@ -148,13 +148,14 @@ then
    printf "\nAvailable courses\n"
    printf "   ANYDC\n"
    printf "   ANYSA\n"
+   printf "   Sensor\n"
    printf "\nChoose the course : "
    read course
    printf "You chose $course\n"
 fi
 
 # Ensure it's a vaild choice
-if [ "$course" != "ANYDC" ] && [ "$course" != "ANYSA" ]
+if [ "$course" != "ANYDC" ] && [ "$course" != "ANYSA" ]  && [ "$course" != "Sensor" ]
 then
    printf "Invalid course\n"
    exit
@@ -164,12 +165,28 @@ fi
 if [ "$course" = "ANYDC" ]
 then
   url="https://s3-eu-west-1.amazonaws.com/deploy-student-env/ANYDC.json"
+  
+  # Set the paratmer variables hat need to be sent this cloud formation template
+  # Each Sub Org has a differnt VPC ID. The Cloudfomration template needs to know which VPC to deploy into so we need to grab the VPC ID first
+  # Each Sub Org only has one VPC called TrainingVPC. The default VPC has been removed from each subOrg for security reasons
+  vpcid=$(aws ec2 describe-vpcs --filters Name=isDefault,Values=false --query Vpcs[*].VpcId --output=text --profile $profile)
+
+  # Build the paramter variable for the ANYDC course
+  parameter="ParameterKey=TrainingVPC,ParameterValue=$vpcid"
+
 fi
 
 if [ "$course" = "ANYSA" ]
 then
   url="https://s3-eu-west-1.amazonaws.com/deploy-student-env/ANYSA.json"
 fi
+
+if [ "$course" = "Sensor" ]
+then
+  url="https://s3.amazonaws.com/downloads.alienvault.cloud/usm-anywhere/sensor-images/usm-anywhere-sensor-aws-vpc.template"
+fi
+
+
 
 # If you try and connect to the CloudFormation service immeditely it might fail. 
 # Run a read only command 10 times to see if it's up first
@@ -202,11 +219,9 @@ fi
 
 # If it is up then we will go ahead and deploy the lab using the CloudFormation template url that we set above
 printf "\nCreating Student Lab Under New Account\n"
-# Each Sub Org has a differnt VPC ID. The CLoudfomration tempalte needs to know which VPC to deploy into so we need to grab the VPC ID first
-# Each Sub Org only has one VPC called TrainingVPC. The default VPC has been removed from each subOrg for security reasons
-vpcid=$(aws ec2 describe-vpcs --filters Name=isDefault,Values=false --query Vpcs[*].VpcId --output=text --profile $profile)
+
 # Create the stack and pass the VPC id and URL from above. 
-aws cloudformation create-stack --stack-name $course --template-url $url --parameters ParameterKey=TrainingVPC,ParameterValue=$vpcid --profile $profile > /dev/null 
+aws cloudformation create-stack --stack-name $course --template-url $url --parameters $parameter --profile $profile > /dev/null 
 if [ $? -ne 0 ]
 then
   printf "Student Lab Failed to Create\n"
@@ -279,5 +294,10 @@ printf "URL  : https://console.aws.amazon.com/console/home?region=$region\n"
 printf "ACC  : $accID\n"
 printf "USER : $userName\n"
 printf "PASS : $userPassword\n"
-aws cloudformation describe-stacks --stack-name $course --profile $profile --query 'Stacks[0].[Outputs]' --output text
+
+if [ "$course" == "ANYDC" ] || [ "$course" == "ANYSA" ]
+then
+   aws cloudformation describe-stacks --stack-name $course --profile $profile --query 'Stacks[0].[Outputs]' --output text
+fi
+
 
