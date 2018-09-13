@@ -9,7 +9,8 @@ function usage
 				      --account_name [-a] ACCOUNT_NAME
 				      --password [-p] PASSWORD
 				      --region [r] REGION
-				      --course [-c] COURSE"
+				      --course [-c] COURSE
+				      --sensor [-s] YES/NO"
 }
 
 # Set some variables
@@ -37,6 +38,9 @@ while [ "$1" != "" ]; do
                                 ;;
         -c | --course )         shift
                                 course=$1
+                                ;;
+        -s | --sensor )         shift
+                                sensor=$1
                                 ;;
         -h | --help )           usage
                                 exit
@@ -148,18 +152,106 @@ then
    printf "\nAvailable courses\n"
    printf "   ANYDC\n"
    printf "   ANYSA\n"
-   printf "   Sensor\n"
+   printf "   CENSP\n"
    printf "\nChoose the course : "
    read course
    printf "You chose $course\n"
 fi
 
 # Ensure it's a vaild choice
-if [ "$course" != "ANYDC" ] && [ "$course" != "ANYSA" ]  && [ "$course" != "Sensor" ]
+if [ "$course" != "ANYDC" ] && [ "$course" != "ANYSA" ]  && [ "$course" != "CENSP" ]
 then
    printf "Invalid course\n"
    exit
 fi
+
+# Prompt for sensor 
+if [ "$sensor" = "" ]
+then
+   printf "\nPlease type yes or no\n"
+   read sensor
+   sensor=$(echo "$sensor" | tr '[:upper:]' '[:lower:]')
+   printf "You chose $sensor\n"
+fi
+
+# Ensure it's a vaild choice
+if [ "$sensor" != "y" ] && [ "$sensor" != "yes" ] && [ "$sensor" != "n" ] && [ "$sensor" != "no" ]
+then
+   printf "Invalid sensor choice\n"
+   exit
+fi
+
+deploy_template () {
+
+   stackName=$1
+   url=$2
+   parameter="$3"
+
+   printf "\n"
+   printf "Course : $stackName\n"
+   printf "URL : $url\n"
+   printf "Parameters : "
+   printf "$parameter"
+   printf "\n"
+
+   # If you try and connect to the CloudFormation service immeditely it might fail.
+   # Run a read only command 10 times to see if it's up first
+   cfcntr=0
+   printf "Waiting for CloudFormation Service ..."
+   aws cloudformation list-stacks --profile $profile > /dev/null 2>&1
+   # Capture any errors as actOut
+   actOut=$?
+   # If there are errors then wait 5 seconds and try again
+   #  We will do this 10 times
+   while [[ $actOut -ne 0 && $cfcntr -le 10 ]]
+   do
+     sleep 5
+     aws cloudformation list-stacks --profile $profile > /dev/null 2>&1
+     actOut=$?
+     if [ $actOut -eq 0 ]
+     then
+       break
+     fi
+     printf "."
+     cfcntr=$[$cfcntr +1]
+   done
+
+   # If we tried 10 times and it's still not answering then we give up
+   if [ $cfcntr -gt 10 ]
+   then
+     printf "\nCloudFormation Service not available\n"
+     exit 1
+   fi
+
+   # If it is up then we will go ahead and deploy the lab using the CloudFormation template url that we set above
+   printf "\nCreating $stackName Lab Under New Account\n"
+
+   # Create the stack and pass the VPC id and URL from above.
+   aws cloudformation create-stack --stack-name $stackName --template-url $url --parameters $parameter --capabilities CAPABILITY_IAM --profile $profile > /dev/null
+   if [ $? -ne 0 ]
+   then
+     printf "$stackName Lab Failed to Create\n"
+     exit 1
+   fi
+
+   # Loop until the stack status is CREATE_COMPLETE. If we get an error status then error out
+   printf "Waiting for $stackName Lab to start ..."
+   cfStat=$(aws cloudformation describe-stacks --stack-name $stackName --profile $profile --query 'Stacks[0].[StackStatus]' --output text)
+   while [ $cfStat != "CREATE_COMPLETE" ]
+   do
+     sleep 5
+     printf "."
+     cfStat=$(aws cloudformation describe-stacks --stack-name $stackName --profile $profile --query 'Stacks[0].[StackStatus]' --output text)
+     if [ $cfStat = "CREATE_FAILED" ] || [ $cfStat = "ROLLBACK_COMPLETE"  ]
+     then
+       printf "\n$stackName Lab failed to start\n"
+       printf "ERROR : $cfStat\n"
+       aws cloudformation describe-stacks --stack-name $stackName --profile $profile
+       exit 1
+     fi
+   done
+   printf "\n$stackName started\n"
+}
 
 # Choose the appropriate CloudFormation json
 if [ "$course" = "ANYDC" ]
@@ -167,12 +259,14 @@ then
   url="https://s3-eu-west-1.amazonaws.com/deploy-student-env/ANYDC.json"
   
   # Set the paratmer variables hat need to be sent this cloud formation template
-  # Each Sub Org has a differnt VPC ID. The Cloudfomration template needs to know which VPC to deploy into so we need to grab the VPC ID first
+  # Each Sub Org has a different VPC ID. The Cloudformation template needs to know which VPC to deploy into so we need to grab the VPC ID first
   # Each Sub Org only has one VPC called TrainingVPC. The default VPC has been removed from each subOrg for security reasons
   vpcid=$(aws ec2 describe-vpcs --filters Name=isDefault,Values=false --query Vpcs[*].VpcId --output=text --profile $profile)
 
   # Build the paramter variable for the ANYDC course
   parameter="ParameterKey=TrainingVPC,ParameterValue=$vpcid"
+
+  deploy_template $course $url $parameter
 
 fi
 
@@ -181,70 +275,67 @@ then
   url="https://s3-eu-west-1.amazonaws.com/deploy-student-env/ANYSA.json"
 fi
 
-if [ "$course" = "Sensor" ]
+if [ "$course" = "CENSP" ]
+then
+  url="https://s3-eu-west-1.amazonaws.com/deploy-student-env/CENSP.json"
+
+  # Set the paratmer variables hat need to be sent this cloud formation template
+  # Each Sub Org has a different VPC ID. The Cloudformation template needs to know which VPC to deploy into so we need to grab the VPC ID first
+  # Each Sub Org only has one VPC called TrainingVPC. The default VPC has been removed from each subOrg for security reasons
+  vpcid=$(aws ec2 describe-vpcs --filters Name=isDefault,Values=false --query Vpcs[*].VpcId --output=text --profile $profile)
+
+  # Build the paramter variable for the ANYDC course
+  parameter="ParameterKey=TrainingVPC,ParameterValue=$vpcid"
+
+  deploy_template $course $url $parameter
+
+fi
+
+if [ "$course" = "ANYSA" ]
+then
+  url="https://s3-eu-west-1.amazonaws.com/deploy-student-env/ANYSA.json"
+fi
+
+
+if [ "$sensor" = "yes" ] || [ "$sensor" = "y" ]
 then
   url="https://s3.amazonaws.com/downloads.alienvault.cloud/usm-anywhere/sensor-images/usm-anywhere-sensor-aws-vpc.template"
-fi
 
+  # The sensor cloudformatin tempalte is provided by AlienVault. To deploy it it needs
+  # A Key - Which we will have to create
+  # The VPC ID - Each Sub Org has a different VPC ID. The Cloudformation template needs to know which VPC to deploy into so we need to grab the VPC ID first
+  # The NodeName - We will just call it Sensor
+  # The SubnetID - Each Sub Org has a different SubnetID. The Cloudfomration template needs to know which Subnet to deploy into so we need to grab the Subnet ID first
 
-
-# If you try and connect to the CloudFormation service immeditely it might fail. 
-# Run a read only command 10 times to see if it's up first
-cfcntr=0
-printf "Waiting for CloudFormation Service ..."
-aws cloudformation list-stacks --profile $profile > /dev/null 2>&1
-# Capture any errors as actOut
-actOut=$?
-# If there are errors then wait 5 seconds and try again
-#  We will do this 10 times
-while [[ $actOut -ne 0 && $cfcntr -le 10 ]]
-do
-  sleep 5
-  aws cloudformation list-stacks --profile $profile > /dev/null 2>&1
-  actOut=$?
-  if [ $actOut -eq 0 ]
+  # Creating the key
+  aws ec2 create-key-pair --key-name Sensor --profile $profile > /dev/null 2>&1
+  if [ $? -ne 0 ]
   then
-    break
+    printf "Failed to create SSH Key\n"
+  exit 1
   fi
-  printf "."
-  cfcntr=$[$cfcntr +1]
-done
 
-# If we tried 10 times and it's still not answering then we give up
-if [ $cfcntr -gt 10 ]
-then
-  printf "\nCloudFormation Service not available\n"
-  exit 1
-fi
+  # Getting the VPC ID
+  vpcid=$(aws ec2 describe-vpcs --filters Name=isDefault,Values=false --query Vpcs[*].VpcId --output=text --profile $profile)
 
-# If it is up then we will go ahead and deploy the lab using the CloudFormation template url that we set above
-printf "\nCreating Student Lab Under New Account\n"
+  # Getting the subnet ID - Each VPC should only have one subnet so we don't need to worry about multiple results here
+  subnetid=$(aws ec2 describe-subnets --query Subnets[*].SubnetId --output=text --profile $profile)
 
-# Create the stack and pass the VPC id and URL from above. 
-aws cloudformation create-stack --stack-name $course --template-url $url --parameters $parameter --profile $profile > /dev/null 
-if [ $? -ne 0 ]
-then
-  printf "Student Lab Failed to Create\n"
-  exit 1
-fi
-
-# Loop until the stack status is CREATE_COMPLETE. If we get an error status then error out
-printf "Waiting for Student Lab to start ..."
-cfStat=$(aws cloudformation describe-stacks --stack-name $course --profile $profile --query 'Stacks[0].[StackStatus]' --output text)
-while [ $cfStat != "CREATE_COMPLETE" ]
-do
-  sleep 5
-  printf "."
-  cfStat=$(aws cloudformation describe-stacks --stack-name $course --profile $profile --query 'Stacks[0].[StackStatus]' --output text)
-  if [ $cfStat = "CREATE_FAILED" ] || [ $cfStat = "ROLLBACK_COMPLETE"  ]
+  if [ "$subnetid" = "" ]
   then
-    printf "\nStudent Lab failed to start\n"
-    printf "ERROR : $cfStat\n"
-    aws cloudformation describe-stacks --stack-name $course --profile $profile
-    exit 1
+     printf "Error: No subnet found. Did you deploy a course lab? Exiting...... Account cleanup required\n"
+     exit 1
   fi
-done
-printf "\nStudent Lab started\n"
+
+  parameter="ParameterKey=VpcId,ParameterValue=$vpcid ParameterKey=KeyName,ParameterValue=Sensor ParameterKey=SubnetId,ParameterValue=$subnetid ParameterKey=NodeName,ParameterValue=Sensor"
+
+  deploy_template Sensor $url "$parameter"
+
+  # Now that the sensor is deployed lets open it up to local traffic
+  sgid=$(aws ec2 describe-security-groups --query SecurityGroups[*].GroupId --filter Name=description,Values="Enable USM Services Connectivity" --output text --profile $profile)
+  aws ec2 authorize-security-group-ingress --group-id $sgid --cidr 192.168.250.0/24 --protocol all --profile $profile
+   
+fi
 
 # Create a user to allow the students access the account
 
@@ -295,9 +386,6 @@ printf "ACC  : $accID\n"
 printf "USER : $userName\n"
 printf "PASS : $userPassword\n"
 
-if [ "$course" == "ANYDC" ] || [ "$course" == "ANYSA" ]
-then
-   aws cloudformation describe-stacks --stack-name $course --profile $profile --query 'Stacks[0].[Outputs]' --output text
-fi
+aws cloudformation describe-stacks --stack-name $course --profile $profile --query 'Stacks[0].[Outputs]' --output text
 
 

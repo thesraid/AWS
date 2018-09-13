@@ -128,6 +128,20 @@ do
       sleep 10 && printf "." && sleep 10 && printf "." && sleep 10 && printf "." && sleep 10 && printf "." && sleep 10 && printf "."
       sleep 10 && printf "." && sleep 10 && printf "." && sleep 10 && printf "." && sleep 10 && printf "." && sleep 10 && printf ".\n"
    fi
+
+   # Linux SSH keys will be deleted
+   KEYS=($(aws ec2 describe-key-pairs --query KeyPairs[*].KeyName --output text --profile $profile))
+
+   for KEY in "${KEYS[@]}"
+   do
+      printf "\nDeleting Keys in $region\n"
+      aws ec2 delete-key-pair --key-name $KEY --profile $profile
+      if [ $? -ne 0 ]
+      then
+         printf "$KEY FAILED to Delete in $region\n"
+      fi
+   done
+
    
    # Get a list of stacks in the region and delete them. Deleting a stack will deelte all resources created by the stack, Networks, GWs, SecGrps etc. 
    STACKS=($(aws cloudformation describe-stacks --query Stacks[*].StackName --output text --profile $profile))
@@ -196,19 +210,6 @@ do
          fi
       done
    
-      # Linux SSH keys created by the student will be deleted
-      KEYS=($(aws ec2 describe-key-pairs --query KeyPairs[*].KeyName --output text --profile $profile))
-   
-      for KEY in "${KEYS[@]}"
-      do
-         printf "\nDeleting Keys in $region\n"
-   	 aws ec2 delete-key-pair --key-name $KEY --profile $profile
-   	 if [ $? -ne 0 ]
-      	 then
-            printf "$KEY FAILED to Delete in $region\n"
-         fi
-      done
-
       # Delete log groups
       LOGGROUPS=($(aws logs describe-log-groups --query logGroups[*].logGroupName --output text --profile $profile))
   

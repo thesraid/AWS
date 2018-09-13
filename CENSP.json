@@ -1,7 +1,7 @@
 {
 	"AWSTemplateFormatVersion" : "2010-09-09",
 
-	"Description" : "Deploy ANYDC-v3",
+	"Description" : "Deploy CENSP",
 	
 	"Parameters" : {
 		"TrainingVPC": {
@@ -14,7 +14,7 @@
 	"Mappings": {
 		"Linux1RegionMap": {
 			"us-east-1": {
-				"AMI": "ami-01f76ae14f32c9a7e"
+				"AMI": "ami-0fa408143ac5c36e9"
 			},
 			"eu-west-1": {
 				"AMI": "ami-ec143995"
@@ -22,7 +22,7 @@
 		},
         	"Linux2RegionMap": {
             		"us-east-1": {
-                		"AMI": "ami-00b06fd687898b802"
+                		"AMI": "ami-0fa408143ac5c36e9"
             		},
             		"eu-west-1": {
                 		"AMI": "ami-8b1a37f2"
@@ -30,7 +30,7 @@
         	},
         	"WindowsRegionMap": {
             		"us-east-1": {
-                		"AMI": "ami-0b81e083d601b11a3"
+                		"AMI": "ami-0b09c21d45435aa7f"
             		},
             		"eu-west-1": {
 				"AMI": "ami-ad1a35d4"
