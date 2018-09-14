@@ -13,13 +13,13 @@ function usage
 				      --sensor [-s] YES/NO"
 }
 
-# Set some variables
-accName=""
-
 # This is the name of the role in the Parent Org that has permissions to do things in the child orgs. It's set up in the child orgs when they are created. 
 role="OrganizationAccountAccessRole"
 # This is the directory into which all students orgs are organised. There are other OUs for partner demo environments and so on.
 destinationOUname="Students"
+
+# Instansiate some variables
+accName=""
 region=""
 course=""
 url=""
@@ -80,7 +80,7 @@ then
 fi
 printf "The account ID for $accName is $accID\n"
 
-# Profiles are what the AWS CLI uses to identify which sub Org you want to run a command in. We will call the profile after the account name
+# Profiles are what the AWS CLI uses to identify which sub Org you want to run a command in. We will call the profile after the account name with the word Profile at the end
 profile=$accName"Profile"
 printf "Profile name is now $profile\n"
 
@@ -93,6 +93,7 @@ then
 fi
 
 # If a region wasn't supplied when the script was run prompt for one. Only prompt for regions where AMI Images for a course exist. 
+# This is done manually
 if [ "$region" = "" ]
 then
    printf "\nAvailable Regions\n"
@@ -112,7 +113,7 @@ then
    exit
 fi
 
-# Get a ticket to allow use to use the role that was created in the sub Orgs during their creation
+# Get a ticket to allow us to use the role that was created in the sub Orgs during their creation
 expiry=$(aws sts assume-role --role-arn arn:aws:iam::$accID:role/$role --query 'Credentials.Expiration' --role-session-name $profile)
 if [ $? -ne 0 ]
 then
@@ -146,7 +147,7 @@ then
   exit 1
 fi
 
-# Prompt for a course to launch
+# Prompt for a course to launch if it wasn't included in the command
 if [ "$course" = "" ]
 then
    printf "\nAvailable courses\n"
@@ -165,11 +166,12 @@ then
    exit
 fi
 
-# Prompt for sensor 
+# Prompt for sensor deployment if it wasn't included in the command
 if [ "$sensor" = "" ]
 then
    printf "\nPlease type yes or no\n"
    read sensor
+   # convert the answer to lowercase to cut down on the number of variations
    sensor=$(echo "$sensor" | tr '[:upper:]' '[:lower:]')
    printf "You chose $sensor\n"
 fi
@@ -181,20 +183,20 @@ then
    exit
 fi
 
+# Since we may be deploying multiple cloudformation templates (for example including a sensor) it is a function that can be called.
+# The function has to be called from below where the fuction is written.
+
 deploy_template () {
 
+   # When calling the cuntion 3 pieces of information will be included in this order 
+   # stackName (course) 
+   # Template URL
+   # Parameters to pass to the template
    stackName=$1
    url=$2
    parameter="$3"
 
-   printf "\n"
-   printf "Course : $stackName\n"
-   printf "URL : $url\n"
-   printf "Parameters : "
-   printf "$parameter"
-   printf "\n"
-
-   # If you try and connect to the CloudFormation service immeditely it might fail.
+   # If you try and connect to the CloudFormation service immediately it might fail.
    # Run a read only command 10 times to see if it's up first
    cfcntr=0
    printf "Waiting for CloudFormation Service ..."
@@ -251,6 +253,8 @@ deploy_template () {
      fi
    done
    printf "\n$stackName started\n"
+
+# End of deploy_sensor function
 }
 
 # Choose the appropriate CloudFormation json
@@ -258,12 +262,13 @@ if [ "$course" = "ANYDC" ]
 then
   url="https://s3-eu-west-1.amazonaws.com/deploy-student-env/ANYDC.json"
   
-  # Set the paratmer variables hat need to be sent this cloud formation template
+  # Set the paratmer variables that need to be sent this cloud formation template
+
   # Each Sub Org has a different VPC ID. The Cloudformation template needs to know which VPC to deploy into so we need to grab the VPC ID first
   # Each Sub Org only has one VPC called TrainingVPC. The default VPC has been removed from each subOrg for security reasons
   vpcid=$(aws ec2 describe-vpcs --filters Name=isDefault,Values=false --query Vpcs[*].VpcId --output=text --profile $profile)
 
-  # Build the paramter variable for the ANYDC course
+  # Build the parameter variable for the ANYDC course
   parameter="ParameterKey=TrainingVPC,ParameterValue=$vpcid"
 
   deploy_template $course $url $parameter
@@ -279,7 +284,8 @@ if [ "$course" = "CENSP" ]
 then
   url="https://s3-eu-west-1.amazonaws.com/deploy-student-env/CENSP.json"
 
-  # Set the paratmer variables hat need to be sent this cloud formation template
+  # Set the paratmer variables that need to be sent this cloud formation template
+
   # Each Sub Org has a different VPC ID. The Cloudformation template needs to know which VPC to deploy into so we need to grab the VPC ID first
   # Each Sub Org only has one VPC called TrainingVPC. The default VPC has been removed from each subOrg for security reasons
   vpcid=$(aws ec2 describe-vpcs --filters Name=isDefault,Values=false --query Vpcs[*].VpcId --output=text --profile $profile)
@@ -291,17 +297,11 @@ then
 
 fi
 
-if [ "$course" = "ANYSA" ]
-then
-  url="https://s3-eu-west-1.amazonaws.com/deploy-student-env/ANYSA.json"
-fi
-
-
 if [ "$sensor" = "yes" ] || [ "$sensor" = "y" ]
 then
   url="https://s3.amazonaws.com/downloads.alienvault.cloud/usm-anywhere/sensor-images/usm-anywhere-sensor-aws-vpc.template"
 
-  # The sensor cloudformatin tempalte is provided by AlienVault. To deploy it it needs
+  # The sensor cloudformatin template is provided by AlienVault. To deploy it it needs
   # A Key - Which we will have to create
   # The VPC ID - Each Sub Org has a different VPC ID. The Cloudformation template needs to know which VPC to deploy into so we need to grab the VPC ID first
   # The NodeName - We will just call it Sensor
@@ -329,11 +329,18 @@ then
 
   parameter="ParameterKey=VpcId,ParameterValue=$vpcid ParameterKey=KeyName,ParameterValue=Sensor ParameterKey=SubnetId,ParameterValue=$subnetid ParameterKey=NodeName,ParameterValue=Sensor"
 
+  # The parameter variable has to be in quotes as it contains spaces. If the quotes aren't there it get's parsed up to the first space only
   deploy_template Sensor $url "$parameter"
 
   # Now that the sensor is deployed lets open it up to local traffic
   sgid=$(aws ec2 describe-security-groups --query SecurityGroups[*].GroupId --filter Name=description,Values="Enable USM Services Connectivity" --output text --profile $profile)
   aws ec2 authorize-security-group-ingress --group-id $sgid --cidr 192.168.250.0/24 --protocol all --profile $profile
+  if [ $? -ne 0 ]
+  then
+    printf "Failed to add rule to Security Group to allow local inblound traffic to Sensor\n"
+  exit 1
+  fi
+
    
 fi
 
@@ -386,6 +393,7 @@ printf "ACC  : $accID\n"
 printf "USER : $userName\n"
 printf "PASS : $userPassword\n"
 
+# Print out any other output from the class CloudFormation template. 
 aws cloudformation describe-stacks --stack-name $course --profile $profile --query 'Stacks[0].[Outputs]' --output text
 
 

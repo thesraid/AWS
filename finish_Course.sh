@@ -238,22 +238,68 @@ do
          fi
       done
 
+
       # Here we delete all Security Groups except for the default one as it can't be deleted and would cause an error
       SECGROUPS=($(aws ec2 describe-security-groups --query 'SecurityGroups[?GroupName!=`default`].GroupId' --output text --profile $profile))
-   
+
       for secgroup in "${SECGROUPS[@]}"
       do
-         if [ $secgroup != "default" ]
+        if [ $secgroup != "default" ]
          then
-            printf "\nDeleting the Security Group $secgroup\n"
-            aws ec2 delete-security-group --group-id $secgroup --output text --profile $profile
-            if [ $? -ne 0 ]
-            then
-               printf "Error occured removing the Security Group $secgroup\n"
-               exit 1
-            fi
+
+            # Sometimes deleting a security group will fail if something refers to it
+            # Usually it's a instance that hasn't fully terminated yet
+            # If the security group deletion fails we will wait and try angain 10 times
+            cfcntr=0
+            printf "Deleting the Security Group $secgroup\n"
+            aws ec2 delete-security-group --group-id $secgroup --output text --profile $profile > /dev/null
+            # Capture any errors as actOut
+            actOut=$?
+            # If there are errors then wait 5 seconds and try again
+            #  We will do this 10 times
+            while [[ $actOut -ne 0 && $cfcntr -le 10 ]]
+            do
+              printf "."
+              sleep 5
+              aws ec2 delete-security-group --group-id $secgroup --output text --profile $profile > /dev/null
+              actOut=$?
+              if [ $actOut -eq 0 ]
+              then
+                break
+              fi
+              printf "."
+              cfcntr=$[$cfcntr +1]
+            done
          fi
       done
+
+      # If we tried 10 times and it's still not answering then we try one more time but print the error to the screen and exit if it fails again 
+      if [ $cfcntr -gt 10 ]
+      then
+        aws ec2 delete-security-group --group-id $secgroup --output text --profile $profile
+	if [ $? -ne 0 ]
+        then
+           printf "Error occured removing the Security Group $secgroup\n"
+           exit 1
+        fi
+      fi
+
+#      # Here we delete all Security Groups except for the default one as it can't be deleted and would cause an error
+#      SECGROUPS=($(aws ec2 describe-security-groups --query 'SecurityGroups[?GroupName!=`default`].GroupId' --output text --profile $profile))
+#   
+#      for secgroup in "${SECGROUPS[@]}"
+#      do
+#         if [ $secgroup != "default" ]
+#         then
+#            printf "\nDeleting the Security Group $secgroup\n"
+#            aws ec2 delete-security-group --group-id $secgroup --output text --profile $profile
+#            if [ $? -ne 0 ]
+#            then
+#               printf "Error occured removing the Security Group $secgroup\n"
+#               exit 1
+#           fi
+#         fi
+#      done
    done
    
    # Here we delete all roles except for the built in ones which can't be deleted and would cause an error
@@ -288,47 +334,4 @@ do
    done
 done
 
-# Premissions are added to the group that the user is attached to rather than the user themselves. This is becuase you can add a greater amount of permissions to a group
-#printf "\nRemoving the specified user account\n"
-#
-#aws iam delete-group-policy --group-name $groupName --policy-name StudentRole --profile $profile
-#aws iam delete-group-policy --group-name $groupName --policy-name LocationRole --profile $profile
-#if [ $? -ne 0 ]
-#then
-#  printf "Error occured deleting a policy\n"
-#  exit 1
-#fi
-#printf "Removed policy from user\n"
-#
-#aws iam remove-user-from-group --group-name $groupName --user-name $userName --profile $profile
-#if [ $? -ne 0 ]
-#then
-#  printf "Error occured removing the user from a group\n"
-#  exit 1
-#fi
-#printf "Removed user from group\n"
-#
-#aws iam delete-group --group-name $groupName --profile $profile
-#if [ $? -ne 0 ]
-#then
-#  printf "Error occured deleting the group\n"
-#  exit 1
-#fi
-#printf "Deleted group\n"
-#
-#aws iam delete-login-profile --user-name $userName --profile $profile
-#if [ $? -ne 0 ]
-#then
-#  printf "Error occured removing the users login permissions (profile) \n"
-#  exit 1
-#fi
-#printf "Removed user $userName login permissions\n"
-#
-#aws iam delete-user --user-name $userName --profile $profile
-#if [ $? -ne 0 ]
-#then
-#  printf "Error occured deleting the user\n"
-#  exit 1
-#fi
-#printf "Deleted user $userName\n"
 printf "\n"
