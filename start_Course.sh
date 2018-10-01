@@ -169,7 +169,7 @@ fi
 # Prompt for sensor deployment if it wasn't included in the command
 if [ "$sensor" = "" ]
 then
-   printf "\nPlease type yes or no\n"
+   printf "\nWould you like to deploy a Sensor? Please type yes or no\n"
    read sensor
    # convert the answer to lowercase to cut down on the number of variations
    sensor=$(echo "$sensor" | tr '[:upper:]' '[:lower:]')
@@ -396,4 +396,11 @@ printf "PASS : $userPassword\n"
 # Print out any other output from the class CloudFormation template. 
 aws cloudformation describe-stacks --stack-name $course --profile $profile --query 'Stacks[0].[Outputs]' --output text
 
-
+if [ "$sensor" = "yes" ] || [ "$sensor" = "y" ]
+then
+   printf "Sensor Internal: "
+   aws ec2 describe-instances --query Reservations[*].Instances[*].PrivateIpAddress --filters Name=tag:Name,Values=Sensor --output text --profile $profile
+   printf "Sensor External : "
+   aws ec2 describe-instances --query Reservations[*].Instances[*].PublicIpAddress --filters Name=tag:Name,Values=Sensor --output text --profile $profile
+  
+fi

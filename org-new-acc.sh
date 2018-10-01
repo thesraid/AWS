@@ -2,14 +2,9 @@
 # joriordan@alienvault.com
 function usage
 {
-    echo "usage: organization_new_acc.sh [-h] 
+    echo "usage: org-new-acc.sh [-h] 
 				      --account_name [-n] ACCOUNT_NAME
-                                      --account_email [-e] ACCOUNT_EMAIL
-                                      --cl_profile_name [-c] CLI_PROFILE_NAME
-				      --user_name [-u] USER_NAME
-                        	      --password [-p] PASSWORD
-                        	      --group_name [-g] GROUP_NAME
-                        	      --policy [-y] POLICY"
+                                      --account_email [-e] ACCOUNT_EMAIL"
 }
 
 newAccName=""
@@ -27,24 +22,6 @@ while [ "$1" != "" ]; do
         -e | --account_email )  shift
                                 newAccEmail=$1
                                 ;;
-        -c | --cl_profile_name ) shift
-                                profile=$1
-                                ;;
-        -r | --region )        shift
-                                region=$1
-                                ;;
-        -u | --user_name )      shift
-                                userName=$1
-                                ;;
-        -p | --password)        shift
-                                userPassword=$1
-                                ;;
-        -g | --group_name )     shift
-                                groupName=$1
-                                ;;
-        -y | --policy )         shift
-                                policy=$1
-                                ;;
         -h | --help )           usage
                                 exit
                                 ;;
@@ -52,13 +29,15 @@ while [ "$1" != "" ]; do
     shift
 done
 
-if [ "$newAccName" = "" ] || [ "$newAccEmail" = "" ] || [ "$profile" = "" ] || [ "$destinationOUname" = "" ] || [ "$userName" = "" ] || [ "$userPassword" = "" ] || [ "$groupName" = "" ] || [ "$policy" = "" ]
+if [ "$newAccName" = "" ] || [ "$newAccEmail" = "" ] 
 then
   usage
   exit
 fi
 
-printf "Create New Account\n"
+profile=$newAccName
+
+printf "Creating a new account called $newAccName\n"
 ReqID=$(aws organizations create-account --email $newAccEmail --account-name "$newAccName" --role-name $roleName \
 --query 'CreateAccountStatus.[Id]' \
 --output text)
@@ -88,24 +67,37 @@ accID=$(aws organizations describe-create-account-status --create-account-reques
 
 accARN="arn:aws:iam::$accID:role/$roleName"
 
-printf "\nCreate New CLI Profile\n"
+printf "\nCreating New CLI Profile\n"
 aws configure set role_arn $accARN --profile $profile
 aws configure set source_profile default --profile $profile
 
+# We can't list the regions from this account as it's not created yet. So we will list them from cliaccount
+regions=($(aws ec2 describe-regions --query Regions[*].RegionName --output text --profile cliaccount))
 
+printf "Waiting for account to be fully spun up."
+sleep 5
+printf "."
+sleep 5
+printf "."
+sleep 5
+printf "."
+sleep 5
+printf ".\n"
+
+printf "Creating the TrainingVPC in each region while deleting the default VPC\n"
 for region in "${regions[@]}"
 do
 
    aws configure set region $region --profile $profile
 
-
-   printf "Creating VPC in $region \n"
-   sleep 20
+   #printf "Creating Training VPC in $region \n"
+   #sleep 20
+   printf "."
 
    aws ec2 create-vpc --cidr-block 192.168.250.0/24 --profile $profile  > /dev/null 2>&1
    if [ $? -ne 0 ]
    then
-      printf "Error occured creating VPC\n"
+      printf "Error occured creating TrainingVPC in $region\n"
       exit 1
    fi
 
@@ -113,57 +105,60 @@ do
    aws ec2 create-tags --resources $vpcid --tags Key=Name,Value=TrainingVPC --profile $profile > /dev/null 2>&1
    if [ $? -ne 0 ]
    then
-      printf "Error occured naming VPC\n"
+      printf "Error occured naming TrainingVPC in $region\n"
       exit 1
    fi
 
-   printf "VPC Created in $region \n"
+
+   #printf "Deleting Default VPC in $region\n"
+   printf "."
+
+   vpcid=$(aws ec2 describe-vpcs --filters Name=isDefault,Values=true --query Vpcs[*].VpcId --output=text --profile $profile)
+   if [ $? -ne 0 ]
+   then
+      printf "Error getting Default VPC information in $region\n"
+      exit 1
+   fi
+
+   SUBNETS=($(aws ec2 describe-subnets --query Subnets[*].SubnetId --output text --profile $profile))
+   for subnetid in "${SUBNETS[@]}"
+   do
+      aws ec2 delete-subnet --subnet-id $subnetid --profile $profile
+      if [ $? -ne 0 ]
+      then
+         printf "Error deleting default subnets in $region\n"
+         exit 1
+      fi
+   done
+
+   GATEWAYS=($(aws ec2 describe-internet-gateways --query InternetGateways[*].InternetGatewayId --output text --profile $profile))
+   for gatewayid in "${GATEWAYS[@]}"
+   do
+      aws ec2 detach-internet-gateway --internet-gateway-id $gatewayid --vpc-id $vpcid --profile $profile
+      if [ $? -ne 0 ]
+      then
+         printf "Error detaching default gateway in $region\n"
+         exit 1
+      fi
+
+      aws ec2 delete-internet-gateway --internet-gateway-id $gatewayid --profile $profile
+      if [ $? -ne 0 ]
+      then
+         printf "Error deleting default gateway in $region\n"
+         exit 1
+      fi
+   done
+
+   aws ec2 delete-vpc --vpc-id $vpcid --profile $profile
+   if [ $? -ne 0 ]
+   then
+      printf "Error deleting default VPC in $region\n"
+      exit 1
+   fi
+
 done
 
-
-printf "Creating User Login Profile\n"
-printf "Creating a new user\n"
-aws iam create-user --user-name $userName --profile $profile > /dev/null 2>&1
-if [ $? -ne 0 ]
-then
-  printf "Error occured creating a user\n"
-  exit 1
-fi
-
-printf "Creating a new group\n"
-aws iam create-group --group-name $groupName --profile $profile > /dev/null 2>&1
-if [ $? -ne 0 ]
-then
-  printf "Error occured creating a group\n"
-  exit 1
-fi
-
-printf "Adding the user to the group\n"
-aws iam add-user-to-group --user-name $userName --group-name $groupName --profile $profile > /dev/null 2>&1
-if [ $? -ne 0 ]
-then
-  printf "Error occured adding the user to the group\n"
-  exit 1
-fi
-
-printf "Applying the Policy\n"
-aws iam put-user-policy --user-name $userName --policy-name StudentRole --policy-document $policy --profile $profile > /dev/null 2>&1
-if [ $? -ne 0 ]
-then
-  printf "Error occured assigning the policy to the user\n"
-  exit 1
-fi
-
-printf "Giving user a login password\n"
-aws iam create-login-profile --user-name $userName --password $userPassword --profile $profile > /dev/null 2>&1
-if [ $? -ne 0 ]
-then
-  printf "Error occured setting the users login and password\n"
-  exit 1
-fi
-
-printf "Created User\n"
-
+printf "\n"
 
 printf "Adding to Parent Org\n"
 if [ "$destinationOUname" != "" ]

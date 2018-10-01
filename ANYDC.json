@@ -117,7 +117,7 @@
 						"AMI"
 					]
 				},
-				"InstanceType": "t3.micro",
+				"InstanceType": "t2.micro",
 				"SecurityGroupIds" : [ {"Ref" : "LinuxSecurityGroup"} ],
 				"SubnetId": { "Ref" : "TrainingSubnet" },
 				"Tags" : [{"Key" : "Name", "Value" : "linux1"}],
@@ -142,7 +142,7 @@
                                         "AMI"
                                 ]
                            },
-		"InstanceType": "t3.micro",
+		"InstanceType": "t2.micro",
 				"SecurityGroupIds" : [ {"Ref" : "LinuxSecurityGroup"} ],
 				"SubnetId": { "Ref" : "TrainingSubnet" },
 				"Tags" : [{"Key" : "Name", "Value" : "linux2"}],
@@ -167,7 +167,7 @@
                                         "AMI"
                                 ]
                            },
-                "InstanceType": "t3.small",
+                "InstanceType": "t2.small",
                                 "SecurityGroupIds" : [ {"Ref" : "HTML5SecurityGroup"} ],
                                 "SubnetId": { "Ref" : "TrainingSubnet" },
                                 "Tags" : [{"Key" : "Name", "Value" : "HTML5"}],
@@ -192,7 +192,7 @@
                                         "AMI"
                                 ]
                            },
-		"InstanceType": "t3.small",
+		"InstanceType": "t2.small",
 				"SecurityGroupIds" : [ {"Ref" : "WindowsSecurityGroup"} ],
 				"SubnetId": { "Ref" : "TrainingSubnet" },
 				"PrivateIpAddress" : "192.168.250.14",
@@ -225,20 +225,7 @@
 		}
 	},
 	"Outputs" : {
-		"Linux1" : {
-			"Description" : "Linux1",
-			"Value" : { "Fn::Join" : ["", [{ "Fn::GetAtt" : [ "Linux1Instance", "PublicIp" ]}]] }
-		},
-		"Linux2" : {
-			"Description" : "Linux2",
-			"Value" : { "Fn::Join" : ["", [{ "Fn::GetAtt" : [ "Linux2Instance", "PublicIp" ]}]] }
-		},
-		"Windows" : {
-			"Description" : "Windows",
-			"Value" : { "Fn::Join" : ["", [{ "Fn::GetAtt" : [ "WindowsInstance", "PublicIp" ]}]] }
-		},
 		"HTML5" : {
-                        "Description" : "HTML5",
                         "Value" : { "Fn::Join" : ["", [{ "Fn::GetAtt" : [ "HTML5Instance", "PublicIp" ]}]] }
                 }
 

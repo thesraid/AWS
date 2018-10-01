@@ -89,7 +89,7 @@ do
 done
 
 # Iterate through each AWS region and remove any labs 
-ARRAY=($(aws ec2 describe-regions --query Regions[*].RegionName --output text --profile cliaccount))
+ARRAY=($(aws ec2 describe-regions --query Regions[*].RegionName --output text --profile $profile))
 for region in "${ARRAY[@]}"
 do
 
@@ -100,6 +100,7 @@ do
    if [ $? -ne 0 ]
    then
      printf "Error occured connecting to the account\n"
+     printf "Trying re-running the script again in a few seconds\n"
      exit 1
    fi
 
@@ -120,6 +121,7 @@ do
       if [ $? -ne 0 ]
       then
         printf "FAILED to terminate all Instancese in $region\n"
+        printf "Trying re-running the script again in a few seconds\n"
         exit 1
       fi
    
@@ -139,6 +141,7 @@ do
       if [ $? -ne 0 ]
       then
          printf "$KEY FAILED to Delete in $region\n"
+         printf "Trying re-running the script again in a few seconds\n"
       fi
    done
 
@@ -160,6 +163,7 @@ do
       if [ $? -ne 0 ]
       then
         printf "$STACK FAILED to Delete in $region\n"
+        printf "Trying re-running the script again in a few seconds\n"
         exit 1
       fi
    
@@ -173,7 +177,7 @@ do
         if [ "$cfStat" = "DELETE_FAILED" ]
         then
           printf "\n$STACK FAILED to delete in $region\n"
-          printf "MANUAL CLEANUP REQUIRED\n"
+          printf "Trying re-running the script again in a few seconds\n"
           exit 1
         fi
       done
@@ -193,6 +197,7 @@ do
          if [ $? -ne 0 ]
          then
             printf "Error occured removing the CloudTrail $trail\n"
+            printf "Trying re-running the script again in a few seconds\n"
             exit 1
          fi
       done
@@ -206,6 +211,7 @@ do
          if [ $? -ne 0 ]
          then
             printf "Error occured removing the VPC Flow $flow\n"
+            printf "Trying re-running the script again in a few seconds\n"
             exit 1
          fi
       done
@@ -220,6 +226,7 @@ do
          if [ $? -ne 0 ]
          then
             printf "Error occured removing the Log Group $group\n"
+            printf "Trying re-running the script again in a few seconds\n"
             exit 1
          fi
       done
@@ -234,6 +241,7 @@ do
          if [ $? -ne 0 ]
          then
             printf "Error occured removing the Bucket $bucket\n"
+            printf "Trying re-running the script again in a few seconds\n"
             exit 1
          fi
       done
@@ -242,6 +250,8 @@ do
       # Here we delete all Security Groups except for the default one as it can't be deleted and would cause an error
       SECGROUPS=($(aws ec2 describe-security-groups --query 'SecurityGroups[?GroupName!=`default`].GroupId' --output text --profile $profile))
 
+      # Counter used to count how many times we've tried to delete a Security Group
+      cfcntr=0
       for secgroup in "${SECGROUPS[@]}"
       do
         if [ $secgroup != "default" ]
@@ -250,9 +260,8 @@ do
             # Sometimes deleting a security group will fail if something refers to it
             # Usually it's a instance that hasn't fully terminated yet
             # If the security group deletion fails we will wait and try angain 10 times
-            cfcntr=0
             printf "Deleting the Security Group $secgroup\n"
-            aws ec2 delete-security-group --group-id $secgroup --output text --profile $profile > /dev/null
+            aws ec2 delete-security-group --group-id $secgroup --output text --profile $profile > /dev/null 2>&1
             # Capture any errors as actOut
             actOut=$?
             # If there are errors then wait 5 seconds and try again
@@ -280,6 +289,7 @@ do
 	if [ $? -ne 0 ]
         then
            printf "Error occured removing the Security Group $secgroup\n"
+           printf "Trying re-running the script again in a few seconds\n"
            exit 1
         fi
       fi
