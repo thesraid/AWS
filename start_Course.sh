@@ -10,7 +10,8 @@ function usage
 				      --password [-p] PASSWORD
 				      --region [r] REGION
 				      --course [-c] COURSE
-				      --sensor [-s] YES/NO"
+				      --sensor [-s] YES/NO
+    Multiple accounts can be specified in quotes"
 }
 
 # This is the name of the role in the Parent Org that has permissions to do things in the child orgs. It's set up in the child orgs when they are created. 
@@ -28,7 +29,7 @@ url=""
 while [ "$1" != "" ]; do
     case $1 in
         -a | --account_name )   shift
-                                accName=$1
+                                accNameArray=($1)
                                 ;;
 	-p | --password)	shift
 				userPassword=$1
@@ -48,6 +49,10 @@ while [ "$1" != "" ]; do
     esac
     shift
 done
+
+
+for accName in "${accNameArray[@]}"
+do
 
 # Username and Group Name will match the sub Org name
 userName=$accName
@@ -400,7 +405,10 @@ if [ "$sensor" = "yes" ] || [ "$sensor" = "y" ]
 then
    printf "Sensor Internal: "
    aws ec2 describe-instances --query Reservations[*].Instances[*].PrivateIpAddress --filters Name=tag:Name,Values=Sensor --output text --profile $profile
-   printf "Sensor External : "
+   printf "Sensor External: "
    aws ec2 describe-instances --query Reservations[*].Instances[*].PublicIpAddress --filters Name=tag:Name,Values=Sensor --output text --profile $profile
   
 fi
+printf "\n"
+
+done

@@ -6,7 +6,8 @@
 function usage
 {
     echo "usage: finish_Course.sh [-h]
-				      --account_name [-a] ACCOUNT_NAME"
+				      --account_name [-a] ACCOUNT_NAME
+				      Multiple accounts can be specified in quotes"
 }
 
 
@@ -17,7 +18,7 @@ accName=""
 while [ "$1" != "" ]; do
     case $1 in
         -a | --account_name )   shift
-                                accName=$1
+                                accNameArray=($1)
                                 ;;
         -h | --help )           usage
                                 exit
@@ -25,6 +26,9 @@ while [ "$1" != "" ]; do
     esac
     shift
 done
+
+for accName in "${accNameArray[@]}"
+do
 
 # If an accName was not proivded when the script was run prompt the user to enter one. 
 if [ "$accName" = "" ]
@@ -345,3 +349,4 @@ do
 done
 
 printf "\n"
+done
