@@ -1,0 +1,6 @@
+The account ID for AVStudent34 is 403818245815
+Profile name is now AVStudent34Profile
+Connection valid to AVStudent34 until "2018-10-09T11:45:17Z"
+Waiting for CloudFormation Service ...
+Creating ANYDC-Oct-09 Stack Under New Account
+ANYDC-Oct-09 Stack Failed to Create

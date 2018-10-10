@@ -4,12 +4,11 @@ function usage
 {
     echo "usage: org-new-acc.sh [-h] 
 				      --account_name [-n] ACCOUNT_NAME
-                                      --account_email [-e] ACCOUNT_EMAIL
-     EXAMPLE: ./org-new-acc.sh -n AVStudent30 -e avstudent30@alien-training.com"
+                                      --accountId [-i] ACCOUNT_ID"
 }
 
 newAccName=""
-newAccEmail=""
+accId=""
 profile=""
 roleName="OrganizationAccountAccessRole"
 destinationOUname="Students"
@@ -20,8 +19,8 @@ while [ "$1" != "" ]; do
         -n | --account_name )   shift
                                 newAccName=$1
                                 ;;
-        -e | --account_email )  shift
-                                newAccEmail=$1
+        -i | --accountId )  	shift
+                                accId=$1
                                 ;;
         -h | --help )           usage
                                 exit
@@ -30,60 +29,10 @@ while [ "$1" != "" ]; do
     shift
 done
 
-if [ "$newAccName" = "" ] || [ "$newAccEmail" = "" ] 
-then
-  usage
-  exit
-fi
-
 profile=$newAccName
-
-printf "Creating a new account called $newAccName\n"
-ReqID=$(aws organizations create-account --email $newAccEmail --account-name "$newAccName" --role-name $roleName \
---query 'CreateAccountStatus.[Id]' \
---output text)
-
-printf "Waiting for New Account ..."
-orgStat=$(aws organizations describe-create-account-status --create-account-request-id $ReqID \
---query 'CreateAccountStatus.[State]' \
---output text)
-
-while [ $orgStat != "SUCCEEDED" ]
-do
-  if [ $orgStat = "FAILED" ]
-  then
-    printf "\nAccount Failed to Create\n"
-    exit 1
-  fi
-  printf "."
-  sleep 10
-  orgStat=$(aws organizations describe-create-account-status --create-account-request-id $ReqID \
-  --query 'CreateAccountStatus.[State]' \
-  --output text)
-done
-
-accID=$(aws organizations describe-create-account-status --create-account-request-id $ReqID \
---query 'CreateAccountStatus.[AccountId]' \
---output text)
-
-accARN="arn:aws:iam::$accID:role/$roleName"
-
-printf "\nCreating New CLI Profile\n"
-aws configure set role_arn $accARN --profile $profile
-aws configure set source_profile default --profile $profile
 
 # We can't list the regions from this account as it's not created yet. So we will list them from cliaccount
 regions=($(aws ec2 describe-regions --query Regions[*].RegionName --output text --profile cliaccount))
-
-printf "Waiting for account $accID to be fully spun up."
-sleep 5
-printf "."
-sleep 5
-printf "."
-sleep 5
-printf "."
-sleep 5
-printf ".\n"
 
 printf "Creating the TrainingVPC in each region while deleting the default VPC\n"
 for region in "${regions[@]}"
@@ -99,10 +48,6 @@ do
    if [ $? -ne 0 ]
    then
       printf "Error occured creating TrainingVPC in $region\n"
-      printf "******************************************************************************************\n"
-      printf "Try running this command in a few minutes org-VPC-move.sh -n $newAccName -i $accID"
-      printf "******************************************************************************************\n"
-      echo " "
       exit 1
    fi
 
@@ -169,8 +114,13 @@ printf "Adding to Parent Org\n"
 if [ "$destinationOUname" != "" ]
 then
   printf "Moving New Account to OU\n"
+  accID=$(aws organizations list-accounts --output text --query 'Accounts[?Name==`$newAccName`]'.Id)
   rootOU=$(aws organizations list-roots --query 'Roots[0].[Id]' --output text)
   destOU=$(aws organizations list-organizational-units-for-parent --parent-id $rootOU --query 'OrganizationalUnits[?Name==`'$destinationOUname'`].[Id]' --output text)
+
+  printf "accID:$accID\n"
+  printf "rootOU:$rootOU\n"
+  printf "destOU:$destOU\n"
 
   aws organizations move-account --account-id $accID --source-parent-id $rootOU --destination-parent-id $destOU 
   if [ $? -ne 0 ]
@@ -180,6 +130,4 @@ then
 fi
 
 echo New Account ID is $accID
-echo " "
-echo "Don't forget to update permissions with share-ami.sh"
-echo "Don't forget to verify the e-mail where required"
+

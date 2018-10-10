@@ -11,6 +11,7 @@ function usage
 				      --region [r] REGION
 				      --course [-c] COURSE
 				      --sensor [-s] YES/NO
+                                      --tag [-t] TAG
     Multiple accounts can be specified in quotes"
 }
 
@@ -24,6 +25,7 @@ accName=""
 region=""
 course=""
 url=""
+tag=$(date +"%b-%d")
 
 # Read the input from the command. 
 while [ "$1" != "" ]; do
@@ -43,6 +45,9 @@ while [ "$1" != "" ]; do
         -s | --sensor )         shift
                                 sensor=$1
                                 ;;
+        -t | --tag )            shift
+                                tag=$1
+                                ;;
         -h | --help )           usage
                                 exit
                                 ;;
@@ -58,9 +63,9 @@ do
 userName=$accName
 groupName=$accName
 # This policy specifies what resources the user can access. It should be in the same folder as the script
-UserPolicy="file://StudentPolicy.json"
+UserPolicy="file://policies/StudentPolicy.json"
 # This policy specifies what region the user can access. It should be in the same folder as the script
-LocationPolicy="file://$region.json"
+LocationPolicy="file://policies/$region.json"
 
 
 
@@ -197,7 +202,7 @@ deploy_template () {
    # stackName (course) 
    # Template URL
    # Parameters to pass to the template
-   stackName=$1
+   stackName="$1"
    url=$2
    parameter="$3"
 
@@ -231,18 +236,18 @@ deploy_template () {
    fi
 
    # If it is up then we will go ahead and deploy the lab using the CloudFormation template url that we set above
-   printf "\nCreating $stackName Lab Under New Account\n"
+   printf "\nCreating $stackName Stack Under New Account\n"
 
    # Create the stack and pass the VPC id and URL from above.
    aws cloudformation create-stack --stack-name $stackName --template-url $url --parameters $parameter --capabilities CAPABILITY_IAM --profile $profile > /dev/null
    if [ $? -ne 0 ]
    then
-     printf "$stackName Lab Failed to Create\n"
+     printf "$stackName Stack Failed to Create\n"
      exit 1
    fi
 
    # Loop until the stack status is CREATE_COMPLETE. If we get an error status then error out
-   printf "Waiting for $stackName Lab to start ..."
+   printf "Waiting for $stackName stack to start ..."
    cfStat=$(aws cloudformation describe-stacks --stack-name $stackName --profile $profile --query 'Stacks[0].[StackStatus]' --output text)
    while [ $cfStat != "CREATE_COMPLETE" ]
    do
@@ -251,7 +256,7 @@ deploy_template () {
      cfStat=$(aws cloudformation describe-stacks --stack-name $stackName --profile $profile --query 'Stacks[0].[StackStatus]' --output text)
      if [ $cfStat = "CREATE_FAILED" ] || [ $cfStat = "ROLLBACK_COMPLETE"  ]
      then
-       printf "\n$stackName Lab failed to start\n"
+       printf "\n$stackName Stack failed to start\n"
        printf "ERROR : $cfStat\n"
        aws cloudformation describe-stacks --stack-name $stackName --profile $profile
        exit 1
@@ -276,7 +281,7 @@ then
   # Build the parameter variable for the ANYDC course
   parameter="ParameterKey=TrainingVPC,ParameterValue=$vpcid"
 
-  deploy_template $course $url $parameter
+  deploy_template "$course-$tag" $url $parameter
 
 fi
 
@@ -295,10 +300,10 @@ then
   # Each Sub Org only has one VPC called TrainingVPC. The default VPC has been removed from each subOrg for security reasons
   vpcid=$(aws ec2 describe-vpcs --filters Name=isDefault,Values=false --query Vpcs[*].VpcId --output=text --profile $profile)
 
-  # Build the paramter variable for the ANYDC course
+  # Build the paramter variable for the course
   parameter="ParameterKey=TrainingVPC,ParameterValue=$vpcid"
-
-  deploy_template $course $url $parameter
+  
+  deploy_template "$course-$tag" $url $parameter
 
 fi
 
@@ -392,21 +397,24 @@ then
   exit 1
 fi
 
-printf "Students can now log into\n"
-printf "URL  : https://console.aws.amazon.com/console/home?region=$region\n"
-printf "ACC  : $accID\n"
-printf "USER : $userName\n"
-printf "PASS : $userPassword\n"
+echo "-------------------------------------------------------------------" >> results.txt
+echo $tag >> results.txt
+date >> results.txt
+printf "Students can now log into\n" | tee -a results.txt
+printf "URL  : https://console.aws.amazon.com/console/home?region=$region\n" | tee -a results.txt
+printf "ACC  : $accID\n" | tee -a results.txt
+printf "USER : $userName\n" | tee -a results.txt
+printf "PASS : $userPassword\n" | tee -a results.txt
 
 # Print out any other output from the class CloudFormation template. 
-aws cloudformation describe-stacks --stack-name $course --profile $profile --query 'Stacks[0].[Outputs]' --output text
+aws cloudformation describe-stacks --stack-name "$course-$tag" --profile $profile --query 'Stacks[0].[Outputs]' --output text | tee -a results.txt
 
 if [ "$sensor" = "yes" ] || [ "$sensor" = "y" ]
 then
-   printf "Sensor Internal: "
-   aws ec2 describe-instances --query Reservations[*].Instances[*].PrivateIpAddress --filters Name=tag:Name,Values=Sensor --output text --profile $profile
-   printf "Sensor External: "
-   aws ec2 describe-instances --query Reservations[*].Instances[*].PublicIpAddress --filters Name=tag:Name,Values=Sensor --output text --profile $profile
+   printf "Sensor Internal: " | tee -a results.txt
+   aws ec2 describe-instances --query Reservations[*].Instances[*].PrivateIpAddress --filters Name=tag:Name,Values=Sensor --output text --profile $profile | tee -a results.txt
+   printf "Sensor External: " | tee -a results.txt
+   aws ec2 describe-instances --query Reservations[*].Instances[*].PublicIpAddress --filters Name=tag:Name,Values=Sensor --output text --profile $profile | tee -a results.txt
   
 fi
 printf "\n"

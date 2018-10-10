@@ -14,7 +14,7 @@
 	"Mappings": {
 		"Linux1RegionMap": {
 			"us-east-1": {
-				"AMI": "ami-01f76ae14f32c9a7e"
+				"AMI": "ami-087909f67cbf0a7e2"
 			},
 			"eu-west-1": {
 				"AMI": "ami-ec143995"
@@ -22,7 +22,7 @@
 		},
         	"Linux2RegionMap": {
             		"us-east-1": {
-                		"AMI": "ami-00b06fd687898b802"
+                		"AMI": "ami-024c086079066929a"
             		},
             		"eu-west-1": {
                 		"AMI": "ami-8b1a37f2"
@@ -127,7 +127,8 @@
              				"echo linux1 > /etc/hostname\n",
              				"echo nameserver 192.168.250.14 > /etc/resolv.conf\n",
              				"echo search training.lab >> /etc/resolv.conf\n",
-					"hostname -F /etc/hostname\n"
+					"hostname -F /etc/hostname\n",
+					"reboot\n"
 					]]}}			
 			}
 		},
@@ -152,7 +153,8 @@
                                         "echo linux2 > /etc/hostname\n",
                                         "echo nameserver 192.168.250.14 > /etc/resolv.conf\n",
                                         "echo search training.lab >> /etc/resolv.conf\n",
-                                        "hostname -F /etc/hostname\n"
+                                        "hostname -F /etc/hostname\n",
+					"reboot\n"
                                         ]]}}
 			}
 		},
