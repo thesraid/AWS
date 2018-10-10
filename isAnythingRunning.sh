@@ -2,13 +2,26 @@
 function usage
 {
     echo "usage: isAnythingRunning.sh [-h]
-                                      --region [-r] If not specified all regions will be checked"
+                                      --region [-r] If not specified all regions will be checked
+                                      --start [-s] 10	AVStudent account to start with
+                                      --end [-e] 20     AVStudent account to end on
+                                                        If start or end are not specified it will run to the end
+"
 }
 
 while [ "$1" != "" ]; do
     case $1 in
         -r | --region )         shift
-                                ARRAY=$1
+                                REGIONS=$1
+                                ;;
+        -s | --start )          shift
+                                begin=$1
+                                ;;
+        -e | --end )            shift
+                                end=$1
+                                ;;
+        -c | --cli )            shift
+                                cli=true
                                 ;;
         -h | --help )           usage
                                 exit
@@ -18,54 +31,73 @@ while [ "$1" != "" ]; do
 done
 
 
-if [ -z "$ARRAY" ]
+if [ -z "$REGIONS" ]
 then
-   ARRAY=($(aws ec2 describe-regions --query Regions[*].RegionName --output text --profile cliaccount))
+   REGIONS=($(aws ec2 describe-regions --query Regions[*].RegionName --output text --profile cliaccount))
 fi
 
-printf "cliaccount\n"
-users=($(aws iam list-users --output text --query 'Users[*].UserName' --profile cliaccount))
-if [ ! -z "$users" ]
-then
-   printf "Users : "
-   aws iam list-users --output text --query 'Users[*].UserName' --profile cliaccount | tr -d "\n"
-   printf "\n"
-fi
 
-#ARRAY=($(aws ec2 describe-regions --query Regions[*].RegionName --output text --profile cliaccount))
-for region in "${ARRAY[@]}"
-do
-   aws configure set region $region --profile cliaccount
-   stacks=($(aws cloudformation describe-stacks --query Stacks[*].StackName --output text --profile cliaccount))
-   if [ ! -z "$stacks" ]
+if [ "$cli" = true ];
+then
+
+   printf "cliaccount\n"
+   users=($(aws iam list-users --output text --query 'Users[*].UserName' --profile cliaccount))
+   if [ ! -z "$users" ]
    then
-      printf "\ncliaccount $region Stacks : "
-      for stack in "${stacks[*]}"
-      do
-         printf "$stack"
-      done
-   fi
-   instances=($(aws ec2 describe-instances --query 'Reservations[*].Instances[*].[Tags[?Key==`Name`].Value]' --output text --profile cliaccount))
-   #instances=($(aws ec2 describe-instances --query 'Reservations[*].Instances[*].[Tags[?Key==`Name`].Value,State.Name]' --output text --profile cliaccount))
-   if [ ! -z "$instances" ]
-   then
-      printf "\ncliaccount $region Instances : "
-      for instance in "${instances[*]}"
-      do
-         printf "$instance"
-      done
+      printf "Users : "
+      aws iam list-users --output text --query 'Users[*].UserName' --profile cliaccount | tr -d "\n"
       printf "\n"
    fi
-   printf "."
-done
 
-printf "\n\n"
+   #ARRAY=($(aws ec2 describe-regions --query Regions[*].RegionName --output text --profile cliaccount))
+   for region in "${REGIONS[@]}"
+   do
+      aws configure set region $region --profile cliaccount
+      stacks=($(aws cloudformation describe-stacks --query Stacks[*].StackName --output text --profile cliaccount))
+      if [ ! -z "$stacks" ]
+      then
+         printf "\ncliaccount $region Stacks : "
+         for stack in "${stacks[*]}"
+         do
+            printf "$stack"
+         done
+      fi
+      instances=($(aws ec2 describe-instances --query 'Reservations[*].Instances[*].[Tags[?Key==`Name`].Value]' --output text --profile cliaccount))
+      #instances=($(aws ec2 describe-instances --query 'Reservations[*].Instances[*].[Tags[?Key==`Name`].Value,State.Name]' --output text --profile cliaccount))
+      if [ ! -z "$instances" ]
+      then
+         printf "\ncliaccount $region Instances : "
+         for instance in "${instances[*]}"
+         do
+            printf "$instance"
+         done
+         printf "\n"
+      fi
+      printf "."
+   done
 
-count=$(aws organizations list-accounts-for-parent --parent-id ou-yus6-1nrdvs4m --output text --query 'Accounts[*].[Name,Id]' | wc -l)
-#echo $count
-((count = count - 1))
-NumberOfAccounts=($(seq -f '%02g' 1 $count))
+   printf "\n\n"
 
+
+fi
+
+NumberOfAccounts=()
+
+if [ -z "$begin" ] || [ -z "$end" ]
+then
+   count=$(aws organizations list-accounts-for-parent --parent-id ou-yus6-1nrdvs4m --output text --query 'Accounts[*].[Name,Id]' | wc -l)
+   #echo $count
+   ((count = count - 1))
+   NumberOfAccounts=($(seq -f '%02g' 1 $count))
+else
+   end=$[$end+1]
+   while [ $begin -lt $end ]
+   do
+      NumberOfAccounts+=($begin)
+      begin=$[$begin+1]
+   done
+
+fi
 
 
 for accounts in "${NumberOfAccounts[@]}"
@@ -83,7 +115,7 @@ do
    fi
    
    #ARRAY=($(aws ec2 describe-regions --query Regions[*].RegionName --output text --profile $profile))
-   for region in "${ARRAY[@]}"
+   for region in "${REGIONS[@]}"
    do
       aws configure set region $region --profile $profile
       stacks=($(aws cloudformation describe-stacks --query Stacks[*].StackName --output text --profile $profile))

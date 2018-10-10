@@ -181,5 +181,4 @@ fi
 
 echo New Account ID is $accID
 echo " "
-echo "Don't forget to update permissions with share-ami.sh"
-echo "Don't forget to verify the e-mail where required"
+echo "Don't forget to update AMI permissions with share-ami-remote.sh when all of the new accounts have been succesfully created"

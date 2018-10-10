@@ -5,11 +5,9 @@
 # Prints the script usage information
 function usage
 {
-    echo "verify-email-remote [-h]
+    echo "add2Array [-h]
           --start [-s] 10       First AVStudent Number
-          --end [-e]   20       Last AVStudent Number
-
-RUNS REMOTELY ON SCRIPT SERVER AS IT RUNS THE MAIL SERVER TO alien-training.com"
+          --end [-e]   20       Last AVStudent Number"
 }
 
 # Read the input from the command.
@@ -28,6 +26,14 @@ while [ "$1" != "" ]; do
     shift
 done
 
-ssh ubuntu@script-server.alien-training.com /home/ubuntu/.johno/awscli/verify-email.sh -s $address -e $end
+ARRAY=()
+end=$[$end+1]
 
-echo "Download the emails from the S3 bucket and click the verify link"
+while [ $address -lt $end ]
+do
+   #echo $address
+   ARRAY+=($address)
+   address=$[$address+1]
+done
+
+printf '%s\n' "${ARRAY[@]}"
