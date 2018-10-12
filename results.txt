@@ -64,3 +64,32 @@ PASS : Password1!
 HTML5	18.206.177.30
 Sensor Internal: 192.168.250.70
 Sensor External: 34.226.233.70
+-------------------------------------------------------------------
+Oct-10
+Wed Oct 10 15:46:55 UTC 2018
+Students can now log into the 551703027539 account with the information below
+URL  : https://console.aws.amazon.com/console/home?region=us-east-1
+ACC  : avstudent05profile
+USER : avstudent05
+PASS : Password1!
+HTML5	34.204.95.223
+-------------------------------------------------------------------
+Oct-10
+Wed Oct 10 15:49:46 UTC 2018
+Students can now log into the 275422901773 account with the information below
+URL  : https://console.aws.amazon.com/console/home?region=us-east-1
+ACC  : avstudent08
+USER : avstudent08
+PASS : Password1!
+HTML5	34.207.132.173
+-------------------------------------------------------------------
+deployTest
+Fri Oct 12 08:22:51 UTC 2018
+Students can now log into the 351525835562 account with the information below
+URL  : https://console.aws.amazon.com/console/home?region=us-east-1
+ACC  : avstudent101
+USER : avstudent101
+PASS : Password1!
+HTML5	35.153.255.95
+Sensor Internal: 192.168.250.37
+Sensor External: 18.209.225.131

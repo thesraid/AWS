@@ -91,7 +91,7 @@ fi
 printf "The account ID for $accName is $accID\n"
 
 # Profiles are what the AWS CLI uses to identify which sub Org you want to run a command in. We will call the profile after the account name with the word Profile at the end
-profile=$accName"Profile"
+profile=$accName
 printf "Profile name is now $profile\n"
 
 # If a password wasn't supplied when the script was run prompt for one
@@ -259,6 +259,9 @@ deploy_template () {
        printf "\n$stackName Stack failed to start\n"
        printf "ERROR : $cfStat\n"
        aws cloudformation describe-stacks --stack-name $stackName --profile $profile
+       aws cloudformation describe-stack-events --no-paginate --stack-name $stackName --profile $profile > error-$profile-$stackName.txt
+       printf "\n\n*** View error-$profile-$stackName.txt for more detailed error information ***\n"
+       printf "*** *** ***            Error file is read from the bottom up       *** *** ***\n"
        exit 1
      fi
    done
@@ -400,10 +403,10 @@ fi
 echo "-------------------------------------------------------------------" >> results.txt
 echo $tag >> results.txt
 date >> results.txt
-printf "Students can now log into\n" | tee -a results.txt
+printf "Students can now log into the $accID account with the information below\n" | tee -a results.txt
 printf "URL  : https://console.aws.amazon.com/console/home?region=$region\n" | tee -a results.txt
-printf "ACC  : $accID\n" | tee -a results.txt
-printf "USER : $userName\n" | tee -a results.txt
+printf "ACC  : ${profile,,}\n" | tee -a results.txt
+printf "USER : ${userName,,}\n" | tee -a results.txt
 printf "PASS : $userPassword\n" | tee -a results.txt
 
 # Print out any other output from the class CloudFormation template. 

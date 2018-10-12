@@ -1,6 +1,66 @@
-The account ID for AVStudent34 is 403818245815
-Profile name is now AVStudent34Profile
-Connection valid to AVStudent34 until "2018-10-09T11:45:17Z"
+The account ID for AVStudent65 is 791872996500
+Profile name is now AVStudent65
+Connection valid to AVStudent65 until "2018-10-10T16:57:23Z"
 Waiting for CloudFormation Service ...
-Creating ANYDC-Oct-09 Stack Under New Account
-ANYDC-Oct-09 Stack Failed to Create
+Creating ANYDC-verify-test Stack Under New Account
+Waiting for ANYDC-verify-test stack to start ..............
+ANYDC-verify-test started
+Waiting for CloudFormation Service ...
+Creating Sensor Stack Under New Account
+Waiting for Sensor stack to start .................................
+Sensor Stack failed to start
+ERROR : ROLLBACK_COMPLETE
+{
+    "Stacks": [
+        {
+            "StackId": "arn:aws:cloudformation:us-east-1:791872996500:stack/Sensor/581ce940-cca5-11e8-952d-500c217b26c6", 
+            "Description": "AWS CloudFormation Template for the USM Anywhere Sensor. This template will create an instance of the USM Anywhere Sensor AMI with appropriate security restrictions. The AMI will create a read-only instance role that also has access to administer CloudTrail Logs and perform configuration assessment of your environment. You can access the USM Sensor by going to the CloudFormation Template Resource tab and clicking the link in the URL field that directs you to the AWS Console Instance details page. Then, from the lower instance Description tab, enter the IP address of the instance your browser.", 
+            "Parameters": [
+                {
+                    "ParameterValue": "Sensor", 
+                    "ParameterKey": "KeyName"
+                }, 
+                {
+                    "ParameterValue": "0.0.0.0/0", 
+                    "ParameterKey": "SSHLocation"
+                }, 
+                {
+                    "ParameterValue": "vpc-030549dbec1747d85", 
+                    "ParameterKey": "VpcId"
+                }, 
+                {
+                    "ParameterValue": "Sensor", 
+                    "ParameterKey": "NodeName"
+                }, 
+                {
+                    "ParameterValue": "subnet-0623e9224ef915712", 
+                    "ParameterKey": "SubnetId"
+                }, 
+                {
+                    "ParameterValue": "true", 
+                    "ParameterKey": "EncryptData"
+                }, 
+                {
+                    "ParameterValue": "0.0.0.0/0", 
+                    "ParameterKey": "HTTPSLocation"
+                }, 
+                {
+                    "ParameterValue": "12", 
+                    "ParameterKey": "VolumeSize"
+                }
+            ], 
+            "Tags": [], 
+            "EnableTerminationProtection": false, 
+            "CreationTime": "2018-10-10T15:58:35.584Z", 
+            "Capabilities": [
+                "CAPABILITY_IAM"
+            ], 
+            "StackName": "Sensor", 
+            "NotificationARNs": [], 
+            "StackStatus": "ROLLBACK_COMPLETE", 
+            "DisableRollback": false, 
+            "RollbackConfiguration": {}, 
+            "DeletionTime": "2018-10-10T16:01:04.714Z"
+        }
+    ]
+}

@@ -72,9 +72,6 @@ printf "\nCreating New CLI Profile\n"
 aws configure set role_arn $accARN --profile $profile
 aws configure set source_profile default --profile $profile
 
-# We can't list the regions from this account as it's not created yet. So we will list them from cliaccount
-regions=($(aws ec2 describe-regions --query Regions[*].RegionName --output text --profile cliaccount))
-
 printf "Waiting for account $accID to be fully spun up."
 sleep 5
 printf "."
@@ -84,6 +81,13 @@ sleep 5
 printf "."
 sleep 5
 printf ".\n"
+
+printf "Giving the new account an alias of ${profile,,}\n"
+aws iam create-account-alias --account-alias ${profile,,} --profile $profile
+
+
+# We can't list the regions from this account as it's not created yet. So we will list them from cliaccount
+regions=($(aws ec2 describe-regions --query Regions[*].RegionName --output text --profile cliaccount))
 
 printf "Creating the TrainingVPC in each region while deleting the default VPC\n"
 for region in "${regions[@]}"

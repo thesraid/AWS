@@ -1,13 +1,10 @@
 #!/bin/bash
 
-i=81
+i=10
 
 while [ $i -lt 101 ]
 do
-   echo "./org-new-acc.sh -n AVStudent$i -e avstudent$i@alien-training.com | tee newOrgs.txt"
-   ./org-new-acc.sh -n AVStudent$i -e avstudent$i@alien-training.com | tee -a newOrgs.txt
+   echo "aws iam create-account-alias --account-alias avstudent$i --profile AVStudent$i"
+   aws iam create-account-alias --account-alias avstudent$i --profile AVStudent$i
    i=$[$i+1]
-   echo " "
-   echo "*****************************************"
-   echo " "
 done
