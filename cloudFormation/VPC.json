@@ -1,0 +1,19 @@
+{
+	"AWSTemplateFormatVersion" : "2010-09-09",
+
+	"Description" : "Create a VPC",
+	
+	"Resources" : {
+		"CFVPC": {
+			"Type" : "AWS::EC2::VPC",
+			"Properties" : {
+				  "CidrBlock" : "192.168.250.0/24",
+				  "EnableDnsSupport" : "true",
+				  "EnableDnsHostnames" : "true",
+				  "InstanceTenancy" : "default",
+				  "Tags" : [ {"Key" : "Name", "Value" : "CFVPC"} ]
+			   }
+		}
+	}
+	
+}

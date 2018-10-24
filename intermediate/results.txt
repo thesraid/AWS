@@ -1,0 +1,308 @@
+Wed Oct  3 15:01:56 UTC 2018
+Students can now log into
+URL  : https://console.aws.amazon.com/console/home?region=us-east-1
+ACC  : 657780108927
+USER : AVStudent09
+PASS : Password1!
+HTML5	34.236.237.87
+-------------------------------------------------------------------
+Wed Oct  3 15:12:57 UTC 2018
+Students can now log into
+URL  : https://console.aws.amazon.com/console/home?region=us-east-1
+ACC  : 657780108927
+USER : AVStudent09
+PASS : Password1!
+HTML5	34.239.164.192
+-------------------------------------------------------------------
+Johno-ANYDC-Oct09
+Mon Oct  8 15:25:42 UTC 2018
+Students can now log into
+URL  : https://console.aws.amazon.com/console/home?region=us-east-1
+ACC  : 612158176009
+USER : AVStudent01
+PASS : Password1!
+HTML5	34.205.45.70
+-------------------------------------------------------------------
+Oct-09
+Tue Oct  9 09:41:53 UTC 2018
+Students can now log into
+URL  : https://console.aws.amazon.com/console/home?region=us-east-1
+ACC  : 776043761097
+USER : AVStudent31
+PASS : Password1!
+HTML5	18.204.245.65
+-------------------------------------------------------------------
+Oct-09
+Tue Oct  9 09:56:09 UTC 2018
+Students can now log into
+URL  : https://console.aws.amazon.com/console/home?region=us-east-1
+ACC  : 776043761097
+USER : AVStudent31
+PASS : Password1!
+HTML5	34.205.75.34
+Sensor Internal: 192.168.250.114
+Sensor External: 18.206.152.245
+-------------------------------------------------------------------
+Oct-09
+Tue Oct  9 10:02:22 UTC 2018
+Students can now log into
+URL  : https://console.aws.amazon.com/console/home?region=us-east-1
+ACC  : 615153935553
+USER : AVStudent32
+PASS : Password1!
+HTML5	18.208.155.65
+Sensor Internal: 192.168.250.88
+Sensor External: 54.165.52.196
+-------------------------------------------------------------------
+Oct-09
+Tue Oct  9 10:44:00 UTC 2018
+Students can now log into
+URL  : https://console.aws.amazon.com/console/home?region=us-east-1
+ACC  : 801576610991
+USER : AVStudent35
+PASS : Password1!
+HTML5	18.206.177.30
+Sensor Internal: 192.168.250.70
+Sensor External: 34.226.233.70
+-------------------------------------------------------------------
+Oct-10
+Wed Oct 10 15:46:55 UTC 2018
+Students can now log into the 551703027539 account with the information below
+URL  : https://console.aws.amazon.com/console/home?region=us-east-1
+ACC  : avstudent05profile
+USER : avstudent05
+PASS : Password1!
+HTML5	34.204.95.223
+-------------------------------------------------------------------
+Oct-10
+Wed Oct 10 15:49:46 UTC 2018
+Students can now log into the 275422901773 account with the information below
+URL  : https://console.aws.amazon.com/console/home?region=us-east-1
+ACC  : avstudent08
+USER : avstudent08
+PASS : Password1!
+HTML5	34.207.132.173
+-------------------------------------------------------------------
+deployTest
+Fri Oct 12 08:22:51 UTC 2018
+Students can now log into the 351525835562 account with the information below
+URL  : https://console.aws.amazon.com/console/home?region=us-east-1
+ACC  : avstudent101
+USER : avstudent101
+PASS : Password1!
+HTML5	35.153.255.95
+Sensor Internal: 192.168.250.37
+Sensor External: 18.209.225.131
+-------------------------------------------------------------------
+powerDownTest
+Mon Oct 15 08:23:52 UTC 2018
+Students can now log into the 247629012762 account with the information below
+URL  : https://console.aws.amazon.com/console/home?region=us-east-1
+ACC  : cliaccount
+USER : cliaccount
+PASS : Password1!
+HTML5	54.175.140.41
+Sensor Internal: 192.168.250.112
+Sensor External: 54.80.161.193
+-------------------------------------------------------------------
+powerDownTest
+Mon Oct 15 09:44:30 UTC 2018
+Students can now log into the 612158176009 account with the information below
+URL  : https://console.aws.amazon.com/console/home?region=us-east-1
+ACC  : avstudent01
+USER : avstudent01
+PASS : Password1!
+HTML5	35.173.215.244
+Sensor Internal: 192.168.250.55
+Sensor External: 35.174.60.144
+-------------------------------------------------------------------
+CENSP-Sysmon
+Tue Oct 16 14:45:24 UTC 2018
+Students can now log into the 612158176009 account with the information below
+URL  : https://console.aws.amazon.com/console/home?region=us-east-1
+ACC  : avstudent01
+USER : avstudent01
+PASS : Password1!
+HTML5	18.214.98.72
+Sensor Internal: 192.168.250.36
+Sensor External: 34.224.165.38
+-------------------------------------------------------------------
+CENSP-Sysmon
+Tue Oct 16 15:04:51 UTC 2018
+Students can now log into the 612158176009 account with the information below
+URL  : https://console.aws.amazon.com/console/home?region=us-east-1
+ACC  : avstudent01
+USER : avstudent01
+PASS : Password1!
+HTML5	34.239.240.4
+Sensor Internal: 192.168.250.109
+Sensor External: 18.234.242.255
+-------------------------------------------------------------------
+CENSP-Sysmon-JoR
+Tue Oct 16 15:22:48 UTC 2018
+Students can now log into the 227442159135 account with the information below
+URL  : https://console.aws.amazon.com/console/home?region=us-east-1
+ACC  : avstudent02
+USER : avstudent02
+PASS : Password1!
+HTML5	34.238.152.49
+Sensor Internal: 192.168.250.95
+Sensor External: 54.175.0.35
+-------------------------------------------------------------------
+HTML5-JoR
+Tue Oct 16 15:32:20 UTC 2018
+Students can now log into the 386528483832 account with the information below
+URL  : https://console.aws.amazon.com/console/home?region=us-east-1
+ACC  : avstudent03
+USER : avstudent03
+PASS : Password1!
+HTML5	35.174.60.35
+Sensor Internal: 192.168.250.60
+Sensor External: 35.174.62.33
+-------------------------------------------------------------------
+HTML5-JoR
+Wed Oct 17 09:24:59 UTC 2018
+Students can now log into the 247629012762 account with the information below
+URL  : https://console.aws.amazon.com/console/home?region=us-east-1
+ACC  : cliaccount
+USER : cliaccount
+PASS : Password1!
+HTML5	18.206.204.102
+-------------------------------------------------------------------
+HTML5-JoR
+Wed Oct 17 09:41:04 UTC 2018
+Students can now log into the 247629012762 account with the information below
+URL  : https://console.aws.amazon.com/console/home?region=us-east-1
+ACC  : cliaccount
+USER : cliaccount
+PASS : Password1!
+HTML5	54.237.186.104
+Sensor Internal: 192.168.250.89
+Sensor External: 184.72.99.88
+-------------------------------------------------------------------
+testJOR
+Wed Oct 17 13:09:17 UTC 2018
+Students can now log into the 612158176009 account with the information below
+URL  : https://console.aws.amazon.com/console/home?region=us-east-1
+ACC  : avstudent01
+USER : avstudent01
+PASS : Password1!
+HTML5	34.204.183.186
+-------------------------------------------------------------------
+JoR-Lab-Screenshot-Oct17
+Wed Oct 17 14:14:19 UTC 2018
+Students can now log into the 247629012762 account with the information below
+URL  : https://console.aws.amazon.com/console/home?region=us-east-1
+ACC  : cliaccount
+USER : cliaccount
+PASS : Password1!
+HTML5	52.205.133.78
+-------------------------------------------------------------------
+sensorCase
+Wed Oct 17 14:59:19 UTC 2018
+Students can now log into the 247629012762 account with the information below
+URL  : https://console.aws.amazon.com/console/home?region=us-east-1
+ACC  : cliaccount
+USER : cliaccount
+PASS : Password1!
+HTML5	34.239.147.221
+Sensor Internal: 192.168.250.108
+Sensor External: 18.232.59.129
+-------------------------------------------------------------------
+html
+Mon Oct 22 11:00:13 UTC 2018
+Students can now log into the 247629012762 account with the information below
+URL  : https://console.aws.amazon.com/console/home?region=us-east-1
+ACC  : cliaccount
+USER : cliaccount
+PASS : Password1!
+-------------------------------------------------------------------
+htmlpassword
+Mon Oct 22 15:00:36 UTC 2018
+Students can now log into the 247629012762 account with the information below
+URL  : https://console.aws.amazon.com/console/home?region=us-east-1
+ACC  : cliaccount
+USER : cliaccount
+PASS : Password1!
+HTML5	34.234.201.86
+-------------------------------------------------------------------
+htmlpassword
+Mon Oct 22 15:07:00 UTC 2018
+Students can now log into the 247629012762 account with the information below
+URL  : https://console.aws.amazon.com/console/home?region=us-east-1
+ACC  : cliaccount
+USER : cliaccount
+PASS : JohnIsGreat123
+HTML5	34.204.169.99
+-------------------------------------------------------------------
+htmlpassword
+Mon Oct 22 15:18:53 UTC 2018
+Students can now log into the 247629012762 account with the information below
+URL  : https://console.aws.amazon.com/console/home?region=us-east-1
+ACC  : cliaccount
+USER : cliaccount
+PASS : JohnIsGreat123
+HTML5	34.236.143.129
+-------------------------------------------------------------------
+htmlpassword
+Mon Oct 22 15:32:39 UTC 2018
+Students can now log into the 247629012762 account with the information below
+URL  : https://console.aws.amazon.com/console/home?region=us-east-1
+ACC  : cliaccount
+USER : cliaccount
+PASS : JohnIsGreat123
+HTML5	54.159.4.206
+-------------------------------------------------------------------
+cron
+Tue Oct 23 08:35:28 UTC 2018
+Students can now log into the 247629012762 account with the information below
+URL  : https://console.aws.amazon.com/console/home?region=us-east-1
+ACC  : cliaccount
+USER : cliaccount
+PASS : JohnIsGreat123
+HTML5	54.83.152.147
+-------------------------------------------------------------------
+cron
+Tue Oct 23 10:32:31 UTC 2018
+Students can now log into the 247629012762 account with the information below
+URL  : https://console.aws.amazon.com/console/home?region=us-east-1
+ACC  : cliaccount
+USER : cliaccount
+PASS : JohnIsGreat123
+HTML5	54.91.251.118
+-------------------------------------------------------------------
+html
+Tue Oct 23 13:11:04 IST 2018
+Students can now log into the 247629012762 account with the information below
+URL  : https://console.aws.amazon.com/console/home?region=us-east-1
+ACC  : cliaccount
+USER : cliaccount
+PASS : Password1!
+HTML5	34.200.241.125
+-------------------------------------------------------------------
+html
+Tue Oct 23 16:17:09 IST 2018
+Students can now log into the 247629012762 account with the information below
+URL  : https://console.aws.amazon.com/console/home?region=us-east-1
+ACC  : cliaccount
+USER : cliaccount
+PASS : Password1!
+HTML5	34.205.92.13
+-------------------------------------------------------------------
+powerOffTest
+Wed Oct 24 10:59:38 IST 2018
+Students can now log into the 247629012762 account with the information below
+URL  : https://console.aws.amazon.com/console/home?region=us-east-1
+ACC  : cliaccount
+USER : cliaccount
+PASS : Password123
+HTML5	100.24.33.115
+-------------------------------------------------------------------
+powerOffTest
+Wed Oct 24 11:14:37 IST 2018
+Students can now log into the 247629012762 account with the information below
+URL  : https://console.aws.amazon.com/console/home?region=us-east-1
+ACC  : cliaccount
+USER : cliaccount
+PASS : Password123
+HTML5	35.168.3.118

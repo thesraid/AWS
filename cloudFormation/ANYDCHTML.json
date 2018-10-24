@@ -1,0 +1,248 @@
+{
+	"AWSTemplateFormatVersion" : "2010-09-09",
+
+	"Description" : "Deploy ANYDC-v3",
+	
+	"Parameters" : {
+		"TrainingVPC": {
+			"Description" : "VPC ID of TrainingVPC",
+			"Type": "String",
+			"ConstraintDescription" : "vpc id"
+		},
+		"HTML5Password": {
+                        "Description" : "Password for HTML5 Interface",
+                        "Type": "String",
+                        "ConstraintDescription" : "html5 password"
+		}
+	},
+
+	"Mappings": {
+		"Linux1RegionMap": {
+			"us-east-1": {
+				"AMI": "ami-087909f67cbf0a7e2"
+			},
+			"eu-west-1": {
+				"AMI": "ami-ec143995"
+			}
+		},
+        	"Linux2RegionMap": {
+            		"us-east-1": {
+                		"AMI": "ami-024c086079066929a"
+            		},
+            		"eu-west-1": {
+                		"AMI": "ami-8b1a37f2"
+            		}
+        	},
+        	"WindowsRegionMap": {
+            		"us-east-1": {
+                		"AMI": "ami-0b81e083d601b11a3"
+            		},
+            		"eu-west-1": {
+				"AMI": "ami-ad1a35d4"
+            		}
+        	},
+                "HTML5RegionMap": {
+                        "us-east-1": {
+                                "AMI": "ami-0c1b9ce4bb5e45959"
+                        },
+                        "eu-west-1": {
+                                "AMI": "ami-12345678"
+                        }
+                }
+	},
+
+	"Resources" : {
+		"TrainingSubnet" : {
+			"Type" : "AWS::EC2::Subnet",
+			"Properties" : {
+				"VpcId" : { "Ref" : "TrainingVPC" },
+				"MapPublicIpOnLaunch" : "true",
+				"CidrBlock" : "192.168.250.0/25",
+				"Tags" : [ {"Key" : "Name", "Value" : "TrainingSubnet"} ]
+			}
+		},
+		"TrainingDHCPOptions" : {
+			"Type" : "AWS::EC2::DHCPOptions",
+			"Properties" : {
+				"DomainName" : "training.lab",
+				"DomainNameServers" : [ "192.168.250.14" ]
+			}
+		},
+		"TrainingGateway" : {
+			"Type" : "AWS::EC2::InternetGateway",
+			"Properties" : {
+				"Tags" : [ {"Key" : "Name", "Value" : "TrainingGateway"}]
+			}
+		},
+		"AttachGateway" : {
+			"Type" : "AWS::EC2::VPCGatewayAttachment",
+			"Properties" : {
+				"VpcId" : { "Ref" : "TrainingVPC" },
+				"InternetGatewayId" : { "Ref" : "TrainingGateway" }
+			}
+		},
+		"RTableTraining" : {
+			"Type" : "AWS::EC2::RouteTable",
+			"Properties" : {
+				"VpcId" : { "Ref" : "TrainingVPC" },
+				"Tags" : [ { "Key" : "Name", "Value" : "RTableTraining" } ]
+			}
+		},
+		"TrainingRoute" : {
+			"Type" : "AWS::EC2::Route",
+			"DependsOn" : ["TrainingGateway","AttachGateway"],
+				"Properties" : {
+					"RouteTableId" : { "Ref" : "RTableTraining" },
+					"DestinationCidrBlock" : "0.0.0.0/0",
+					"GatewayId" : { "Ref" : "TrainingGateway" }
+				}
+		},
+		"TrainingSubnetRouteTableAssociation" : {
+			"Type" : "AWS::EC2::SubnetRouteTableAssociation",
+			"Properties" : {
+				"SubnetId" : { "Ref" : "TrainingSubnet" },
+				"RouteTableId" : { "Ref" : "RTableTraining" }
+			}
+		},
+		"DHCPOptionsAssociation" : {
+  			"Type" : "AWS::EC2::VPCDHCPOptionsAssociation",
+  			"Properties" : {
+    				"VpcId" : {"Ref" : "TrainingVPC"},
+    				"DhcpOptionsId" : {"Ref" : "TrainingDHCPOptions"}
+  			}
+		},
+		"Linux1Instance": {
+			"Type": "AWS::EC2::Instance",
+			"Properties": {
+                		"ImageId": {
+					"Fn::FindInMap": [
+						"Linux1RegionMap", {
+							"Ref": "AWS::Region"
+						},
+						"AMI"
+					]
+				},
+				"InstanceType": "t2.micro",
+				"SecurityGroupIds" : [ {"Ref" : "LinuxSecurityGroup"} ],
+				"SubnetId": { "Ref" : "TrainingSubnet" },
+				"Tags" : [{"Key" : "Name", "Value" : "linux1"}],
+				"PrivateIpAddress" : "192.168.250.30",
+				"UserData"       : { "Fn::Base64" : { "Fn::Join" : ["", [
+             				"#!/bin/bash -xe\n",
+             				"echo linux1 > /etc/hostname\n",
+             				"echo nameserver 192.168.250.14 > /etc/resolv.conf\n",
+             				"echo search training.lab >> /etc/resolv.conf\n",
+					"hostname -F /etc/hostname\n",
+					"reboot\n"
+					]]}}			
+			}
+		},
+		"Linux2Instance": {
+			"Type": "AWS::EC2::Instance",
+			"Properties": {
+                "ImageId": {
+                                "Fn::FindInMap": [
+                                        "Linux2RegionMap", {
+                                                "Ref": "AWS::Region"
+                                        },
+                                        "AMI"
+                                ]
+                           },
+		"InstanceType": "t2.micro",
+				"SecurityGroupIds" : [ {"Ref" : "LinuxSecurityGroup"} ],
+				"SubnetId": { "Ref" : "TrainingSubnet" },
+				"Tags" : [{"Key" : "Name", "Value" : "linux2"}],
+				"PrivateIpAddress" : "192.168.250.31",
+                                "UserData"       : { "Fn::Base64" : { "Fn::Join" : ["", [
+                                        "#!/bin/bash -xe\n",
+                                        "echo linux2 > /etc/hostname\n",
+                                        "echo nameserver 192.168.250.14 > /etc/resolv.conf\n",
+                                        "echo search training.lab >> /etc/resolv.conf\n",
+                                        "hostname -F /etc/hostname\n",
+					"reboot\n"
+                                        ]]}}
+			}
+		},
+		"HTML5Instance": {
+                        "Type": "AWS::EC2::Instance",
+                        "Properties": {
+                "ImageId": {
+                                "Fn::FindInMap": [
+                                        "HTML5RegionMap", {
+                                                "Ref": "AWS::Region"
+                                        },
+                                        "AMI"
+                                ]
+                           },
+                "InstanceType": "t2.small",
+                                "SecurityGroupIds" : [ {"Ref" : "HTML5SecurityGroup"} ],
+                                "SubnetId": { "Ref" : "TrainingSubnet" },
+                                "Tags" : [{"Key" : "Name", "Value" : "HTML5"}],
+                                "PrivateIpAddress" : "192.168.250.10",
+                                "UserData"       : { "Fn::Base64" : { "Fn::Join" : ["", [
+                                        "#!/bin/bash -xe\n",
+                                        "echo html5 > /etc/hostname\n",
+                                        "echo nameserver 192.168.250.14 > /etc/resolv.conf\n",
+                                        "echo search training.lab >> /etc/resolv.conf\n",
+                                        "hostname -F /etc/hostname\n",
+					"sed -i '0,/Password1!/s//",
+					{ "Ref" : "HTML5Password" },
+					"/' /etc/guacamole/user-mapping.xml\n"
+                                        ]]}}
+                        }
+                },
+		"WindowsInstance": {
+			"Type": "AWS::EC2::Instance",
+			"Properties": {
+                "ImageId": {
+                                "Fn::FindInMap": [
+                                        "WindowsRegionMap", {
+                                                "Ref": "AWS::Region"
+                                        },
+                                        "AMI"
+                                ]
+                           },
+		"InstanceType": "t2.small",
+				"SecurityGroupIds" : [ {"Ref" : "WindowsSecurityGroup"} ],
+				"SubnetId": { "Ref" : "TrainingSubnet" },
+				"PrivateIpAddress" : "192.168.250.14",
+				"Tags" : [{"Key" : "Name", "Value" : "windows"}]
+			}
+		},
+		"LinuxSecurityGroup" : {
+			"Type" : "AWS::EC2::SecurityGroup",
+			"Properties" : {
+                                "GroupName" : "ANYDC-LinuxSecurityGroup",
+				"GroupDescription" : "Enable SSH access via port 22 to the Linux Instance",
+				"VpcId" : { "Ref" : "TrainingVPC" },
+				"SecurityGroupIngress" : [{"IpProtocol" : "tcp", "FromPort" : "22", "ToPort" : "22", "CidrIp" : "0.0.0.0/0"}]
+			}
+		},
+                "HTML5SecurityGroup" : {
+                        "Type" : "AWS::EC2::SecurityGroup",
+                        "Properties" : {
+                                "GroupName" : "ANYDC-HTML5SecurityGroup",
+                                "GroupDescription" : "Enable HTML5 access via port 80",
+                                "VpcId" : { "Ref" : "TrainingVPC" },
+                                "SecurityGroupIngress" : [{"IpProtocol" : "tcp", "FromPort" : "80", "ToPort" : "80", "CidrIp" : "0.0.0.0/0"},{"IpProtocol" : "tcp", "FromPort" : "22", "ToPort" : "22", "CidrIp" : "0.0.0.0/0"}]
+                        }
+                },
+		"WindowsSecurityGroup" : {
+			"Type" : "AWS::EC2::SecurityGroup",
+			"Properties" : {
+                                "GroupName" : "ANYDC-WindowsSecurityGroup",
+				"GroupDescription" : "Enable RDP access via port 3389 to the Windows Instance and DNS and WinRM internally",
+				"VpcId" : { "Ref" : "TrainingVPC" },
+				"SecurityGroupIngress" : [{"IpProtocol" : "tcp", "FromPort" : "3389", "ToPort" : "3389", "CidrIp" : "0.0.0.0/0"},{"IpProtocol" : "tcp", "FromPort" : "53", "ToPort" : "53", "CidrIp": "192.168.250.0/24"},{"IpProtocol" : "udp", "FromPort" : "53", "ToPort" : "53", "CidrIp": "192.168.250.0/24"}, {"IpProtocol" : "tcp", "FromPort" : "5985", "ToPort" : "5985", "CidrIp": "192.168.250.0/24"}]
+			}
+		}
+	},
+	"Outputs" : {
+		"HTML5" : {
+                        "Value" : { "Fn::Join" : ["", [{ "Fn::GetAtt" : [ "HTML5Instance", "PublicIp" ]}]] }
+                }
+
+	}
+	
+}
+

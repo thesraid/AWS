@@ -1,0 +1,218 @@
+Creating a new account called AVStudent81
+Waiting for New Account ....
+Creating New CLI Profile
+Waiting for account 027256487850 to be fully spun up.....
+Creating the TrainingVPC in each region while deleting the default VPC
+..............................
+Adding to Parent Org
+Moving New Account to OU
+New Account ID is 027256487850
+ 
+Don't forget to update permissions and configure e-mail where required
+Creating a new account called AVStudent82
+Waiting for New Account ....
+Creating New CLI Profile
+Waiting for account 232732773252 to be fully spun up.....
+Creating the TrainingVPC in each region while deleting the default VPC
+..............................
+Adding to Parent Org
+Moving New Account to OU
+New Account ID is 232732773252
+ 
+Don't forget to update permissions and configure e-mail where required
+Creating a new account called AVStudent83
+Waiting for New Account ....
+Creating New CLI Profile
+Waiting for account 387995993427 to be fully spun up.....
+Creating the TrainingVPC in each region while deleting the default VPC
+..............................
+Adding to Parent Org
+Moving New Account to OU
+New Account ID is 387995993427
+ 
+Don't forget to update permissions and configure e-mail where required
+Creating a new account called AVStudent84
+Waiting for New Account ....
+Creating New CLI Profile
+Waiting for account 446956531543 to be fully spun up.....
+Creating the TrainingVPC in each region while deleting the default VPC
+..............................
+Adding to Parent Org
+Moving New Account to OU
+New Account ID is 446956531543
+ 
+Don't forget to update permissions and configure e-mail where required
+Creating a new account called AVStudent85
+Waiting for New Account ....
+Creating New CLI Profile
+Waiting for account 737181237281 to be fully spun up.....
+Creating the TrainingVPC in each region while deleting the default VPC
+..............................
+Adding to Parent Org
+Moving New Account to OU
+New Account ID is 737181237281
+ 
+Don't forget to update permissions and configure e-mail where required
+Creating a new account called AVStudent86
+Waiting for New Account ....
+Creating New CLI Profile
+Waiting for account 947214624140 to be fully spun up.....
+Creating the TrainingVPC in each region while deleting the default VPC
+..............................
+Adding to Parent Org
+Moving New Account to OU
+New Account ID is 947214624140
+ 
+Don't forget to update permissions and configure e-mail where required
+Creating a new account called AVStudent87
+Waiting for New Account ....
+Creating New CLI Profile
+Waiting for account 292226963480 to be fully spun up.....
+Creating the TrainingVPC in each region while deleting the default VPC
+..............................
+Adding to Parent Org
+Moving New Account to OU
+New Account ID is 292226963480
+ 
+Don't forget to update permissions and configure e-mail where required
+Creating a new account called AVStudent88
+Waiting for New Account ....
+Creating New CLI Profile
+Waiting for account 255574988427 to be fully spun up.....
+Creating the TrainingVPC in each region while deleting the default VPC
+..............................
+Adding to Parent Org
+Moving New Account to OU
+New Account ID is 255574988427
+ 
+Don't forget to update permissions and configure e-mail where required
+Creating a new account called AVStudent89
+Waiting for New Account ....
+Creating New CLI Profile
+Waiting for account 573663913935 to be fully spun up.....
+Creating the TrainingVPC in each region while deleting the default VPC
+..............................
+Adding to Parent Org
+Moving New Account to OU
+New Account ID is 573663913935
+ 
+Don't forget to update permissions and configure e-mail where required
+Creating a new account called AVStudent90
+Waiting for New Account ....
+Creating New CLI Profile
+Waiting for account 359559943637 to be fully spun up.....
+Creating the TrainingVPC in each region while deleting the default VPC
+..............................
+Adding to Parent Org
+Moving New Account to OU
+New Account ID is 359559943637
+ 
+Don't forget to update permissions and configure e-mail where required
+Creating a new account called AVStudent91
+Waiting for New Account ....
+Creating New CLI Profile
+Waiting for account 947444439582 to be fully spun up.....
+Creating the TrainingVPC in each region while deleting the default VPC
+..............................
+Adding to Parent Org
+Moving New Account to OU
+New Account ID is 947444439582
+ 
+Don't forget to update permissions and configure e-mail where required
+Creating a new account called AVStudent92
+Waiting for New Account ....
+Creating New CLI Profile
+Waiting for account 739978931698 to be fully spun up.....
+Creating the TrainingVPC in each region while deleting the default VPC
+..............................
+Adding to Parent Org
+Moving New Account to OU
+New Account ID is 739978931698
+ 
+Don't forget to update permissions and configure e-mail where required
+Creating a new account called AVStudent93
+Waiting for New Account ....
+Creating New CLI Profile
+Waiting for account 554593710552 to be fully spun up.....
+Creating the TrainingVPC in each region while deleting the default VPC
+..............................
+Adding to Parent Org
+Moving New Account to OU
+New Account ID is 554593710552
+ 
+Don't forget to update permissions and configure e-mail where required
+Creating a new account called AVStudent94
+Waiting for New Account ....
+Creating New CLI Profile
+Waiting for account 388307992521 to be fully spun up.....
+Creating the TrainingVPC in each region while deleting the default VPC
+..............................
+Adding to Parent Org
+Moving New Account to OU
+New Account ID is 388307992521
+ 
+Don't forget to update permissions and configure e-mail where required
+Creating a new account called AVStudent95
+Waiting for New Account ....
+Creating New CLI Profile
+Waiting for account 694790921738 to be fully spun up.....
+Creating the TrainingVPC in each region while deleting the default VPC
+..............................
+Adding to Parent Org
+Moving New Account to OU
+New Account ID is 694790921738
+ 
+Don't forget to update permissions and configure e-mail where required
+Creating a new account called AVStudent96
+Waiting for New Account ....
+Creating New CLI Profile
+Waiting for account 924787625302 to be fully spun up.....
+Creating the TrainingVPC in each region while deleting the default VPC
+..............................
+Adding to Parent Org
+Moving New Account to OU
+New Account ID is 924787625302
+ 
+Don't forget to update permissions and configure e-mail where required
+Creating a new account called AVStudent97
+Waiting for New Account ....
+Creating New CLI Profile
+Waiting for account 033274256019 to be fully spun up.....
+Creating the TrainingVPC in each region while deleting the default VPC
+..............................
+Adding to Parent Org
+Moving New Account to OU
+New Account ID is 033274256019
+ 
+Don't forget to update permissions and configure e-mail where required
+Creating a new account called AVStudent98
+Waiting for New Account ....
+Creating New CLI Profile
+Waiting for account 801608760804 to be fully spun up.....
+Creating the TrainingVPC in each region while deleting the default VPC
+..............................
+Adding to Parent Org
+Moving New Account to OU
+New Account ID is 801608760804
+ 
+Don't forget to update permissions and configure e-mail where required
+Creating a new account called AVStudent99
+Waiting for New Account ....
+Creating New CLI Profile
+Waiting for account 851794344194 to be fully spun up.....
+Creating the TrainingVPC in each region while deleting the default VPC
+..............................
+Adding to Parent Org
+Moving New Account to OU
+New Account ID is 851794344194
+ 
+Don't forget to update permissions and configure e-mail where required
+Creating a new account called AVStudent100
+Waiting for New Account ....
+Creating New CLI Profile
+Waiting for account 415650686195 to be fully spun up.....
+Creating the TrainingVPC in each region while deleting the default VPC
+.Error occured creating TrainingVPC in ap-south-1
+******************************************************************************************
+Try running this command in a few minutes org-VPC-move.sh -n AVStudent100 -i 415650686195******************************************************************************************
+ 

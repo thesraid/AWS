@@ -1,0 +1,165 @@
+{
+	"AWSTemplateFormatVersion" : "2010-09-09",
+
+	"Description" : "Create VPC and deploy ANYSA",
+	
+	"Parameters" : {
+		"JEOSName": {
+			"Description" : "Name of the JEOS instance",
+			"Type": "String",
+			"ConstraintDescription" : "No spaces."
+		},
+		"PTName": {
+			"Description" : "Name of the PT instance",
+			"Type": "String",
+			"ConstraintDescription" : "No spaces."
+		},
+		"WinVictName": {
+			"Description" : "Name of the Windows Victim instance",
+			"Type": "String",
+			"ConstraintDescription" : "No spaces."
+		},
+		"WinJumpboxName": {
+			"Description" : "Name of the Windows Jumpbox instance",
+			"Type": "String",
+			"ConstraintDescription" : "No spaces."
+		}
+	},
+
+	"Resources" : {
+		"CFVPC": {
+			"Type" : "AWS::EC2::VPC",
+			"Properties" : {
+				  "CidrBlock" : "192.168.250.0/24",
+				  "EnableDnsSupport" : "true",
+				  "EnableDnsHostnames" : "true",
+				  "InstanceTenancy" : "default",
+				  "Tags" : [ {"Key" : "Name", "Value" : "CFVPC"} ]
+			   }
+		},
+		"CFSubnet" : {
+			"Type" : "AWS::EC2::Subnet",
+			"Properties" : {
+				"VpcId" : { "Ref" : "CFVPC" },
+				"MapPublicIpOnLaunch" : "true",
+				"CidrBlock" : "192.168.250.0/25",
+				"Tags" : [ {"Key" : "Name", "Value" : "CFSubnet"} ]
+			}
+		},
+		"CFGateway" : {
+			"Type" : "AWS::EC2::InternetGateway",
+			"Properties" : {
+				"Tags" : [ {"Key" : "Name", "Value" : "CFGateway"}]
+			}
+		},
+		"AttachGateway" : {
+			"Type" : "AWS::EC2::VPCGatewayAttachment",
+			"Properties" : {
+				"VpcId" : { "Ref" : "CFVPC" },
+				"InternetGatewayId" : { "Ref" : "CFGateway" }
+			}
+		},
+		"CFRouteTable" : {
+			"Type" : "AWS::EC2::RouteTable",
+			"Properties" : {
+				"VpcId" : { "Ref" : "CFVPC" },
+				"Tags" : [ { "Key" : "Name", "Value" : "CFRouteTable" } ]
+			}
+		},
+		"CFRoute" : {
+			"Type" : "AWS::EC2::Route",
+			"DependsOn" : "CFGateway",
+				"Properties" : {
+					"RouteTableId" : { "Ref" : "CFRouteTable" },
+					"DestinationCidrBlock" : "0.0.0.0/0",
+					"GatewayId" : { "Ref" : "CFGateway" }
+				}
+		},
+		"CFSubnetRouteTableAssociation" : {
+			"Type" : "AWS::EC2::SubnetRouteTableAssociation",
+			"Properties" : {
+				"SubnetId" : { "Ref" : "CFSubnet" },
+				"RouteTableId" : { "Ref" : "CFRouteTable" }
+			}
+		},
+		"JEOSInstance": {
+			"Type": "AWS::EC2::Instance",
+			"Properties": {
+                "ImageId": "ami-3be4b442",
+                "InstanceType": "t2.micro",
+				"SecurityGroupIds" : [ {"Ref" : "LinuxSecurityGroup"} ],
+				"SubnetId": { "Ref" : "CFSubnet" },
+				"Tags" : [{"Key" : "Name", "Value" : { "Ref" : "JEOSName" }}],
+				"PrivateIpAddress" : "192.168.250.30"
+			}
+		},
+		"PTInstance": {
+			"Type": "AWS::EC2::Instance",
+			"Properties": {
+                "ImageId": "ami-c3e8b8ba",
+                "InstanceType": "t2.micro",
+				"SecurityGroupIds" : [ {"Ref" : "LinuxSecurityGroup"} ],
+				"SubnetId": { "Ref" : "CFSubnet" },
+				"Tags" : [{"Key" : "Name", "Value" : { "Ref" : "PTName" }}],
+				"PrivateIpAddress" : "192.168.250.100"
+			}
+		},
+		"WinVictInstance": {
+			"Type": "AWS::EC2::Instance",
+			"Properties": {
+                "ImageId": "ami-3ffeae46",
+                "InstanceType": "t2.micro",
+				"SecurityGroupIds" : [ {"Ref" : "WindowsSecurityGroup"} ],
+				"SubnetId": { "Ref" : "CFSubnet" },
+				"PrivateIpAddress" : "192.168.250.17",
+				"Tags" : [{"Key" : "Name", "Value" : { "Ref" : "WinVictName" }}]
+			}
+		},
+		"WinJumpboxInstance": {
+			"Type": "AWS::EC2::Instance",
+			"Properties": {
+                "ImageId": "ami-b9e2b2c0",
+                "InstanceType": "t2.micro",
+				"SecurityGroupIds" : [ {"Ref" : "WindowsSecurityGroup"} ],
+				"SubnetId": { "Ref" : "CFSubnet" },
+				"PrivateIpAddress" : "192.168.250.14",
+				"Tags" : [{"Key" : "Name", "Value" : { "Ref" : "WinJumpboxName" }}]
+			}
+		},
+		"LinuxSecurityGroup" : {
+			"Type" : "AWS::EC2::SecurityGroup",
+			"Properties" : {
+				"GroupDescription" : "Enable SSH access via port 22 to the Linux Instance",
+				"VpcId" : { "Ref" : "CFVPC" },
+				"SecurityGroupIngress" : [{"IpProtocol" : "tcp", "FromPort" : "22", "ToPort" : "22", "CidrIp" : "0.0.0.0/0"}]
+			}
+		},
+		"WindowsSecurityGroup" : {
+			"Type" : "AWS::EC2::SecurityGroup",
+			"Properties" : {
+				"GroupDescription" : "Enable RDP access via port 3389 to the Linux Instance",
+				"VpcId" : { "Ref" : "CFVPC" },
+				"SecurityGroupIngress" : [{"IpProtocol" : "tcp", "FromPort" : "3389", "ToPort" : "3389", "CidrIp" : "0.0.0.0/0"}]
+			}
+		}
+	},
+	"Outputs" : {
+		"JEOSIP" : {
+			"Description" : "IP for JEOS",
+			"Value" : { "Fn::Join" : ["", [{ "Fn::GetAtt" : [ "JEOSInstance", "PublicIp" ]}]] }
+		},
+		"PTIP" : {
+			"Description" : "IP for PT",
+			"Value" : { "Fn::Join" : ["", [{ "Fn::GetAtt" : [ "PTInstance", "PublicIp" ]}]] }
+		},
+		"WinVictIP" : {
+			"Description" : "IP for Windows Victim",
+			"Value" : { "Fn::Join" : ["", [{ "Fn::GetAtt" : [ "WinVictInstance", "PublicIp" ]}]] }
+		},
+		"WinJumpboxIP" : {
+			"Description" : "IP for Windows Jumpbox",
+			"Value" : { "Fn::Join" : ["", [{ "Fn::GetAtt" : [ "WinJumpboxInstance", "PublicIp" ]}]] }
+		}
+	}
+	
+}

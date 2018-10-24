@@ -1,0 +1,5 @@
+# m h  dom mon dow   command
+AWS_CONFIG_FILE="/home/ubuntu/.aws/config"
+HOME="/home/ubuntu"
+PATH="/home/ubuntu/bin:/home/ubuntu/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin"
+
