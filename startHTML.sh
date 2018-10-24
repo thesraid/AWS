@@ -273,7 +273,7 @@ deploy_template () {
 # Choose the appropriate CloudFormation json
 if [ "$course" = "ANYDC" ]
 then
-  url="https://s3-eu-west-1.amazonaws.com/deploy-student-env/ANYDC.json"
+  url="https://s3-eu-west-1.amazonaws.com/deploy-student-env/ANYDCHTML.json"
   
   # Set the paratmer variables that need to be sent this cloud formation template
 
@@ -282,9 +282,9 @@ then
   vpcid=$(aws ec2 describe-vpcs --filters Name=isDefault,Values=false --query Vpcs[*].VpcId --output=text --profile $profile)
 
   # Build the parameter variable for the ANYDC course
-  parameter="ParameterKey=TrainingVPC,ParameterValue=$vpcid"
+  parameter="ParameterKey=TrainingVPC,ParameterValue=$vpcid ParameterKey=HTML5Password,ParameterValue=$userPassword "
 
-  deploy_template "$course-$tag" $url $parameter
+  deploy_template "$course-$tag" $url "$parameter"
 
 fi
 
@@ -350,7 +350,7 @@ then
   aws ec2 authorize-security-group-ingress --group-id $sgid --cidr 192.168.250.0/24 --protocol all --profile $profile
   if [ $? -ne 0 ]
   then
-    printf "Failed to add rule to Security Group to allow local inblound traffic to Sensor\n"
+    printf "Failed to add rule to Security Group to allow local inbound traffic to Sensor\n"
   exit 1
   fi
 

@@ -38,7 +38,7 @@
         	},
                 "HTML5RegionMap": {
                         "us-east-1": {
-                                "AMI": "ami-0487e4ebf02c2cba0"
+                                "AMI": "ami-0c1b9ce4bb5e45959"
                         },
                         "eu-west-1": {
                                 "AMI": "ami-12345678"
@@ -204,6 +204,7 @@
 		"LinuxSecurityGroup" : {
 			"Type" : "AWS::EC2::SecurityGroup",
 			"Properties" : {
+                                "GroupName" : "ANYDC-LinuxSecurityGroup",
 				"GroupDescription" : "Enable SSH access via port 22 to the Linux Instance",
 				"VpcId" : { "Ref" : "TrainingVPC" },
 				"SecurityGroupIngress" : [{"IpProtocol" : "tcp", "FromPort" : "22", "ToPort" : "22", "CidrIp" : "0.0.0.0/0"}]
@@ -212,6 +213,7 @@
                 "HTML5SecurityGroup" : {
                         "Type" : "AWS::EC2::SecurityGroup",
                         "Properties" : {
+                                "GroupName" : "ANYDC-HTML5SecurityGroup",
                                 "GroupDescription" : "Enable HTML5 access via port 80",
                                 "VpcId" : { "Ref" : "TrainingVPC" },
                                 "SecurityGroupIngress" : [{"IpProtocol" : "tcp", "FromPort" : "80", "ToPort" : "80", "CidrIp" : "0.0.0.0/0"},{"IpProtocol" : "tcp", "FromPort" : "22", "ToPort" : "22", "CidrIp" : "0.0.0.0/0"}]
@@ -220,6 +222,7 @@
 		"WindowsSecurityGroup" : {
 			"Type" : "AWS::EC2::SecurityGroup",
 			"Properties" : {
+                                "GroupName" : "ANYDC-WindowsSecurityGroup",
 				"GroupDescription" : "Enable RDP access via port 3389 to the Windows Instance and DNS and WinRM internally",
 				"VpcId" : { "Ref" : "TrainingVPC" },
 				"SecurityGroupIngress" : [{"IpProtocol" : "tcp", "FromPort" : "3389", "ToPort" : "3389", "CidrIp" : "0.0.0.0/0"},{"IpProtocol" : "tcp", "FromPort" : "53", "ToPort" : "53", "CidrIp": "192.168.250.0/24"},{"IpProtocol" : "udp", "FromPort" : "53", "ToPort" : "53", "CidrIp": "192.168.250.0/24"}, {"IpProtocol" : "tcp", "FromPort" : "5985", "ToPort" : "5985", "CidrIp": "192.168.250.0/24"}]

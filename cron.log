@@ -1,0 +1,136 @@
+Tue Oct 23 10:35:01 UTC 2018
+The account ID for cliaccount is 247629012762
+
+
+This is group cliaccount
+Deleting policy LocationRole
+Deleting policy StudentRole
+Removing cliaccount from cliaccount
+Deleting cliaccount
+Deleting user: cliaccount
+............
+Terminating Instances in us-east-1{
+    "TerminatingInstances": [
+        {
+            "InstanceId": "i-07846fd56e07653aa", 
+            "CurrentState": {
+                "Code": 32, 
+                "Name": "shutting-down"
+            }, 
+            "PreviousState": {
+                "Code": 16, 
+                "Name": "running"
+            }
+        }, 
+        {
+            "InstanceId": "i-015e137e868901b7f", 
+            "CurrentState": {
+                "Code": 32, 
+                "Name": "shutting-down"
+            }, 
+            "PreviousState": {
+                "Code": 16, 
+                "Name": "running"
+            }
+        }, 
+        {
+            "InstanceId": "i-06d9eb5866bc80ef1", 
+            "CurrentState": {
+                "Code": 32, 
+                "Name": "shutting-down"
+            }, 
+            "PreviousState": {
+                "Code": 16, 
+                "Name": "running"
+            }
+        }, 
+        {
+            "InstanceId": "i-073685ac604128ef7", 
+            "CurrentState": {
+                "Code": 32, 
+                "Name": "shutting-down"
+            }, 
+            "PreviousState": {
+                "Code": 16, 
+                "Name": "running"
+            }
+        }
+    ]
+}
+...............
+
+Deleting ANYDC-cron in us-east-1 
+Waiting for ANYDC-cron to delete ............An error occurred (ValidationError) when calling the DescribeStacks operation: Stack with id ANYDC-cron does not exist << IGNORE THIS ERROR IF SEEN ABOVE
+
+ANYDC-cron deleted in us-east-1
+...
+Tue Oct 23 10:43:22 UTC 2018
+The account ID for cliaccount is 247629012762
+
+...............
+Tue Oct 23 13:25:01 IST 2018
+The account ID for cliaccount is 247629012762
+
+
+This is group cliaccount
+Deleting policy LocationRole
+Deleting policy StudentRole
+Removing cliaccount from cliaccount
+Deleting cliaccount
+Deleting user: cliaccount
+............
+Terminating Instances in us-east-1{
+    "TerminatingInstances": [
+        {
+            "InstanceId": "i-0b055724d3bda6641", 
+            "CurrentState": {
+                "Code": 32, 
+                "Name": "shutting-down"
+            }, 
+            "PreviousState": {
+                "Code": 16, 
+                "Name": "running"
+            }
+        }, 
+        {
+            "InstanceId": "i-01a076f95a614be58", 
+            "CurrentState": {
+                "Code": 32, 
+                "Name": "shutting-down"
+            }, 
+            "PreviousState": {
+                "Code": 16, 
+                "Name": "running"
+            }
+        }, 
+        {
+            "InstanceId": "i-0cda1957b8ac560a9", 
+            "CurrentState": {
+                "Code": 32, 
+                "Name": "shutting-down"
+            }, 
+            "PreviousState": {
+                "Code": 16, 
+                "Name": "running"
+            }
+        }, 
+        {
+            "InstanceId": "i-0249eb2b797c6e611", 
+            "CurrentState": {
+                "Code": 32, 
+                "Name": "shutting-down"
+            }, 
+            "PreviousState": {
+                "Code": 16, 
+                "Name": "running"
+            }
+        }
+    ]
+}
+...............
+
+Deleting ANYDC-html in us-east-1 
+Waiting for ANYDC-html to delete .............An error occurred (ValidationError) when calling the DescribeStacks operation: Stack with id ANYDC-html does not exist << IGNORE THIS ERROR IF SEEN ABOVE
+
+ANYDC-html deleted in us-east-1
+...

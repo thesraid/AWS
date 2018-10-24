@@ -11,7 +11,9 @@ function usage
                                       --region [-r] REGION 		us-east-1
                                       --course [-c] COURSE 		ANYDC ANYSA CENSP
                                       --sensor [-s] yes/no
-                                      --tag [-t] TAG 			Alphanumeric with dashes only"
+                                      --tag [-t] TAG 			Alphanumeric with dashes only
+				      --date [-d] DATE			Date to power off YYYY-MM-DD
+				      --timezone [-z] TIMEZONE		WET CET EST PST APJ"
 }
 
 # This is the name of the role in the Parent Org that has permissions to do things in the child orgs. It's set up in the child orgs when they are created. 
@@ -47,6 +49,12 @@ while [ "$1" != "" ]; do
         -t | --tag )            shift
                                 tag=$1
                                 ;;
+        -d | --date )	        shift
+                                powerOffDate=$1
+                                ;;
+        -z | --timezone )       shift
+                                zone=$1
+                                ;;
         -h | --help )           usage
                                 exit
                                 ;;
@@ -58,6 +66,7 @@ done
 for accName in "${accNameArray[@]}"
 do
 
+echo "Power off on $powerOffDate $zone"
 # Username and Group Name will match the sub Org name
 userName=$accName
 groupName=$accName
@@ -273,7 +282,7 @@ deploy_template () {
 # Choose the appropriate CloudFormation json
 if [ "$course" = "ANYDC" ]
 then
-  url="https://s3-eu-west-1.amazonaws.com/deploy-student-env/ANYDC.json"
+  url="https://s3-eu-west-1.amazonaws.com/deploy-student-env/ANYDCStg.json"
   
   # Set the paratmer variables that need to be sent this cloud formation template
 
@@ -282,9 +291,9 @@ then
   vpcid=$(aws ec2 describe-vpcs --filters Name=isDefault,Values=false --query Vpcs[*].VpcId --output=text --profile $profile)
 
   # Build the parameter variable for the ANYDC course
-  parameter="ParameterKey=TrainingVPC,ParameterValue=$vpcid"
+  parameter="ParameterKey=TrainingVPC,ParameterValue=$vpcid ParameterKey=HTML5Password,ParameterValue=$userPassword "
 
-  deploy_template "$course-$tag" $url $parameter
+  deploy_template "$course-$tag" $url "$parameter"
 
 fi
 
@@ -350,7 +359,7 @@ then
   aws ec2 authorize-security-group-ingress --group-id $sgid --cidr 192.168.250.0/24 --protocol all --profile $profile
   if [ $? -ne 0 ]
   then
-    printf "Failed to add rule to Security Group to allow local inblound traffic to Sensor\n"
+    printf "Failed to add rule to Security Group to allow local inbound traffic to Sensor\n"
   exit 1
   fi
 
