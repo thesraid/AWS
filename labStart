@@ -436,9 +436,9 @@ case $zone in
 esac
 
 # Add the cronjob and write the output of the cronjob to a log file
-(crontab -l 2>/dev/null; echo "00 $hour $day $month * /usr/bin/env bash /usr/local/bin/labFinish -a $profile | tee -a /var/log/labs/labFinish.log") | crontab -
+(crontab -l 2>/dev/null; echo "00 $hour $day $month * /usr/bin/env bash /usr/local/bin/labFinish -a $profile | tee -a /var/log/labs/$month-$day-$profile-$course-$tag-labFinish.log") | crontab -
 
-printf "Added cronjob to power off lab on the $day of $month \nErrors will be logged to /var/log/labs on that date\n"
+printf "Added cronjob to power off lab on the $day of $month \nErrors will be logged to /var/log/labs/$month-$day-$profile-$course-$tag-labFinish.log\n"
 # Create a user to allow the students access the account
 
 printf "Creating a new user\n"

@@ -1,0 +1,11 @@
+-------------------------------------------------------------------
+JohnOAcc
+Thu Oct 25 10:01:34 IST 2018
+Students can now log into the 779560141542 account with the information below
+URL  : https://console.aws.amazon.com/console/home?region=us-east-1
+ACC  : avstudent04
+USER : avstudent04
+PASS : JohnPassword123
+HTML5	54.172.112.208
+Sensor Internal: 192.168.250.36
+Sensor External: 34.238.114.137
