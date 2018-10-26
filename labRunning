@@ -2,7 +2,7 @@
 function usage
 {
     echo "usage: labRunning [-h]
-                                      --region [-r] If not specified all regions will be checked
+                                      --region [-r] 	us-east-1 - If not specified all regions will be checked
                                       --start [-s] 10	AVStudent account to start with
                                       --end [-e] 20     AVStudent account to end on
                                                         If start or end are not specified it will run to the end

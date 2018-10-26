@@ -16,7 +16,7 @@ fi
 userName="AVAdmin"
 userPassword=""
 groupName="AVAdmin"
-policy="file://policies/AdminPolicy.json"
+policy="file:///opt/avorgcreator/policies/AdminPolicy.json"
 
 while [ "$1" != "" ]; do
     case $1 in

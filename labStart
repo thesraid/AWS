@@ -6,7 +6,7 @@
 function usage
 {
     echo "usage: labStart [-h]
-                                      --account_name [-a] ACCOUNT_NAME	Multiple accounts can be specified in quotes
+                                      --account_name [-a] ACCOUNT_NAME	\"AVStudentXX AVStudentXX AVStudetXX\" 
                                       --password [-p] PASSWORD
                                       --region [-r] REGION 		us-east-1
                                       --course [-c] COURSE 		ANYDC ANYSA CENSP
@@ -412,26 +412,26 @@ fi
 case $zone in
    WET )
       hour=19
-      echo "WET : $day $hour"
+      #echo "WET : $day $hour"
       ;;
    CET )
       hour=20
-      echo "CET : $day $hour"
+      #echo "CET : $day $hour"
       ;;
    EST )
       hour=00
       day=$((day+1))
-      echo "EST : $day $hour"
+      #echo "EST : $day $hour"
       ;;
    PST )
       day=$((day+1))
       hour=03
-      echo "PST : $day $hour"
+      #echo "PST : $day $hour"
       ;;
    APJ )
       day=$((day+1))
       hour=09
-      echo "APJ : $day $hour"
+      #echo "APJ : $day $hour"
       ;;
 esac
 

@@ -354,5 +354,8 @@ do
    done
 done
 
+printf "\nRemoving all references to $profile from users cron\n"
+crontab -l | grep -v $profile | crontab -
+
 printf "\n"
 done

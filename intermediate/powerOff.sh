@@ -43,12 +43,25 @@ else
    exit
 fi
 
-echo "Date : $powerOffDate"
-echo "TZ   : $zone"
+#echo "Date : $powerOffDate"
+#echo "TZ   : $zone"
 
 day=($(date -d $powerOffDate +"%d"))
 month=($(date -d $powerOffDate +"%m"))
 year=($(date -d $powerOffDate +"%y"))
-echo "$day $month $year"
+echo " You entered $year-$month-$day"
+#echo " "
+echo "Date is $(date -d $powerOffDate)"
+newDate=$(date -d $powerOffDate+"1 days")
+echo "Next is $newDate"
+
+day=($(date -d "$newDate" +"%d"))
+month=($(date -d "$newDate" +"%m"))
+year=($(date -d "$newDate" +"%y"))
+
+echo "Year:  $year"
+echo "Month: $month"
+echo "Day:   $day"
+
 
 #(crontab -l 2>/dev/null; echo "45 08 23 10 * finishCourse -a cliaccount") | crontab -
