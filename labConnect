@@ -1,5 +1,5 @@
 #!/bin/bash
-# If we haven't used a subOrg in a while it's tocken may expire. Running this will refresh all tokens
+# If we haven't used a subOrg in a while it's token may expire. Running this will refresh all tokens
 connect () {
 
 accountName=$1
@@ -13,6 +13,7 @@ aws configure set role_arn arn:aws:iam::$accountID:role/$role --profile $account
 aws configure set source_profile default --profile $accountName
 }
 
+date
 
 accArray=($(aws organizations list-accounts-for-parent --parent-id ou-yus6-1nrdvs4m --output text --query 'Accounts[*].[Name,Id]' | sort -V))
 arraySize=${#accArray[@]}

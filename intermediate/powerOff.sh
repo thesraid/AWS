@@ -49,19 +49,57 @@ fi
 day=($(date -d $powerOffDate +"%d"))
 month=($(date -d $powerOffDate +"%m"))
 year=($(date -d $powerOffDate +"%y"))
-echo " You entered $year-$month-$day"
+echo "You entered $year-$month-$day"
 #echo " "
-echo "Date is $(date -d $powerOffDate)"
-newDate=$(date -d $powerOffDate+"1 days")
-echo "Next is $newDate"
 
-day=($(date -d "$newDate" +"%d"))
-month=($(date -d "$newDate" +"%m"))
-year=($(date -d "$newDate" +"%y"))
+nextDayDate=$(date -d $powerOffDate+"1 days")
+nextDay=($(date -d "$nextDayDate" +"%d"))
+nextMonth=($(date -d "$nextDayDate" +"%m"))
+nextYear=($(date -d "$nextDayDate" +"%y"))
 
-echo "Year:  $year"
-echo "Month: $month"
-echo "Day:   $day"
+echo "Next day is $nextYear-$nextMonth-$nextDay"
 
+# Convert the date and time into Irish time (as the server is running in Ireland)
+case $zone in
+   WET )
+      hour=19
+      echo "WET : M: $month D: $day H: $hour"
+      ;;
+   CET )
+      hour=20
+      echo "WET : M: $month D: $day H: $hour"
+      ;;
+   EST )
+      hour=00
+      day=$nextDay
+      month=$nextMonth
+      echo "WET : M: $month D: $day H: $hour"
+      ;;
+   PST )
+      hour=03
+      day=$nextDay
+      month=$nextMonth
+      echo "WET : M: $month D: $day H: $hour"
+      ;;
+   APJ )
+      hour=09
+      day=$nextDay
+      month=$nextMonth
+      echo "WET : M: $month D: $day H: $hour"
+      ;;
+esac
+
+
+#echo "Date is $(date -d $powerOffDate)"
+#newDate=$(date -d $powerOffDate+"1 days")
+#echo "Next is $newDate"
+
+#day=($(date -d "$newDate" +"%d"))
+#month=($(date -d "$newDate" +"%m"))
+#year=($(date -d "$newDate" +"%y"))
+
+#echo "Year:  $year"
+#echo "Month: $month"
+#echo "Day:   $day"
 
 #(crontab -l 2>/dev/null; echo "45 08 23 10 * finishCourse -a cliaccount") | crontab -

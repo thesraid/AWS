@@ -6,14 +6,14 @@
 function usage
 {
     echo "usage: labStart [-h]
-                                      --account_name [-a] ACCOUNT_NAME	\"AVStudentXX AVStudentXX AVStudetXX\" 
+                                      --account_name [-a] ACCOUNT_NAME	\"AVStudentXX AVStudentXX AVStudentXX\" 
                                       --password [-p] PASSWORD
                                       --region [-r] REGION 		us-east-1
                                       --course [-c] COURSE 		ANYDC ANYSA CENSP
                                       --sensor [-s] yes/no
                                       --tag [-t] TAG 			Alphanumeric with dashes only
 				      --date [-d] DATE			Date to power off YYYY-MM-DD
-				      --timezone [-z] TIMEZONE		WET CET EST PST APJ"
+				      --timezone [-z] TIMEZONE		WET CET EST CST PST APJ"
 }
 
 if [ $# -eq 0 ]
@@ -70,10 +70,10 @@ while [ "$1" != "" ]; do
 done
 
 # Ensure a valid poweroff Timezone was selected
-if [ "$zone" != "WET" ] && [ "$zone" != "CET" ] && [ "$zone" != "EST" ] && [ "$zone" != "PST" ] && [ "$zone" != "APJ" ]
+if [ "$zone" != "WET" ] && [ "$zone" != "CET" ] && [ "$zone" != "EST" ] && [ "$zone" != "CST" ] && [ "$zone" != "PST" ] && [ "$zone" != "APJ" ]
 then
   echo "Please enter a valid timezone using -z"
-  echo "You entered $zone. Choices are WET CET EST PST APJ"
+  echo "You entered $zone. Choices are WET CET EST CST PST APJ"
   exit
 fi
 
@@ -101,6 +101,7 @@ then
 fi
 
 # Split the date into different variables
+minute=00
 day=($(date -d $powerOffDate +"%d"))
 month=($(date -d $powerOffDate +"%m"))
 year=($(date -d $powerOffDate +"%y"))
@@ -305,7 +306,7 @@ deploy_template () {
      sleep 5
      printf "."
      cfStat=$(aws cloudformation describe-stacks --stack-name $stackName --profile $profile --query 'Stacks[0].[StackStatus]' --output text)
-     if [ $cfStat = "CREATE_FAILED" ] || [ $cfStat = "ROLLBACK_COMPLETE"  ]
+     if [ $cfStat = "CREATE_FAILED" ] || [ $cfStat = "ROLLBACK_COMPLETE" ]
      then
        printf "\n$stackName Stack failed to start\n"
        printf "ERROR : $cfStat\n"
@@ -408,35 +409,54 @@ then
    
 fi
 
+# Figure out what the next day after the date specified is because of time zones. 
+nextDayDate=$(date -d $powerOffDate+"1 days")
+nextDay=($(date -d "$nextDayDate" +"%d"))
+nextMonth=($(date -d "$nextDayDate" +"%m"))
+nextYear=($(date -d "$nextDayDate" +"%y"))
+
+#echo "Next day is $nextYear-$nextMonth-$nextDay"
+
 # Convert the date and time into Irish time (as the server is running in Ireland)
 case $zone in
    WET )
       hour=19
-      #echo "WET : $day $hour"
+      #echo "WET : M: $month D: $day H: $hour"
       ;;
    CET )
       hour=20
-      #echo "CET : $day $hour"
+      #echo "WET : M: $month D: $day H: $hour"
       ;;
    EST )
       hour=00
-      day=$((day+1))
-      #echo "EST : $day $hour"
+      day=$nextDay
+      month=$nextMonth
+      #echo "WET : M: $month D: $day H: $hour"
+      ;;
+   CST )
+      hour=01
+      day=$nextDay
+      month=$nextMonth
+      #echo "WET : M: $month D: $day H: $hour"
       ;;
    PST )
-      day=$((day+1))
       hour=03
-      #echo "PST : $day $hour"
+      day=$nextDay
+      month=$nextMonth
+      #echo "WET : M: $month D: $day H: $hour"
       ;;
    APJ )
-      day=$((day+1))
       hour=09
-      #echo "APJ : $day $hour"
+      day=$nextDay
+      month=$nextMonth
+      #echo "WET : M: $month D: $day H: $hour"
       ;;
 esac
 
+# Increment the minute by one to ensure finish jobs don't start together
+minute=$((minute+1))
 # Add the cronjob and write the output of the cronjob to a log file
-(crontab -l 2>/dev/null; echo "00 $hour $day $month * /usr/bin/env bash /usr/local/bin/labFinish -a $profile | tee -a /var/log/labs/$month-$day-$profile-$course-$tag-labFinish.log") | crontab -
+(crontab -l 2>/dev/null; echo "$minute $hour $day $month * /usr/bin/env bash /usr/local/bin/labFinish -a $profile | tee -a /var/log/labs/$month-$day-$profile-$course-$tag-labFinish.log") | crontab -
 
 printf "Added cronjob to power off lab on the $day of $month \nErrors will be logged to /var/log/labs/$month-$day-$profile-$course-$tag-labFinish.log\n"
 # Create a user to allow the students access the account
@@ -482,24 +502,25 @@ then
   exit 1
 fi
 
-echo "-------------------------------------------------------------------" | tee -a results.txt /var/log/labs/results.txt
-echo $tag | tee -a results.txt /var/log/labs/results.txt
-date | tee -a results.txt /var/log/labs/results.txt
-printf "Students can now log into the $accID account with the information below\n" | tee -a results.txt /var/log/labs/results.txt
-printf "URL  : https://console.aws.amazon.com/console/home?region=$region\n" | tee -a results.txt /var/log/labs/results.txt
-printf "ACC  : ${profile,,}\n" | tee -a results.txt /var/log/labs/results.txt
-printf "USER : ${userName,,}\n" | tee -a results.txt /var/log/labs/results.txt
-printf "PASS : $userPassword\n" | tee -a results.txt /var/log/labs/results.txt
+echo "-------------------------------------------------------------------" | tee -a results-$tag.txt /var/log/labs/results-$tag.txt
+echo $tag | tee -a results-$tag.txt /var/log/labs/results-$tag.txt
+date | tee -a results-$tag.txt /var/log/labs/results-$tag.txt
+printf "Students can now log into the $accID account with the information below\n" | tee -a results-$tag.txt /var/log/labs/results-$tag.txt
+printf "URL  : https://console.aws.amazon.com/console/home?region=$region\n" | tee -a results-$tag.txt /var/log/labs/results-$tag.txt
+printf "ACCID: $accID\n" | tee -a results-$tag.txt /var/log/labs/results-$tag.txt
+printf "ACC  : ${profile,,}\n" | tee -a results-$tag.txt /var/log/labs/results-$tag.txt
+printf "USER : ${userName,,}\n" | tee -a results-$tag.txt /var/log/labs/results-$tag.txt
+printf "PASS : $userPassword\n" | tee -a results-$tag.txt /var/log/labs/results-$tag.txt
 
 # Print out any other output from the class CloudFormation template. 
-aws cloudformation describe-stacks --stack-name "$course-$tag" --profile $profile --query 'Stacks[0].[Outputs]' --output text | tee -a results.txt /var/log/labs/results.txt
+aws cloudformation describe-stacks --stack-name "$course-$tag" --profile $profile --query 'Stacks[0].[Outputs]' --output text | tee -a results-$tag.txt /var/log/labs/results-$tag.txt
 
 if [ "$sensor" = "yes" ] || [ "$sensor" = "y" ]
 then
-   printf "Sensor Internal: " | tee -a results.txt /var/log/labs/results.txt
-   aws ec2 describe-instances --query Reservations[*].Instances[*].PrivateIpAddress --filters Name=tag:Name,Values=Sensor --output text --profile $profile | tee -a results.txt /var/log/labs/results.txt
-   printf "Sensor External: " | tee -a results.txt /var/log/labs/results.txt
-   aws ec2 describe-instances --query Reservations[*].Instances[*].PublicIpAddress --filters Name=tag:Name,Values=Sensor --output text --profile $profile | tee -a results.txt /var/log/labs/results.txt
+   printf "Sensor Internal: " | tee -a results-$tag.txt /var/log/labs/results-$tag.txt
+   aws ec2 describe-instances --query Reservations[*].Instances[*].PrivateIpAddress --filters Name=tag:Name,Values=Sensor --output text --profile $profile | tee -a results-$tag.txt /var/log/labs/results-$tag.txt
+   printf "Sensor External: " | tee -a results-$tag.txt /var/log/labs/results-$tag.txt
+   aws ec2 describe-instances --query Reservations[*].Instances[*].PublicIpAddress --filters Name=tag:Name,Values=Sensor --output text --profile $profile | tee -a results-$tag.txt /var/log/labs/results-$tag.txt
   
 fi
 printf "\n"

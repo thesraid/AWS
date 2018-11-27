@@ -12,7 +12,6 @@ accId=""
 profile=""
 roleName="OrganizationAccountAccessRole"
 destinationOUname="Students"
-regions=(eu-west-1 us-east-1)
 
 while [ "$1" != "" ]; do
     case $1 in
@@ -33,42 +32,17 @@ profile=$newAccName
 
 # We can't list the regions from this account as it's not created yet. So we will list them from cliaccount
 regions=($(aws ec2 describe-regions --query Regions[*].RegionName --output text --profile cliaccount))
+   
 
-printf "Creating the TrainingVPC in each region while deleting the default VPC\n"
+printf "Creating the TrainingVPC in all regions while deleting the other VPCs\n"
+
 for region in "${regions[@]}"
 do
 
    aws configure set region $region --profile $profile
 
-   #printf "Creating Training VPC in $region \n"
-   #sleep 20
-   printf "."
-
-   aws ec2 create-vpc --cidr-block 192.168.250.0/24 --profile $profile  > /dev/null 2>&1
-   if [ $? -ne 0 ]
-   then
-      printf "Error occured creating TrainingVPC in $region\n"
-      exit 1
-   fi
-
-   vpcid=$(aws ec2 describe-vpcs --filters Name=isDefault,Values=false --query Vpcs[*].VpcId --output=text --profile $profile)
-   aws ec2 create-tags --resources $vpcid --tags Key=Name,Value=TrainingVPC --profile $profile > /dev/null 2>&1
-   if [ $? -ne 0 ]
-   then
-      printf "Error occured naming TrainingVPC in $region\n"
-      exit 1
-   fi
-
-
    #printf "Deleting Default VPC in $region\n"
    printf "."
-
-   vpcid=$(aws ec2 describe-vpcs --filters Name=isDefault,Values=true --query Vpcs[*].VpcId --output=text --profile $profile)
-   if [ $? -ne 0 ]
-   then
-      printf "Error getting Default VPC information in $region\n"
-      exit 1
-   fi
 
    SUBNETS=($(aws ec2 describe-subnets --query Subnets[*].SubnetId --output text --profile $profile))
    for subnetid in "${SUBNETS[@]}"
@@ -84,10 +58,11 @@ do
    GATEWAYS=($(aws ec2 describe-internet-gateways --query InternetGateways[*].InternetGatewayId --output text --profile $profile))
    for gatewayid in "${GATEWAYS[@]}"
    do
-      aws ec2 detach-internet-gateway --internet-gateway-id $gatewayid --vpc-id $vpcid --profile $profile
+      gwvpc=$(aws ec2 describe-internet-gateways --internet-gateway-id $gatewayid --query InternetGateways[*].Attachments[*].VpcId --output text --profile $profile)
+      aws ec2 detach-internet-gateway --internet-gateway-id $gatewayid --vpc-id $gwvpc --profile $profile
       if [ $? -ne 0 ]
       then
-         printf "Error detaching default gateway in $region\n"
+         printf "Error detaching gateway in $region\n"
          exit 1
       fi
 
@@ -99,10 +74,40 @@ do
       fi
    done
 
-   aws ec2 delete-vpc --vpc-id $vpcid --profile $profile
+   VPCS=($(aws ec2 describe-vpcs --query Vpcs[*].VpcId --output=text --profile $profile))
    if [ $? -ne 0 ]
    then
-      printf "Error deleting default VPC in $region\n"
+      printf "Error getting VPC information in $region\n"
+      exit 1
+   fi
+   
+   for vpcid in "${VPCS[@]}"
+   do
+      #printf "Deleting $vpcid in $region\n"
+      aws ec2 delete-vpc --vpc-id $vpcid --profile $profile
+      if [ $? -ne 0 ]
+      then
+         printf "Error deleting $vpcid in $region\n"
+         exit 1
+      fi
+   done
+
+   #printf "Creating Training VPC in $region \n"
+   #sleep 20
+   printf "."
+
+   aws ec2 create-vpc --cidr-block 192.168.250.0/24 --profile $profile > /dev/null 2>&1
+   if [ $? -ne 0 ]
+   then
+      printf "Error occured creating TrainingVPC in $region\n"
+      exit 1
+   fi
+
+   vpcid=$(aws ec2 describe-vpcs --filters Name=isDefault,Values=false --query Vpcs[*].VpcId --output=text --profile $profile)
+   aws ec2 create-tags --resources $vpcid --tags Key=Name,Value=TrainingVPC --profile $profile > /dev/null 2>&1
+   if [ $? -ne 0 ]
+   then
+      printf "Error occured naming TrainingVPC in $region\n"
       exit 1
    fi
 
@@ -114,20 +119,18 @@ printf "Adding to Parent Org\n"
 if [ "$destinationOUname" != "" ]
 then
   printf "Moving New Account to OU\n"
-  accID=$(aws organizations list-accounts --output text --query 'Accounts[?Name==`$newAccName`]'.Id)
+  #accID=$(aws organizations list-accounts --output text --query 'Accounts[?Name==`$newAccName`]'.Id)
   rootOU=$(aws organizations list-roots --query 'Roots[0].[Id]' --output text)
   destOU=$(aws organizations list-organizational-units-for-parent --parent-id $rootOU --query 'OrganizationalUnits[?Name==`'$destinationOUname'`].[Id]' --output text)
 
-  printf "accID:$accID\n"
+  printf "accID:$accId\n"
   printf "rootOU:$rootOU\n"
   printf "destOU:$destOU\n"
 
-  aws organizations move-account --account-id $accID --source-parent-id $rootOU --destination-parent-id $destOU 
+  aws organizations move-account --account-id $accId --source-parent-id $rootOU --destination-parent-id $destOU 
   if [ $? -ne 0 ]
   then
     printf "Moving Account Failed\n"
   fi
 fi
-
-echo New Account ID is $accID
 

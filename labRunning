@@ -96,19 +96,21 @@ then
    ((count = count - 1))
    NumberOfAccounts=($(seq -f '%02g' 1 $count))
 else
-   end=$[$end+1]
-   while [ $begin -lt $end ]
+   #end=$[$end+1]
+   #while [ $begin -lt $end ]
+   for b in $(eval echo {$begin..$end})
    do
-      NumberOfAccounts+=($begin)
-      begin=$[$begin+1]
+      #NumberOfAccounts+=($begin)
+      #begin=$[$begin+1]
+      NumberOfAccounts+=($b)
+      
    done
 
 fi
 
-
 for accounts in "${NumberOfAccounts[@]}"
 #for ((accounts=01;accounts<=count;accounts++))
-#for accounts in $(seq 01 $count)
+#for accounts in $(eval echo {$begin..$count})
 do
    profile="AVStudent$accounts"
    echo $profile

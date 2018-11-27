@@ -1,0 +1,132 @@
+-------------------------------------------------------------------
+launchTest
+Thu Nov  1 13:53:47 GMT 2018
+Students can now log into the 142403501790 account with the information below
+URL  : https://console.aws.amazon.com/console/home?region=us-east-1
+ACCID: 142403501790
+ACC  : avstudent168
+USER : avstudent168
+PASS : Password1!
+HTML5	18.205.6.95
+Sensor Internal: 192.168.250.45
+Sensor External: 18.208.208.186
+-------------------------------------------------------------------
+launchTest
+Thu Nov  1 13:59:07 GMT 2018
+Students can now log into the 983602247132 account with the information below
+URL  : https://console.aws.amazon.com/console/home?region=us-east-1
+ACCID: 983602247132
+ACC  : avstudent169
+USER : avstudent169
+PASS : Password1!
+HTML5	35.175.180.164
+Sensor Internal: 192.168.250.43
+Sensor External: 18.206.15.161
+-------------------------------------------------------------------
+launchTest
+Thu Nov  1 14:08:20 GMT 2018
+Students can now log into the 032184353144 account with the information below
+URL  : https://console.aws.amazon.com/console/home?region=us-east-1
+ACCID: 032184353144
+ACC  : avstudent170
+USER : avstudent170
+PASS : Password1!
+HTML5	35.173.234.203
+Sensor Internal: 192.168.250.122
+Sensor External: 34.239.180.22
+-------------------------------------------------------------------
+launchTest
+Thu Nov  1 14:14:11 GMT 2018
+Students can now log into the 382327085079 account with the information below
+URL  : https://console.aws.amazon.com/console/home?region=us-east-1
+ACCID: 382327085079
+ACC  : avstudent171
+USER : avstudent171
+PASS : Password1!
+HTML5	34.239.134.23
+Sensor Internal: 192.168.250.78
+Sensor External: 35.175.234.78
+-------------------------------------------------------------------
+launchTest
+Thu Nov  1 14:19:40 GMT 2018
+Students can now log into the 043128945391 account with the information below
+URL  : https://console.aws.amazon.com/console/home?region=us-east-1
+ACCID: 043128945391
+ACC  : avstudent172
+USER : avstudent172
+PASS : Password1!
+HTML5	54.144.25.62
+Sensor Internal: 192.168.250.62
+Sensor External: 34.229.206.32
+-------------------------------------------------------------------
+launchTest
+Thu Nov  1 14:25:05 GMT 2018
+Students can now log into the 653802930149 account with the information below
+URL  : https://console.aws.amazon.com/console/home?region=us-east-1
+ACCID: 653802930149
+ACC  : avstudent173
+USER : avstudent173
+PASS : Password1!
+HTML5	54.172.155.172
+Sensor Internal: 192.168.250.101
+Sensor External: 18.234.177.42
+-------------------------------------------------------------------
+launchTest
+Thu Nov  1 14:30:16 GMT 2018
+Students can now log into the 084115783267 account with the information below
+URL  : https://console.aws.amazon.com/console/home?region=us-east-1
+ACCID: 084115783267
+ACC  : avstudent174
+USER : avstudent174
+PASS : Password1!
+HTML5	18.207.152.92
+Sensor Internal: 192.168.250.72
+Sensor External: 54.210.156.120
+-------------------------------------------------------------------
+launchTest
+Thu Nov  1 14:43:00 GMT 2018
+Students can now log into the 607141945416 account with the information below
+URL  : https://console.aws.amazon.com/console/home?region=us-east-1
+ACCID: 607141945416
+ACC  : avstudent176
+USER : avstudent176
+PASS : Password1!
+HTML5	52.71.32.253
+Sensor Internal: 192.168.250.72
+Sensor External: 18.208.232.30
+-------------------------------------------------------------------
+launchTest
+Thu Nov  1 15:18:51 GMT 2018
+Students can now log into the 704209175600 account with the information below
+URL  : https://console.aws.amazon.com/console/home?region=us-east-1
+ACCID: 704209175600
+ACC  : avstudent180
+USER : avstudent180
+PASS : Password1!
+HTML5	35.171.228.109
+Sensor Internal: 192.168.250.12
+Sensor External: 35.175.118.76
+-------------------------------------------------------------------
+launchTest
+Thu Nov  1 15:25:36 GMT 2018
+Students can now log into the 296796116811 account with the information below
+URL  : https://console.aws.amazon.com/console/home?region=us-east-1
+ACCID: 296796116811
+ACC  : avstudent181
+USER : avstudent181
+PASS : Password1!
+HTML5	52.207.78.110
+Sensor Internal: 192.168.250.88
+Sensor External: 100.26.10.42
+-------------------------------------------------------------------
+launchTest
+Thu Nov  1 15:31:08 GMT 2018
+Students can now log into the 250296770581 account with the information below
+URL  : https://console.aws.amazon.com/console/home?region=us-east-1
+ACCID: 250296770581
+ACC  : avstudent182
+USER : avstudent182
+PASS : Password1!
+HTML5	18.209.214.45
+Sensor Internal: 192.168.250.15
+Sensor External: 34.205.53.120

@@ -1,7 +1,6 @@
 #!/bin/bash
 
 # joriordan
-
 # Prints out the usage of the scipt
 function usage
 {
@@ -33,20 +32,18 @@ while [ "$1" != "" ]; do
     shift
 done
 
-for accName in "${accNameArray[@]}"
-do
+#echo "Warming up."
+#sleep $[ ( $RANDOM % 59 )  + 1 ]s
 
-# If an accName was not proivded when the script was run prompt the user to enter one. 
-if [ "$accName" = "" ]
-then
-  # List out the accounts so that the user can copy and paste to make it easier
-  aws organizations list-accounts-for-parent --parent-id ou-yus6-1nrdvs4m --query 'Accounts[*].Name' 
-  printf "Please enter the name of the account (with or without quotes) : "
-  read accName
-  # Remove quotes if entered
-  accName=$(sed -e 's/^"//' -e 's/"$//' <<< $accName)
-  printf "You chose $accName \n"
-fi
+# Made the script a function so that it can be called a few times in case of an error. This allows the script to retry on failure. 
+function removeAccount
+{
+
+echo "Warming up."
+sleep $[ ( $RANDOM % 59 )  + 1 ]s
+
+accName=$1
+echo "accName is $accName"
 
 # Find the accountID for the entered account.
 accID=$(aws organizations list-accounts-for-parent --parent-id ou-yus6-1nrdvs4m --query 'Accounts[?Name==`'$accName'`].Id' --output text)
@@ -110,8 +107,8 @@ do
    if [ $? -ne 0 ]
    then
      printf "Error occured connecting to the account\n"
-     printf "Trying re-running the script again in a few seconds\n"
-     exit 1
+     printf "Try re-running the script again in a few seconds\n"
+     return 1
    fi
 
    # Get a list of instances running in this region and terminate them.   
@@ -131,11 +128,11 @@ do
       if [ $? -ne 0 ]
       then
         printf "FAILED to terminate all Instancese in $region\n"
-        printf "Trying re-running the script again in a few seconds\n"
-        exit 1
+        printf "Try re-running the script again in a few seconds\n"
+        return 1
       fi
    
-      # Give instances time to shut down - This should really be iplemented to wait until all instances show as terminated but it seems to work fine this way
+      # Give instances time to shut down - This should really be implemented to wait until all instances show as terminated but it seems to work fine this way
       sleep 10 && printf "." && sleep 10 && printf "." && sleep 10 && printf "." && sleep 10 && printf "." && sleep 10 && printf "."
       sleep 10 && printf "." && sleep 10 && printf "." && sleep 10 && printf "." && sleep 10 && printf "." && sleep 10 && printf "."
       sleep 10 && printf "." && sleep 10 && printf "." && sleep 10 && printf "." && sleep 10 && printf "." && sleep 10 && printf ".\n"
@@ -151,7 +148,8 @@ do
       if [ $? -ne 0 ]
       then
          printf "$KEY FAILED to Delete in $region\n"
-         printf "Trying re-running the script again in a few seconds\n"
+         printf "Try re-running the script again in a few seconds\n"
+         return 1
       fi
    done
 
@@ -173,8 +171,8 @@ do
       if [ $? -ne 0 ]
       then
         printf "$STACK FAILED to Delete in $region\n"
-        printf "Trying re-running the script again in a few seconds\n"
-        exit 1
+        printf "Try re-running the script again in a few seconds\n"
+        return 1
       fi
    
       printf "Waiting for $STACK to delete ..."
@@ -187,8 +185,8 @@ do
         if [ "$cfStat" = "DELETE_FAILED" ]
         then
           printf "\n$STACK FAILED to delete in $region\n"
-          printf "Trying re-running the script again in a few seconds\n"
-          exit 1
+          printf "Try re-running the script again in a few seconds\n"
+          return 1
         fi
       done
       
@@ -207,8 +205,8 @@ do
          if [ $? -ne 0 ]
          then
             printf "Error occured removing the CloudTrail $trail\n"
-            printf "Trying re-running the script again in a few seconds\n"
-            exit 1
+            printf "Try re-running the script again in a few seconds\n"
+            return 1
          fi
       done
 
@@ -221,8 +219,8 @@ do
          if [ $? -ne 0 ]
          then
             printf "Error occured removing the VPC Flow $flow\n"
-            printf "Trying re-running the script again in a few seconds\n"
-            exit 1
+            printf "Try re-running the script again in a few seconds\n"
+            return 1
          fi
       done
    
@@ -236,8 +234,8 @@ do
          if [ $? -ne 0 ]
          then
             printf "Error occured removing the Log Group $group\n"
-            printf "Trying re-running the script again in a few seconds\n"
-            exit 1
+            printf "Try re-running the script again in a few seconds\n"
+            return 1
          fi
       done
 
@@ -251,8 +249,8 @@ do
          if [ $? -ne 0 ]
          then
             printf "Error occured removing the Bucket $bucket\n"
-            printf "Trying re-running the script again in a few seconds\n"
-            exit 1
+            printf "Try re-running the script again in a few seconds\n"
+            return 1
          fi
       done
 
@@ -279,7 +277,7 @@ do
             while [[ $actOut -ne 0 && $cfcntr -le 10 ]]
             do
               printf "."
-              sleep 5
+              sleep 30
               aws ec2 delete-security-group --group-id $secgroup --output text --profile $profile > /dev/null
               actOut=$?
               if [ $actOut -eq 0 ]
@@ -299,8 +297,8 @@ do
 	if [ $? -ne 0 ]
         then
            printf "Error occured removing the Security Group $secgroup\n"
-           printf "Trying re-running the script again in a few seconds\n"
-           exit 1
+           printf "Try re-running the script again in a few seconds\n"
+           return 1
         fi
       fi
 
@@ -358,4 +356,35 @@ printf "\nRemoving all references to $profile from users cron\n"
 crontab -l | grep -v $profile | crontab -
 
 printf "\n"
+
+return 0
+
+}
+
+retry=0
+function main
+{
+echo "Running removeAccount with $1"
+removeAccount $1
+if [ $? -ne 0 ] && [ $retry -le 10 ]
+then
+  retry=$[$retry+1]
+  echo "RETRY COUNT: $retry for $1"
+  printf "An error occured so I will try again in a couple of minutes\n"
+  sleep 120
+  main $1
+  exit 1
+elif [ $retry -gt 10 ]
+then
+  printf "**************ERROR****************\nUnable to stop lab after 10 attempts. Manual intervention required\n"
+  exit 1
+else
+  printf "Done\n"
+fi
+}
+
+for account in "${accNameArray[@]}"
+do
+  echo "Calling main with $account"
+  main $account
 done
