@@ -376,7 +376,8 @@ then
   exit 1
 elif [ $retry -gt 10 ]
 then
-  printf "**************ERROR****************\nUnable to stop lab after 10 attempts. Manual intervention required\n"
+  printf "**************ERROR****************\nUnable to stop $1 after 10 attempts. Manual intervention required\n"
+  sendEmail.py -r joriordan@alienvault.com ocreed@alienvault.com -s "$1 Failed to Power Off" -b "Do not reply to this e-mail<br/>The labFinish script tried to power off $1 10 times and failed.<br/>Manual intervention is required<br/>"
   exit 1
 else
   printf "Done\n"

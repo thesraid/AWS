@@ -8,6 +8,11 @@
 			"Description" : "VPC ID of TrainingVPC",
 			"Type": "String",
 			"ConstraintDescription" : "vpc id"
+		},
+		"HTML5Password": {
+                        "Description" : "Password for HTML5 Interface",
+                        "Type": "String",
+                        "ConstraintDescription" : "html5 password"
 		}
 	},
 
@@ -179,7 +184,10 @@
                                         "echo html5 > /etc/hostname\n",
                                         "echo nameserver 192.168.250.14 > /etc/resolv.conf\n",
                                         "echo search training.lab >> /etc/resolv.conf\n",
-                                        "hostname -F /etc/hostname\n"
+                                        "hostname -F /etc/hostname\n",
+					"sed -i '0,/Password1!/s//",
+					{ "Ref" : "HTML5Password" },
+					"/' /etc/guacamole/user-mapping.xml\n"
                                         ]]}}
                         }
                 },

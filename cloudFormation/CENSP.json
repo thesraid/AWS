@@ -8,6 +8,11 @@
 			"Description" : "VPC ID of TrainingVPC",
 			"Type": "String",
 			"ConstraintDescription" : "vpc id"
+		},
+                "HTML5Password": {
+                        "Description" : "Password for HTML5 Interface",
+                        "Type": "String",
+                        "ConstraintDescription" : "html5 password"
 		}
 	},
 
@@ -15,7 +20,7 @@
 		"Linux1RegionMap": {
 			"us-east-1": {
 				"AMI": "ami-0fa408143ac5c36e9"
-			},
+                        },
 			"eu-west-1": {
 				"AMI": "ami-ec143995"
 			}
@@ -23,25 +28,24 @@
         	"Linux2RegionMap": {
             		"us-east-1": {
                 		"AMI": "ami-0fa408143ac5c36e9"
-            		},
-            		"eu-west-1": {
-                		"AMI": "ami-8b1a37f2"
+			},
+			"eu-west-1": {
+				"AMI": "ami-ec143995"
             		}
         	},
         	"WindowsRegionMap": {
             		"us-east-1": {
                 		"AMI": "ami-02c66234109361bf9"
-            		},
-            		"eu-west-1": {
-				"AMI": "ami-ad1a35d4"
+			},
+			"eu-west-1": {
+				"AMI": "ami-ec143995"
             		}
         	},
                 "HTML5RegionMap": {
                         "us-east-1": {
-                                "AMI": "ami-0c1b9ce4bb5e45959"
-                        },
-                        "eu-west-1": {
-                                "AMI": "ami-12345678"
+                                "AMI": "ami-0c1b9ce4bb5e45959"},
+			"eu-west-1": {
+				"AMI": "ami-ec143995"
                         }
                 }
 	},
@@ -177,7 +181,10 @@
                                         "echo html5 > /etc/hostname\n",
                                         "echo nameserver 192.168.250.14 > /etc/resolv.conf\n",
                                         "echo search training.lab >> /etc/resolv.conf\n",
-                                        "hostname -F /etc/hostname\n"
+                                        "hostname -F /etc/hostname\n",
+                                        "sed -i '0,/Password1!/s//",
+                                        { "Ref" : "HTML5Password" },
+                                        "/' /etc/guacamole/user-mapping.xml\n"
                                         ]]}}
                         }
                 },
