@@ -1,0 +1,5 @@
+#!/bin/bash
+echo "Starting...." > /var/log/labs/labRunning.txt
+/usr/local/bin/labRunning -s 01 >> /var/log/labs/labRunning.txt 
+/usr/local/bin/sendEmail.py -r joriordan@alienvault.com -s "List of Running Labs" -b "Labs running as of 05:00 WET today" -a /var/log/labs/labRunning.txt 
+/bin/rm /var/log/labs/labRunning.txt
