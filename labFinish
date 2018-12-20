@@ -5,6 +5,7 @@
 function usage
 {
     echo "usage: labFinish [-h]
+				      --region [-r] REGION
 				      --account_name [-a] ACCOUNT_NAME
 				      Multiple accounts can be specified in quotes"
 }
@@ -16,12 +17,15 @@ if [ $# -eq 0 ]
 fi
 
 
-# Create a variable to store the account name
+# Create a variable to store the account name & region
 accName=""
 
 # Reads the input switches and assigns the Account Name to the accName 
 while [ "$1" != "" ]; do
     case $1 in
+        -r | --region )   	shift
+                                singleRegion=$1
+                                ;;
         -a | --account_name )   shift
                                 accNameArray=($1)
                                 ;;
@@ -32,8 +36,6 @@ while [ "$1" != "" ]; do
     shift
 done
 
-#echo "Warming up."
-#sleep $[ ( $RANDOM % 59 )  + 1 ]s
 
 # Made the script a function so that it can be called a few times in case of an error. This allows the script to retry on failure. 
 function removeAccount
@@ -59,6 +61,46 @@ printf "The account ID for $accName is $accID\n"
 profile=$accName
 userName=$accName
 groupName=$accName
+
+#Get a token from AWS so we can talk to the subOrg
+role="OrganizationAccountAccessRole"
+# Get a ticket to allow us to use the role that was created in the sub Orgs during their creation
+expiry=$(aws sts assume-role --role-arn arn:aws:iam::$accID:role/$role --query 'Credentials.Expiration' --role-session-name $profile)
+if [ $? -ne 0 ]
+then
+  printf "Error occured connecting to the account\n"
+  sendEmail.py -r USM-Anywhere-Training@alienvault.com -s "$profile Failed to Finish" -b "Do not reply to this e-mail<br/>The labFinish script tried to finish $profile and failed.<br/>The AWS Account $profile was not accessible.<br/>Manual intervention is required<br/>Try running labConnect on it's own with no arguments"
+  exit 1
+fi
+
+printf "Connection valid to $accName until $expiry\n"
+
+# Set the region to us-east-1 to start with. 
+aws configure set region us-east-1 --profile $profile
+if [ $? -ne 0 ]
+then
+  printf "Error occured connecting to the account\n"
+  sendEmail.py -r USM-Anywhere-Training@alienvault.com -s "$profile Failed to Finish" -b "Do not reply to this e-mail<br/>The labFinish script tried to finish $profile and failed.<br/>The AWS Account $profile was not accessible.<br/>Manual intervention is required<br/>Try running labConnect on it's own with no arguments"
+  exit 1
+fi
+
+# Assume the role created in the Sub Orgs for the following commands
+aws configure set role_arn arn:aws:iam::$accID:role/$role --profile $profile
+if [ $? -ne 0 ]
+then
+  printf "Error occured connecting to the account\n"
+  sendEmail.py -r USM-Anywhere-Training@alienvault.com -s "$profile Failed to Finish" -b "Do not reply to this e-mail<br/>The labFinish script tried to finish $profile and failed.<br/>The AWS Account $profile was not accessible.<br/>Manual intervention is required<br/>Try running labConnect on it's own with no arguments"
+  exit 1
+fi
+
+# Connect to the Sub Org
+aws configure set source_profile default --profile $profile
+if [ $? -ne 0 ]
+then
+  printf "Error occured connecting to the account\n"
+  sendEmail.py -r USM-Anywhere-Training@alienvault.com -s "$profile Failed to Finish" -b "Do not reply to this e-mail<br/>The labFinish script tried to finish $profile and failed.<br/>The AWS Account $profile was not accessible.<br/>Manual intervention is required<br/>Try running labConnect on it's own with no arguments"
+  exit 1
+fi
 
 printf "\n"
 USERGROUPS=($(aws iam list-groups --output text --query 'Groups[*].GroupName' --profile $profile))
@@ -95,8 +137,14 @@ do
    aws iam delete-user --user-name $user --profile $profile
 done
 
-# Iterate through each AWS region and remove any labs 
-ARRAY=($(aws ec2 describe-regions --query Regions[*].RegionName --output text --profile $profile))
+if [ -n "$singleRegion" ]
+then
+   ARRAY=($singleRegion)
+else
+   # Iterate through each AWS region and remove any labs 
+   ARRAY=($(aws ec2 describe-regions --query Regions[*].RegionName --output text --profile $profile))
+fi
+
 for region in "${ARRAY[@]}"
 do
 
@@ -165,6 +213,26 @@ do
    
    for STACK in "${STACKS[@]}"
    do
+
+
+      # The first thing that needs to be removed is any buckets. 
+      # If a bucket was created by a stack then the stack will try and remove it
+      # This will fail if the bucket is not empty
+      # So we will remove the buckets first and then the stacks
+      BUCKETS=($(aws s3 ls --profile $profile | awk '{print $3}'))
+
+      for bucket in "${BUCKETS[@]}"
+      do
+         printf "\nDeleting the Bucket $bucket and its contents\n"
+         aws s3 rm s3://$bucket --recursive --profile $profile > /dev/null
+         aws s3api delete-bucket --bucket $bucket --profile $profile
+         if [ $? -ne 0 ]
+         then
+            printf "Error occured removing the Bucket $bucket\n"
+            printf "Try re-running the script again in a few seconds\n"
+            return 1
+         fi
+      done
    
       printf "\nDeleting $STACK in $region \n"
       aws cloudformation delete-stack --stack-name $STACK --profile $profile
@@ -353,7 +421,7 @@ do
 done
 
 printf "\nRemoving all references to $profile from users cron\n"
-crontab -l | grep -v $profile | crontab -
+crontab -l | grep -v "$profile " | crontab -
 
 printf "\n"
 
@@ -373,12 +441,12 @@ then
   printf "An error occured so I will try again in a couple of minutes\n"
   sleep 120
   main $1
-  exit 1
+  return
 elif [ $retry -gt 10 ]
 then
   printf "**************ERROR****************\nUnable to stop $1 after 10 attempts. Manual intervention required\n"
-  sendEmail.py -r joriordan@alienvault.com ocreed@alienvault.com -s "$1 Failed to Power Off" -b "Do not reply to this e-mail<br/>The labFinish script tried to power off $1 10 times and failed.<br/>Manual intervention is required<br/>"
-  exit 1
+  sendEmail.py -r USM-Anywhere-Training@alienvault.com -s "$1 Failed to Power Off" -b "Do not reply to this e-mail<br/>The labFinish script tried to power off $1 10 times and failed.<br/>Manual intervention is required<br/>"
+  return
 else
   printf "Done\n"
 fi
@@ -386,6 +454,6 @@ fi
 
 for account in "${accNameArray[@]}"
 do
-  echo "Calling main with $account"
+  echo "Removing $account"
   main $account
 done

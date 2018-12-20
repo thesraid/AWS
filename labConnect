@@ -8,7 +8,7 @@ accountID=$2
 echo "$accountName has the ID $accountID"
 role="OrganizationAccountAccessRole"
 aws sts assume-role --role-arn arn:aws:iam::$accountID:role/$role --role-session-name $accountName
-aws configure set region eu-west-1 --profile $accountName
+aws configure set region us-east-1 --profile $accountName
 aws configure set role_arn arn:aws:iam::$accountID:role/$role --profile $accountName
 aws configure set source_profile default --profile $accountName
 }
@@ -17,6 +17,12 @@ date
 
 accArray=($(aws organizations list-accounts-for-parent --parent-id ou-yus6-1nrdvs4m --output text --query 'Accounts[*].[Name,Id]' | sort -V))
 arraySize=${#accArray[@]}
+
+echo "[default]
+output = json
+region = us-east-1
+role_arn = arn:aws:iam::745499864989:role/AVOrgCreatorRole
+credential_source  = Ec2InstanceMetadata" > ~/.aws/config
 
 i=0
 while [ $i -lt $arraySize ]
