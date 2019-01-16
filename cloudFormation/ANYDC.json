@@ -23,7 +23,7 @@
 	"Mappings": {
 		"Linux1RegionMap": {
 			"us-east-1": {
-				"AMI": "ami-087909f67cbf0a7e2"
+				"AMI": "ami-074bbd47a5e3c76c1"
 			},
 			"eu-west-1": {
 				"AMI": "ami-ec143995"

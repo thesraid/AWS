@@ -438,8 +438,8 @@ if [ $? -ne 0 ] && [ $retry -le 10 ]
 then
   retry=$[$retry+1]
   echo "RETRY COUNT: $retry for $1"
-  printf "An error occured so I will try again in a couple of minutes\n"
-  sleep 120
+  printf "An error occured so I will try again ten minutes\n"
+  sleep 600
   main $1
   return
 elif [ $retry -gt 10 ]

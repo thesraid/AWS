@@ -104,7 +104,13 @@ do
    then
       printf "Error occured creating TrainingVPC in $region\n"
       printf "******************************************************************************************\n"
+      printf "This occurs when AWS does not verify the account quickly. It normally takes a few minutes but could take up to 48 hours."
       printf "Try running this command in a few minutes org-VPC-move.sh -n $newAccName -i $accID"
+      printf "If this doesn't work you can create a user in the account using labCreateAdmin -p <Password> -a $newAccName"
+      printf "Once you've logged in visit https://aws-portal.amazon.com/gp/aws/developer/registration/index.html and choose FREE"
+      printf "Try running this command again org-VPC-move.sh -n $newAccName -i $accID"
+      printf "Still no luck? Try again in a few hours or email aws-verification@amazon.com and ask them to verify the account $accID"
+      printf "Once they've verified it run org-VPC-move.sh -n $newAccName -i $accID"
       printf "******************************************************************************************\n"
       echo " "
       exit 1

@@ -224,7 +224,7 @@ else
    (crontab -l 2>/dev/null; echo "$onMinute $onHour $onDay $onMonth * /usr/bin/env bash /usr/local/bin/labStart -a $accName -p $userPassword -r $region -c $course -s $sensor -t $tag -e $powerOffDate -z $zone | tee -a /var/log/labs/labStart/$onMonth-$onDay-$accName-$course-$tag-labStart.log") | crontab -
 
    done
-   
+  
    exit
 fi
 
@@ -408,8 +408,8 @@ deploy_template () {
    # If we tried 10 times and it's still not answering then we give up
    if [ $cfcntr -gt 10 ]
    then
-     printf "\nCloudFormation Service not available\n"
-     sendEmail.py -r USM-Anywhere-Training@alienvault.com -s "$profile-$stackName Failed to Start" -b "Do not reply to this e-mail<br/>The labStart script tried to start $profile-$stackName and failed.<br/>The CloudFormation Service was not accessible.<br/>Manual intervention is required"t
+     printf "\nCloudFormation Service not available\n" | tee error-$profile-$stackName.txt /var/log/labs/error/error-$profile-$stackName.log
+     sendEmail.py -r USM-Anywhere-Training@alienvault.com -s "$profile-$stackName Failed to Start" -b "Do not reply to this e-mail<br/>The labStart script tried to start $profile-$stackName and failed.<br/>The CloudFormation Service was not accessible.<br/>Manual intervention is required"
      exit 1
    fi
 
@@ -420,7 +420,7 @@ deploy_template () {
    aws cloudformation create-stack --stack-name $stackName --template-url $url --parameters $parameter --capabilities CAPABILITY_NAMED_IAM --profile $profile > /dev/null
    if [ $? -ne 0 ]
    then
-     printf "$stackName Stack Failed to Create\n"
+     printf "$stackName Stack Failed to Create\n" | tee error-$profile-$stackName.txt /var/log/labs/error/error-$profile-$stackName.log
      sendEmail.py -r USM-Anywhere-Training@alienvault.com -s "$profile-$stackName Failed to Start" -b "Do not reply to this e-mail<br/>The labStart script tried to start the $profile-$stackName stack and failed.<br/>Manual intervention is required"
      exit 1
    fi
@@ -435,9 +435,9 @@ deploy_template () {
      cfStat=$(aws cloudformation describe-stacks --stack-name $stackName --profile $profile --query 'Stacks[0].[StackStatus]' --output text)
      if [ "$cfStat" = "CREATE_FAILED" ] || [ "$cfStat" = "ROLLBACK_COMPLETE" ]
      then
-       printf "\n$stackName Stack failed to start\n"
-       printf "ERROR : $cfStat\n"
-       aws cloudformation describe-stacks --stack-name $stackName --profile $profile
+       printf "\n$stackName Stack failed to start\n" | tee error-$profile-$stackName.txt /var/log/labs/error/error-$profile-$stackName.log
+       printf "ERROR : $cfStat\n" | tee error-$profile-$stackName.txt /var/log/labs/error/error-$profile-$stackName.log
+       aws cloudformation describe-stacks --stack-name $stackName --profile $profile | tee error-$profile-$stackName.txt /var/log/labs/error/error-$profile-$stackName.log
        aws cloudformation describe-stack-events --no-paginate --stack-name $stackName --profile $profile | tee error-$profile-$stackName.txt /var/log/labs/error/error-$profile-$stackName.log
        printf "\n\n*** View error-$profile-$stackName.log for more detailed error information ***\n"
        printf "*** *** ***            Error file is read from the bottom up       *** *** ***\n"
@@ -453,7 +453,7 @@ deploy_template () {
 # Choose the appropriate CloudFormation json
 if [ "$course" = "ANYDC" ]
 then
-  url="https://s3-eu-west-1.amazonaws.com/deploy-student-env/ANYDC_new.json"
+  url="https://s3-eu-west-1.amazonaws.com/deploy-student-env/ANYDCNew.json"
   
   # Set the paratmer variables that need to be sent this cloud formation template
 
@@ -484,7 +484,7 @@ then
   vpcid=$(aws ec2 describe-vpcs --filters Name=isDefault,Values=false --query Vpcs[*].VpcId --output=text --profile $profile)
 
   # Build the parameter variable for the course
-  parameter="ParameterKey=TrainingVPC,ParameterValue=$vpcid ParameterKey=HTML5Password,ParameterValue=$userPassword"
+  parameter="ParameterKey=TrainingVPC,ParameterValue=$vpcid ParameterKey=userPassword,ParameterValue=$userPassword ParameterKey=account,ParameterValue=$accName"
   
   deploy_template "$course-$tag" $url "$parameter"
 
@@ -504,7 +504,7 @@ then
   aws ec2 create-key-pair --key-name Sensor --profile $profile > /dev/null 2>&1
   if [ $? -ne 0 ]
   then
-    printf "Failed to create SSH Key\n"
+    printf "Failed to create SSH Key\n" | tee error-$profile-$stackName.txt /var/log/labs/error/error-$profile-$stackName.log
     sendEmail.py -r USM-Anywhere-Training@alienvault.com -s "$profile Failed to Start" -b "Do not reply to this e-mail<br/>The labStart script tried to start $profilee and failed.<br/>The SSH key for the sensor could not be created<br/>Manual intervention is required<br/>"
   exit 1
   fi
@@ -517,7 +517,7 @@ then
 
   if [ "$subnetid" = "" ]
   then
-     printf "Error: No subnet found. Did you deploy a course lab? Exiting...... Account cleanup required\n"
+     printf "Error: No subnet found. Did you deploy a course lab? Exiting...... Account cleanup required\n" | tee error-$profile-$stackName.txt /var/log/labs/error/error-$profile-$stackName.log
      sendEmail.py -r USM-Anywhere-Training@alienvault.com -s "$profile Failed to Start" -b "Do not reply to this e-mail<br/>The labStart script tried to start $profile and failed.<br/>No valid subnet was found. The CloudFormation Templates should create the subnet. Was a valid CloudFormation Template used?</br>Manual intervention is required<br/>"
      exit 1
   fi
@@ -532,7 +532,7 @@ then
   aws ec2 authorize-security-group-ingress --group-id $sgid --cidr 192.168.250.0/24 --protocol all --profile $profile
   if [ $? -ne 0 ]
   then
-    printf "Failed to add rule to Security Group to allow local inbound traffic to Sensor\n"
+    printf "Failed to add rule to Security Group to allow local inbound traffic to Sensor\n" | tee error-$profile-$stackName.txt /var/log/labs/error/error-$profile-$stackName.log
     sendEmail.py -r USM-Anywhere-Training@alienvault.com -s "$profile Failed to Start" -b "Do not reply to this e-mail<br/>The labStart script tried to start $profile and failed.<br/>Unable to add inbound sensor security group to account<br/>Manual intervention is required"
   exit 1
   fi

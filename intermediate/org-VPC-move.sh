@@ -32,7 +32,6 @@ profile=$newAccName
 
 # We can't list the regions from this account as it's not created yet. So we will list them from cliaccount
 regions=($(aws ec2 describe-regions --query Regions[*].RegionName --output text --profile cliaccount))
-   
 
 printf "Creating the TrainingVPC in all regions while deleting the other VPCs\n"
 
