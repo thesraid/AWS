@@ -1,0 +1,10 @@
+-------------------------------------------------------------------
+RDPscriptUpdate
+Thu Jan 10 12:06:22 GMT 2019
+Students can now log into the 247629012762 account with the information below
+URL  : https://console.aws.amazon.com/console/home?region=us-east-1
+ACCID: 247629012762
+ACC  : cliaccount
+USER : cliaccount
+PASS : Password1!
+HTML5	100.25.130.147

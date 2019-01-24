@@ -8,22 +8,13 @@
 			"Description" : "VPC ID of TrainingVPC",
 			"Type": "String",
 			"ConstraintDescription" : "vpc id"
-		},
-		"userPassword": {
-            "Description" : "Password for User",
-            "Type": "String",
-            "ConstraintDescription" : "user password"
-		},
-		"account": {
-            "Description" : "Account Name",
-            "Type": "String",
-            "ConstraintDescription" : "account"
 		}
 	},
+
 	"Mappings": {
 		"Linux1RegionMap": {
 			"us-east-1": {
-				"AMI": "ami-053e42115dfe44911"
+				"AMI": "ami-a56c4eda"
 			},
 			"eu-west-1": {
 				"AMI": "ami-ec143995"
@@ -31,7 +22,7 @@
 		},
         	"Linux2RegionMap": {
             		"us-east-1": {
-                		"AMI": "ami-05301508f8bc1fd2b"
+                		"AMI": "ami-aa6d4fd5"
             		},
             		"eu-west-1": {
                 		"AMI": "ami-8b1a37f2"
@@ -39,7 +30,7 @@
         	},
         	"WindowsRegionMap": {
             		"us-east-1": {
-                		"AMI": "ami-0e75c1b55751c6678"
+                		"AMI": "ami-ad6d4fd2"
             		},
             		"eu-west-1": {
 				"AMI": "ami-ad1a35d4"
@@ -47,7 +38,7 @@
         	},
                 "HTML5RegionMap": {
                         "us-east-1": {
-                                "AMI": "ami-0d44e46e86c8a18ed"
+                                "AMI": "ami-853614fa"
                         },
                         "eu-west-1": {
                                 "AMI": "ami-12345678"
@@ -56,203 +47,6 @@
 	},
 
 	"Resources" : {
-		"studentGroup" : {
-			"Type" : "AWS::IAM::Group",
-			"Properties" : {
-				"Path" : "/",
-				"Policies" : [ {
-					"PolicyName" : "StudentPolicy",
-					"PolicyDocument" : {
-						"Version": "2012-10-17",
-						"Statement": [ {
-							"Sid": "CloudFormation",
-							"Effect": "Allow",
-							"Action": [
-								"cloudformation:ListExports",
-								"cloudformation:DescribeStackResource",
-								"cloudformation:DescribeStackEvents",
-								"cloudformation:DescribeChangeSet",
-								"cloudformation:ListStackResources",
-								"cloudformation:DescribeStackResources",
-								"cloudformation:DescribeStacks",
-								"cloudformation:GetStackPolicy",
-								"cloudformation:GetTemplate",
-								"cloudformation:DeleteStack",
-								"cloudformation:EstimateTemplateCost",
-								"cloudformation:DescribeAccountLimits",
-								"cloudformation:ListStacks",
-								"cloudformation:ListImports",
-								"cloudformation:GetTemplateSummary",
-								"cloudformation:CreateStack",
-								"cloudformation:PreviewStackUpdate",
-								"cloudformation:ListChangeSets",
-								"cloudwatch:Describe*",
-								"cloudwatch:GetMetricStatistics",
-								"cloudwatch:ListMetrics"
-							],
-							"Resource": "*"
-						},
-						{	
-							"Sid": "EC2",
-							"Effect": "Allow",
-							"Action": [
-								"ec2:AuthorizeSecurityGroupIngress",
-								"ec2:CreateKeyPair",
-								"ec2:TerminateInstances",
-								"ec2:DeleteVolume",
-								"ec2:DetachVolume",
-								"ec2:ModifyVolumeAttribute",
-								"ec2:ImportKeyPair",
-								"ec2:CreateTags",
-								"ec2:CreateVolume",
-								"ec2:AttachVolume",
-								"ec2:RunInstances",
-								"ec2:RevokeSecurityGroupIngress",
-								"ec2:DeleteKeyPair",
-								"ec2:CreateSecurityGroup",
-								"ec2:Describe*",
-								"ec2:AssociateIamInstanceProfile",
-								"ec2:DeleteSecurityGroup",
-								"ec2:ReplaceIamInstanceProfileAssociation",
-								"ec2:DeleteFlowLogs",
-								"ec2:CreateFlowLogs",
-								"ec2:DescribeFlowLogs",
-								"ec2:RebootInstances"
-							],
-							"Resource": "*"
-						},
-						{
-							"Effect": "Allow",
-							"Action": [
-								"s3:CreateBucket",
-								"s3:Delete*",
-								"s3:Get*",
-								"s3:List*",
-								"s3:PutBucketPolicy",
-								"cloudtrail:*",
-								"logs:CreateLogGroup",
-								"logs:DeleteLogGroup",
-								"iam:GetRolePolicy",
-								"iam:GetUser",
-								"kms:ListKeys",
-								"kms:ListAliases"
-							],
-							"Resource": "*"
-						},
-						{
-							"Sid": "OtherPermissions",
-							"Effect": "Allow",
-							"Action": [
-								"autoscaling:Describe*",
-								"elasticloadbalancing:Describe*",
-								"events:ListRuleNamesByTarget",
-								"events:ListRules",
-								"events:ListTargetsByRule",
-								"events:DescribeRule",
-								"events:TestEventPattern",
-								"iam:RemoveRoleFromInstanceProfile",
-								"iam:CreateRole",
-								"iam:GetRole",
-								"iam:PutRolePolicy",
-								"iam:AddRoleToInstanceProfile",
-								"iam:DeleteRole",
-								"iam:CreateInstanceProfile",
-								"iam:PassRole",
-								"iam:DeleteRolePolicy",
-								"iam:DeleteInstanceProfile",
-								"iam:ListRoles",
-								"iam:CreatePolicy",
-								"iam:ListPolicies",
-								"iam:GetPolicyVersion",
-								"iam:AttachRolePolicy",
-								"iam:ListRolePolicies",
-								"iam:ListAttachedRolePolicies",
-								"iam:ListInstanceProfiles",
-								"iam:UpdateAssumeRolePolicy",
-								"logs:Describe*",
-								"logs:Get*",
-								"logs:FilterLogEvents",
-								"logs:CreateLogGroup",
-								"logs:CreateLogStream",
-								"logs:PutLogEvents",
-								"sns:ListTopics"
-							],
-							"Resource": "*"
-						},
-						{
-							"Sid": "AllowedInstances",
-							"Effect": "Deny",
-							"Action": "ec2:RunInstances",
-							"Resource": "arn:aws:ec2:*:*:instance/*",
-							"Condition": {
-								"StringNotEquals": {
-									"ec2:InstanceType": [
-										"t2.micro",
-										"t2.medium",
-										"t2.large"
-									]
-								}
-							}
-						},
-						{
-							"Sid": "BlockExpensiveDisks",
-							"Effect": "Deny",
-							"Action": "ec2:CreateVolume",
-							"Resource": "*",
-							"Condition": {
-								"ForAnyValue:StringEqualsIgnoreCase": {
-									"ec2:VolumeType": "io1"
-								}
-							}
-						}
-						]
-					}
-				} ]
-			}
-		},
-		"studentUser" : {
-   			"Type" : "AWS::IAM::User",
-   			"Properties" : {
-      			"Path" : "/",
-      			"LoginProfile" : {
-					"Password" : { "Ref" : "userPassword" }
-      			},
-			"UserName" : { "Ref" : "account" }
-   			}
-		},
-		"addUserToGroup" : {
-   			"Type" : "AWS::IAM::UserToGroupAddition",
-   			"Properties" : {
-      			"GroupName" : { "Ref" : "studentGroup" },
-      			"Users" : [ { "Ref" : "studentUser" } ]
-   			}
-		},
-		"CloudWatchLogsRole": {
-			"Type": "AWS::IAM::Role",
-			"Properties": {
-				"AssumeRolePolicyDocument": {
-					"Version" : "2012-10-17",
-					"Statement": [ {
-						"Effect": "Allow",
-						"Principal": {
-							"Service": [ "ec2.amazonaws.com" ]
-						},
-						"Action": [ "sts:AssumeRole" ]
-					} ]
-				},
-				"Path": "/",
-				"ManagedPolicyArns":  ["arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy"]
-            }
-		},
-		"CloudWatchProfile": {
-			"Type": "AWS::IAM::InstanceProfile",
-			"Properties": {
-				"Path": "/",
-				"Roles": [ {
-					"Ref": "CloudWatchLogsRole"
-				} ]
-			}
-		},
 		"TrainingSubnet" : {
 			"Type" : "AWS::EC2::Subnet",
 			"Properties" : {
@@ -324,18 +118,16 @@
 					]
 				},
 				"InstanceType": "t2.micro",
-				"IamInstanceProfile" :  {"Ref" : "CloudWatchProfile"},
 				"SecurityGroupIds" : [ {"Ref" : "LinuxSecurityGroup"} ],
 				"SubnetId": { "Ref" : "TrainingSubnet" },
-				"Tags" : [{"Key" : "Name", "Value" : "linux1"}],
+				"Tags" : [{"Key" : "Name", "Value" : "Linux1"}],
 				"PrivateIpAddress" : "192.168.250.30",
 				"UserData"       : { "Fn::Base64" : { "Fn::Join" : ["", [
              				"#!/bin/bash -xe\n",
              				"echo linux1 > /etc/hostname\n",
              				"echo nameserver 192.168.250.14 > /etc/resolv.conf\n",
              				"echo search training.lab >> /etc/resolv.conf\n",
-					"hostname -F /etc/hostname\n",
-					"reboot\n"
+					"hostname -F /etc/hostname\n"
 					]]}}			
 			}
 		},
@@ -353,15 +145,14 @@
 		"InstanceType": "t2.micro",
 				"SecurityGroupIds" : [ {"Ref" : "LinuxSecurityGroup"} ],
 				"SubnetId": { "Ref" : "TrainingSubnet" },
-				"Tags" : [{"Key" : "Name", "Value" : "linux2"}],
+				"Tags" : [{"Key" : "Name", "Value" : "Linux2"}],
 				"PrivateIpAddress" : "192.168.250.31",
                                 "UserData"       : { "Fn::Base64" : { "Fn::Join" : ["", [
                                         "#!/bin/bash -xe\n",
                                         "echo linux2 > /etc/hostname\n",
                                         "echo nameserver 192.168.250.14 > /etc/resolv.conf\n",
                                         "echo search training.lab >> /etc/resolv.conf\n",
-                                        "hostname -F /etc/hostname\n",
-					"reboot\n"
+                                        "hostname -F /etc/hostname\n"
                                         ]]}}
 			}
 		},
@@ -386,10 +177,7 @@
                                         "echo html5 > /etc/hostname\n",
                                         "echo nameserver 192.168.250.14 > /etc/resolv.conf\n",
                                         "echo search training.lab >> /etc/resolv.conf\n",
-                                        "hostname -F /etc/hostname\n",
-					"sed -i '0,/Password1!/s//",
-					{ "Ref" : "userPassword" },
-					"/' /etc/guacamole/user-mapping.xml\n"
+                                        "hostname -F /etc/hostname\n"
                                         ]]}}
                         }
                 },
@@ -408,13 +196,12 @@
 				"SecurityGroupIds" : [ {"Ref" : "WindowsSecurityGroup"} ],
 				"SubnetId": { "Ref" : "TrainingSubnet" },
 				"PrivateIpAddress" : "192.168.250.14",
-				"Tags" : [{"Key" : "Name", "Value" : "windows"}]
+				"Tags" : [{"Key" : "Name", "Value" : "Windows"}]
 			}
 		},
 		"LinuxSecurityGroup" : {
 			"Type" : "AWS::EC2::SecurityGroup",
 			"Properties" : {
-                                "GroupName" : "ANYDC-LinuxSecurityGroup",
 				"GroupDescription" : "Enable SSH access via port 22 to the Linux Instance",
 				"VpcId" : { "Ref" : "TrainingVPC" },
 				"SecurityGroupIngress" : [{"IpProtocol" : "tcp", "FromPort" : "22", "ToPort" : "22", "CidrIp" : "0.0.0.0/0"}]
@@ -423,7 +210,6 @@
                 "HTML5SecurityGroup" : {
                         "Type" : "AWS::EC2::SecurityGroup",
                         "Properties" : {
-                                "GroupName" : "ANYDC-HTML5SecurityGroup",
                                 "GroupDescription" : "Enable HTML5 access via port 80",
                                 "VpcId" : { "Ref" : "TrainingVPC" },
                                 "SecurityGroupIngress" : [{"IpProtocol" : "tcp", "FromPort" : "80", "ToPort" : "80", "CidrIp" : "0.0.0.0/0"},{"IpProtocol" : "tcp", "FromPort" : "22", "ToPort" : "22", "CidrIp" : "0.0.0.0/0"}]
@@ -432,26 +218,31 @@
 		"WindowsSecurityGroup" : {
 			"Type" : "AWS::EC2::SecurityGroup",
 			"Properties" : {
-                                "GroupName" : "ANYDC-WindowsSecurityGroup",
-				"GroupDescription" : "Enable RDP access via port 3389 to the Windows Instance and DNS and WinRM internally",
+				"GroupDescription" : "Enable RDP access via port 3389 to the Windows Instance",
 				"VpcId" : { "Ref" : "TrainingVPC" },
-				"SecurityGroupIngress" : [{"IpProtocol" : "tcp", "FromPort" : "3389", "ToPort" : "3389", "CidrIp" : "0.0.0.0/0"},{"IpProtocol" : "tcp", "FromPort" : "53", "ToPort" : "53", "CidrIp": "192.168.250.0/24"},{"IpProtocol" : "udp", "FromPort" : "53", "ToPort" : "53", "CidrIp": "192.168.250.0/24"}, {"IpProtocol" : "tcp", "FromPort" : "5985", "ToPort" : "5985", "CidrIp": "192.168.250.0/24"}]
-			}
-		},
-		"CloudLogStack" : {
-			"Type": "AWS::CloudFormation::Stack",
-			"Properties": {
-				"Parameters" : {
-					"TrainingVPC" : { "Ref" : "TrainingVPC" }
-				},
-			"TemplateURL": "https://s3-eu-west-1.amazonaws.com/deploy-student-env/cloudLogs.json"
+				"SecurityGroupIngress" : [{"IpProtocol" : "tcp", "FromPort" : "3389", "ToPort" : "3389", "CidrIp" : "0.0.0.0/0"},{"IpProtocol" : "tcp", "FromPort" : "53", "ToPort" : "53", "CidrIp": "192.168.250.0/24"},{"IpProtocol" : "udp", "FromPort" : "53", "ToPort" : "53", "CidrIp": "192.168.250.0/24"}]
 			}
 		}
 	},
 	"Outputs" : {
+		"Linux1" : {
+			"Description" : "Linux1",
+			"Value" : { "Fn::Join" : ["", [{ "Fn::GetAtt" : [ "Linux1Instance", "PublicIp" ]}]] }
+		},
+		"Linux2" : {
+			"Description" : "Linux2",
+			"Value" : { "Fn::Join" : ["", [{ "Fn::GetAtt" : [ "Linux2Instance", "PublicIp" ]}]] }
+		},
+		"Windows" : {
+			"Description" : "Windows",
+			"Value" : { "Fn::Join" : ["", [{ "Fn::GetAtt" : [ "WindowsInstance", "PublicIp" ]}]] }
+		},
 		"HTML5" : {
+                        "Description" : "HTML5",
                         "Value" : { "Fn::Join" : ["", [{ "Fn::GetAtt" : [ "HTML5Instance", "PublicIp" ]}]] }
                 }
 
-	}	
+	}
+	
 }
+

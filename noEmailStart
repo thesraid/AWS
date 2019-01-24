@@ -300,7 +300,7 @@ expiry=$(aws sts assume-role --role-arn arn:aws:iam::$accID:role/$role --query '
 if [ $? -ne 0 ]
 then
   printf "Error occured connecting to the account\n"
-  sendEmail.py -r USM-Anywhere-Training@alienvault.com -s "$profile Failed to Start" -b "Do not reply to this e-mail<br/>The labStart script tried to start $profile and failed.<br/>The AWS Account $profile was not accessible.<br/>Manual intervention is required"
+  #sendEmail.py -r USM-Anywhere-Training@alienvault.com -s "$profile Failed to Start" -b "Do not reply to this e-mail<br/>The labStart script tried to start $profile and failed.<br/>The AWS Account $profile was not accessible.<br/>Manual intervention is required"
   exit 1
 fi
 
@@ -311,7 +311,7 @@ aws configure set region $region --profile $profile
 if [ $? -ne 0 ]
 then
   printf "Error occured connecting to the account\n"
-  sendEmail.py -r USM-Anywhere-Training@alienvault.com -s "$profile User not created" -b "Do not reply to this e-mail<br/>The labStart script tried to start $profile and failed.<br/>The AWS Account $profile was not accessible.<br/>Manual intervention is required"
+  #sendEmail.py -r USM-Anywhere-Training@alienvault.com -s "$profile User not created" -b "Do not reply to this e-mail<br/>The labStart script tried to start $profile and failed.<br/>The AWS Account $profile was not accessible.<br/>Manual intervention is required"
   exit 1
 fi
 
@@ -320,7 +320,7 @@ aws configure set role_arn arn:aws:iam::$accID:role/$role --profile $profile
 if [ $? -ne 0 ]
 then
   printf "Error occured connecting to the account\n"
-  sendEmail.py -r USM-Anywhere-Training@alienvault.com -s "$profile User not created" -b "Do not reply to this e-mail<br/>The labStart script tried to start $profile and failed.<br/>The AWS Account $profile was not accessible.<br/>Manual intervention is required"
+  #sendEmail.py -r USM-Anywhere-Training@alienvault.com -s "$profile User not created" -b "Do not reply to this e-mail<br/>The labStart script tried to start $profile and failed.<br/>The AWS Account $profile was not accessible.<br/>Manual intervention is required"
   exit 1
 fi
 
@@ -329,7 +329,7 @@ aws configure set source_profile default --profile $profile
 if [ $? -ne 0 ]
 then
   printf "Error occured connecting to the account\n"
-  sendEmail.py -r USM-Anywhere-Training@alienvault.com -s "$profile User not created" -b "Do not reply to this e-mail<br/>The labStart script tried to start $profile and failed.<br/>The AWS Account $profile was not accessible.<br/>Manual intervention is required"
+  #sendEmail.py -r USM-Anywhere-Training@alienvault.com -s "$profile User not created" -b "Do not reply to this e-mail<br/>The labStart script tried to start $profile and failed.<br/>The AWS Account $profile was not accessible.<br/>Manual intervention is required"
   exit 1
 fi
 
@@ -409,7 +409,7 @@ deploy_template () {
    if [ $cfcntr -gt 10 ]
    then
      printf "\nCloudFormation Service not available\n" | tee error-$profile-$stackName.txt /var/log/labs/error/error-$profile-$stackName.log
-     sendEmail.py -r USM-Anywhere-Training@alienvault.com -s "$profile-$stackName Failed to Start" -b "Do not reply to this e-mail<br/>The labStart script tried to start $profile-$stackName and failed.<br/>The CloudFormation Service was not accessible.<br/>Manual intervention is required"
+     #sendEmail.py -r USM-Anywhere-Training@alienvault.com -s "$profile-$stackName Failed to Start" -b "Do not reply to this e-mail<br/>The labStart script tried to start $profile-$stackName and failed.<br/>The CloudFormation Service was not accessible.<br/>Manual intervention is required"
      exit 1
    fi
 
@@ -421,7 +421,7 @@ deploy_template () {
    if [ $? -ne 0 ]
    then
      printf "$stackName Stack Failed to Create\n" | tee error-$profile-$stackName.txt /var/log/labs/error/error-$profile-$stackName.log
-     sendEmail.py -r USM-Anywhere-Training@alienvault.com -s "$profile-$stackName Failed to Start" -b "Do not reply to this e-mail<br/>The labStart script tried to start the $profile-$stackName stack and failed.<br/>Manual intervention is required"
+     #sendEmail.py -r USM-Anywhere-Training@alienvault.com -s "$profile-$stackName Failed to Start" -b "Do not reply to this e-mail<br/>The labStart script tried to start the $profile-$stackName stack and failed.<br/>Manual intervention is required"
      exit 1
    fi
 
@@ -441,7 +441,7 @@ deploy_template () {
        aws cloudformation describe-stack-events --no-paginate --stack-name $stackName --profile $profile | tee error-$profile-$stackName.txt /var/log/labs/error/error-$profile-$stackName.log
        printf "\n\n*** View error-$profile-$stackName.log for more detailed error information ***\n"
        printf "*** *** ***            Error file is read from the bottom up       *** *** ***\n"
-       sendEmail.py -r USM-Anywhere-Training@alienvault.com -s "$profile-$stackName Failed to Start" -b "Do not reply to this e-mail<br/>The labStart script tried to start $profile-$stackName and failed.<br/>Manual intervention is required<br/>See attachment" -a /var/log/labs/error/error-$profile-$stackName.log
+       #sendEmail.py -r USM-Anywhere-Training@alienvault.com -s "$profile-$stackName Failed to Start" -b "Do not reply to this e-mail<br/>The labStart script tried to start $profile-$stackName and failed.<br/>Manual intervention is required<br/>See attachment" -a /var/log/labs/error/error-$profile-$stackName.log
        exit 1
      fi
    done
@@ -505,7 +505,7 @@ then
   if [ $? -ne 0 ]
   then
     printf "Failed to create SSH Key\n" | tee error-$profile-$stackName.txt /var/log/labs/error/error-$profile-$stackName.log
-    sendEmail.py -r USM-Anywhere-Training@alienvault.com -s "$profile Failed to Start" -b "Do not reply to this e-mail<br/>The labStart script tried to start $profilee and failed.<br/>The SSH key for the sensor could not be created<br/>Manual intervention is required<br/>"
+    #sendEmail.py -r USM-Anywhere-Training@alienvault.com -s "$profile Failed to Start" -b "Do not reply to this e-mail<br/>The labStart script tried to start $profilee and failed.<br/>The SSH key for the sensor could not be created<br/>Manual intervention is required<br/>"
   exit 1
   fi
 
@@ -518,7 +518,7 @@ then
   if [ "$subnetid" = "" ]
   then
      printf "Error: No subnet found. Did you deploy a course lab? Exiting...... Account cleanup required\n" | tee error-$profile-$stackName.txt /var/log/labs/error/error-$profile-$stackName.log
-     sendEmail.py -r USM-Anywhere-Training@alienvault.com -s "$profile Failed to Start" -b "Do not reply to this e-mail<br/>The labStart script tried to start $profile and failed.<br/>No valid subnet was found. The CloudFormation Templates should create the subnet. Was a valid CloudFormation Template used?</br>Manual intervention is required<br/>"
+     #sendEmail.py -r USM-Anywhere-Training@alienvault.com -s "$profile Failed to Start" -b "Do not reply to this e-mail<br/>The labStart script tried to start $profile and failed.<br/>No valid subnet was found. The CloudFormation Templates should create the subnet. Was a valid CloudFormation Template used?</br>Manual intervention is required<br/>"
      exit 1
   fi
 
@@ -533,7 +533,7 @@ then
   if [ $? -ne 0 ]
   then
     printf "Failed to add rule to Security Group to allow local inbound traffic to Sensor\n" | tee error-$profile-$stackName.txt /var/log/labs/error/error-$profile-$stackName.log
-    sendEmail.py -r USM-Anywhere-Training@alienvault.com -s "$profile Failed to Start" -b "Do not reply to this e-mail<br/>The labStart script tried to start $profile and failed.<br/>Unable to add inbound sensor security group to account<br/>Manual intervention is required"
+    #sendEmail.py -r USM-Anywhere-Training@alienvault.com -s "$profile Failed to Start" -b "Do not reply to this e-mail<br/>The labStart script tried to start $profile and failed.<br/>Unable to add inbound sensor security group to account<br/>Manual intervention is required"
   exit 1
   fi
 
@@ -597,7 +597,7 @@ printf "Added cronjob to power off lab on the $day of $month \nOutcome will be l
 #if [ $? -ne 0 ]
 #then
 #  printf "Error occured creating a user\n"
-#  sendEmail.py -r USM-Anywhere-Training@alienvault.com -s "$profile User not created" -b "Do not reply to this e-mail<br/>The labStart script tried to start $profile and failed to create a Student User.<br/>Instances are still running and being charged.<br/>Manual intervention is required"
+#  #sendEmail.py -r USM-Anywhere-Training@alienvault.com -s "$profile User not created" -b "Do not reply to this e-mail<br/>The labStart script tried to start $profile and failed to create a Student User.<br/>Instances are still running and being charged.<br/>Manual intervention is required"
 #  exit 1
 #fi
 
@@ -606,7 +606,7 @@ printf "Added cronjob to power off lab on the $day of $month \nOutcome will be l
 #if [ $? -ne 0 ]
 #then
 #  printf "Error occured creating a group\n"
-#  sendEmail.py -r USM-Anywhere-Training@alienvault.com -s "$profile User not created" -b "Do not reply to this e-mail<br/>The labStart script tried to start $profile and failed to create a Student User.<br/>Instances are still running and being charged.<br/>Manual intervention is required"
+#  #sendEmail.py -r USM-Anywhere-Training@alienvault.com -s "$profile User not created" -b "Do not reply to this e-mail<br/>The labStart script tried to start $profile and failed to create a Student User.<br/>Instances are still running and being charged.<br/>Manual intervention is required"
 #  exit 1
 #fi
 
@@ -615,7 +615,7 @@ printf "Added cronjob to power off lab on the $day of $month \nOutcome will be l
 #if [ $? -ne 0 ]
 #then
 #  printf "Error occured adding the user to the group\n"
-#  sendEmail.py -r USM-Anywhere-Training@alienvault.com -s "$profile User not created" -b "Do not reply to this e-mail<br/>The labStart script tried to start $profile and failed to create a Student User.<br/>Instances are still running and being charged.<br/>Manual intervention is required"
+#  #sendEmail.py -r USM-Anywhere-Training@alienvault.com -s "$profile User not created" -b "Do not reply to this e-mail<br/>The labStart script tried to start $profile and failed to create a Student User.<br/>Instances are still running and being charged.<br/>Manual intervention is required"
 #  exit 1
 #fi
 
@@ -625,7 +625,7 @@ printf "Added cronjob to power off lab on the $day of $month \nOutcome will be l
 #if [ $? -ne 0 ]
 #then
 #  printf "Error occured assigning the policy to the user\n"
-#  sendEmail.py -r USM-Anywhere-Training@alienvault.com -s "$profile User not created" -b "Do not reply to this e-mail<br/>The labStart script tried to start $profile and failed to create a Student User.<br/>Instances are still running and being charged.<br/>Manual intervention is required"
+#  #sendEmail.py -r USM-Anywhere-Training@alienvault.com -s "$profile User not created" -b "Do not reply to this e-mail<br/>The labStart script tried to start $profile and failed to create a Student User.<br/>Instances are still running and being charged.<br/>Manual intervention is required"
 #  exit 1
 #fi
 
@@ -634,7 +634,7 @@ printf "Added cronjob to power off lab on the $day of $month \nOutcome will be l
 #if [ $? -ne 0 ]
 #then
 #  printf "Error occured setting the users login and password\n"
-#  sendEmail.py -r USM-Anywhere-Training@alienvault.com -s "$profile User not created" -b "Do not reply to this e-mail<br/>The labStart script tried to start $profile and failed to create a Student User.<br/>Instances are still running and being charged.<br/>Manual intervention is required"
+#  #sendEmail.py -r USM-Anywhere-Training@alienvault.com -s "$profile User not created" -b "Do not reply to this e-mail<br/>The labStart script tried to start $profile and failed to create a Student User.<br/>Instances are still running and being charged.<br/>Manual intervention is required"
 #  exit 1
 #fi
 

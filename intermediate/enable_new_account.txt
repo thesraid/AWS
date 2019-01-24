@@ -1,0 +1,4 @@
+If any account that is active but the services are not active, please just log into the account individually and add the services using this link:
+https://aws-portal.amazon.com/gp/aws/developer/registration/index.html
+
+

@@ -1,0 +1,12 @@
+-------------------------------------------------------------------
+accountUnblockedTest
+Tue Jan 22 11:57:56 GMT 2019
+Students can now log into the 481317665369 account with the information below
+URL  : https://console.aws.amazon.com/console/home?region=us-east-1
+ACCID: 481317665369
+ACC  : avstudent200
+USER : avstudent200
+PASS : Password1!
+HTML5	54.164.206.0
+Sensor Internal: 192.168.250.114
+Sensor External: 18.212.141.206
