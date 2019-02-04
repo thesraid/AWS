@@ -417,7 +417,7 @@ deploy_template () {
    printf "\nCreating $stackName Stack Under New Account\n"
 
    # Create the stack and pass the VPC id and URL from above.
-   aws cloudformation create-stack --stack-name $stackName --template-url $url --parameters $parameter --capabilities CAPABILITY_NAMED_IAM --profile $profile > /dev/null
+   aws cloudformation create-stack --stack-name $stackName --template-url $url --parameters $parameter --capabilities CAPABILITY_NAMED_IAM --no-enable-termination-protection --profile $profile > /dev/null
    if [ $? -ne 0 ]
    then
      printf "$stackName Stack Failed to Create\n" | tee error-$profile-$stackName.txt /var/log/labs/error/error-$profile-$stackName.log
@@ -522,7 +522,7 @@ then
      exit 1
   fi
 
-  parameter="ParameterKey=VpcId,ParameterValue=$vpcid ParameterKey=KeyName,ParameterValue=Sensor ParameterKey=SubnetId,ParameterValue=$subnetid ParameterKey=NodeName,ParameterValue=Sensor"
+  parameter="ParameterKey=VpcId,ParameterValue=$vpcid ParameterKey=KeyName,ParameterValue=Sensor ParameterKey=SubnetId,ParameterValue=$subnetid ParameterKey=NodeName,ParameterValue=Sensor ParameterKey=APITermination,ParameterValue=false"
 
   # The parameter variable has to be in quotes as it contains spaces. If the quotes aren't there it get's parsed up to the first space only
   deploy_template Sensor $url "$parameter"
