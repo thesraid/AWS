@@ -231,9 +231,6 @@ fi
 for accName in "${accNameArray[@]}"
 do
 
-echo "Warming up."
-sleep $[ ( $RANDOM % 59 )  + 1 ]s
-
 # Username and Group Name will match the sub Org name
 #userName=$accName
 #groupName=$accName
@@ -463,7 +460,7 @@ fi
 
 if [ "$course" = "ANYSA" ]
 then
-  url="https://s3-eu-west-1.amazonaws.com/deploy-student-env/ANYSA.json"
+  url="https://s3-eu-west-1.amazonaws.com/deploy-student-env/ANYSA2.json"
 
   # Set the paratmer variables that need to be sent this cloud formation template
 

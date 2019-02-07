@@ -169,7 +169,11 @@ do
    INSTANCES_STRING=""
    for i in "${INSTANCES[@]}"
    do
+      #Add each instance to a string so that we can terminate each of them in one command below
       INSTANCES_STRING+=" $i"
+
+      # However termination protection will have to be turned off for each instance one by one first
+      aws ec2 modify-instance-attribute --no-disable-api-termination --instance-id $i --profile $profile
    done
    
    if [ -n "$INSTANCES_STRING" ]
