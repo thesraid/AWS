@@ -262,13 +262,6 @@
 				"Tags" : [ {"Key" : "Name", "Value" : "TrainingSubnet"} ]
 			}
 		},
-		"TrainingDHCPOptions" : {
-			"Type" : "AWS::EC2::DHCPOptions",
-			"Properties" : {
-				"DomainName" : "training.lab",
-				"DomainNameServers" : [ "192.168.250.14" ]
-			}
-		},
 		"TrainingGateway" : {
 			"Type" : "AWS::EC2::InternetGateway",
 			"Properties" : {
@@ -305,13 +298,6 @@
 				"RouteTableId" : { "Ref" : "RTableTraining" }
 			}
 		},
-		"DHCPOptionsAssociation" : {
-  			"Type" : "AWS::EC2::VPCDHCPOptionsAssociation",
-  			"Properties" : {
-    				"VpcId" : {"Ref" : "TrainingVPC"},
-    				"DhcpOptionsId" : {"Ref" : "TrainingDHCPOptions"}
-  			}
-		},
 		"Linux1Instance": {
 			"Type": "AWS::EC2::Instance",
 			"Properties": {
@@ -332,8 +318,6 @@
 				"UserData"       : { "Fn::Base64" : { "Fn::Join" : ["", [
              				"#!/bin/bash -xe\n",
              				"echo linux1 > /etc/hostname\n",
-             				"echo nameserver 192.168.250.14 > /etc/resolv.conf\n",
-             				"echo search training.lab >> /etc/resolv.conf\n",
 					"hostname -F /etc/hostname\n",
 					"reboot\n"
 					]]}}			
@@ -358,8 +342,6 @@
                                 "UserData"       : { "Fn::Base64" : { "Fn::Join" : ["", [
                                         "#!/bin/bash -xe\n",
                                         "echo linux2 > /etc/hostname\n",
-                                        "echo nameserver 192.168.250.14 > /etc/resolv.conf\n",
-                                        "echo search training.lab >> /etc/resolv.conf\n",
                                         "hostname -F /etc/hostname\n",
 					"reboot\n"
                                         ]]}}
@@ -384,8 +366,6 @@
                                 "UserData"       : { "Fn::Base64" : { "Fn::Join" : ["", [
                                         "#!/bin/bash -xe\n",
                                         "echo html5 > /etc/hostname\n",
-                                        "echo nameserver 192.168.250.14 > /etc/resolv.conf\n",
-                                        "echo search training.lab >> /etc/resolv.conf\n",
                                         "hostname -F /etc/hostname\n",
 					"sed -i '0,/Password1!/s//",
 					{ "Ref" : "userPassword" },

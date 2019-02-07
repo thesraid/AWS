@@ -14,6 +14,8 @@ function usage
 "
 }
 
+echo "This will not work on a Terminus SSH client due to a bug in Terminus"
+
 # Read the input from the command.
 while [ "$1" != "" ]; do
     case $1 in

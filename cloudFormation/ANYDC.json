@@ -23,7 +23,7 @@
 	"Mappings": {
 		"Linux1RegionMap": {
 			"us-east-1": {
-				"AMI": "ami-074bbd47a5e3c76c1"
+				"AMI": "ami-053e42115dfe44911"
 			},
 			"eu-west-1": {
 				"AMI": "ami-ec143995"
@@ -31,7 +31,7 @@
 		},
         	"Linux2RegionMap": {
             		"us-east-1": {
-                		"AMI": "ami-024c086079066929a"
+                		"AMI": "ami-05301508f8bc1fd2b"
             		},
             		"eu-west-1": {
                 		"AMI": "ami-8b1a37f2"
@@ -39,7 +39,7 @@
         	},
         	"WindowsRegionMap": {
             		"us-east-1": {
-                		"AMI": "ami-0b81e083d601b11a3"
+                		"AMI": "ami-0620556e135841d93"
             		},
             		"eu-west-1": {
 				"AMI": "ami-ad1a35d4"
