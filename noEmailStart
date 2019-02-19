@@ -443,7 +443,7 @@ deploy_template () {
 # Choose the appropriate CloudFormation json
 if [ "$course" = "ANYDC" ]
 then
-  url="https://s3-eu-west-1.amazonaws.com/deploy-student-env/ANYDC.json"
+  url="https://s3-eu-west-1.amazonaws.com/deploy-student-env/ANYDC_old.json"
   
   # Set the paratmer variables that need to be sent this cloud formation template
 
