@@ -57,6 +57,7 @@
 				"VpcId" : { "Ref" : "TrainingVPC" },
 				"MapPublicIpOnLaunch" : "true",
 				"CidrBlock" : "192.168.250.0/25",
+				"AvailabilityZone" : "us-east-1a",
 				"Tags" : [ {"Key" : "Name", "Value" : "TrainingSubnet"} ]
 			}
 		},

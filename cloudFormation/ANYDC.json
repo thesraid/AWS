@@ -23,34 +23,22 @@
 	"Mappings": {
 		"Linux1RegionMap": {
 			"us-east-1": {
-				"AMI": "ami-053e42115dfe44911"
-			},
-			"eu-west-1": {
-				"AMI": "ami-ec143995"
+				"AMI": "ami-0d067d9842abf80e3"
 			}
 		},
         	"Linux2RegionMap": {
             		"us-east-1": {
                 		"AMI": "ami-05301508f8bc1fd2b"
-            		},
-            		"eu-west-1": {
-                		"AMI": "ami-8b1a37f2"
             		}
         	},
         	"WindowsRegionMap": {
             		"us-east-1": {
                 		"AMI": "ami-0620556e135841d93"
-            		},
-            		"eu-west-1": {
-				"AMI": "ami-ad1a35d4"
             		}
         	},
                 "HTML5RegionMap": {
                         "us-east-1": {
                                 "AMI": "ami-0c1b9ce4bb5e45959"
-                        },
-                        "eu-west-1": {
-                                "AMI": "ami-12345678"
                         }
                 }
 	},
@@ -260,6 +248,7 @@
 				"VpcId" : { "Ref" : "TrainingVPC" },
 				"MapPublicIpOnLaunch" : "true",
 				"CidrBlock" : "192.168.250.0/25",
+				"AvailabilityZone" : "us-east-1a",
 				"Tags" : [ {"Key" : "Name", "Value" : "TrainingSubnet"} ]
 			}
 		},
