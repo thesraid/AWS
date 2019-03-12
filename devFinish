@@ -48,7 +48,7 @@ accName=$1
 echo "accName is $accName"
 
 # Find the accountID for the entered account.
-accID=$(aws organizations list-accounts-for-parent --parent-id ou-yus6-1nrdvs4m --query 'Accounts[?Name==`'$accName'`].Id' --output text)
+accID=$(aws organizations list-accounts-for-parent --parent-id ou-yus6-erm3u7s2 --query 'Accounts[?Name==`'$accName'`].Id' --output text)
 if [ "$accID" = "" ] 
 then
    printf "Invalid account\n"

@@ -39,11 +39,11 @@ then
   exit
 fi
 
-accID=$(aws organizations list-accounts-for-parent --parent-id ou-yus6-1nrdvs4m --query 'Accounts[?Name==`'$profile'`].Id' --output text)
-echo "ALIAS: $profile"
-echo "ID   : $accID"
+accID=$(aws organizations list-accounts-for-parent --parent-id ou-yus6-erm3u7s2 --query 'Accounts[?Name==`'$profile'`].Id' --output text)
 echo "USER : $userName"
 echo "PASS : $userPassword"
+echo "ACC  : $profile"
+echo "ID   : $accID"
 
 
 printf "Creating a new user\n"

@@ -16,7 +16,9 @@ function usage
 "
 }
 
-echo "This will not work on a Terminus SSH client due to a bug in Terminus"
+echo "***********************
+ DO NOT RUN DURING LAB DEPLOYMENTS 
+***********************"
 
 # Read the input from the command.
 while [ "$1" != "" ]; do
