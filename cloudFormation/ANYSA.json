@@ -21,17 +21,17 @@
 		}
 	},
 	"Mappings": {
-		"Linux1RegionMap": {
+		"RedRegionMap": {
 			"us-east-1": {
-				"AMI": "ami-0ca8d081aa7be69a2"
+				"AMI": "ami-0d27558c87b3e359d"
 			},
 			"eu-west-1": {
 				"AMI": "ami-ec143995"
 			}
 		},
-        	"Linux2RegionMap": {
+        	"BlueRegionMap": {
             		"us-east-1": {
-                		"AMI": "ami-01f1aa4c35d469cff"
+                		"AMI": "ami-0951c532331f39507"
             		},
             		"eu-west-1": {
                 		"AMI": "ami-8b1a37f2"
@@ -39,7 +39,7 @@
         	},
         	"WindowsRegionMap": {
             		"us-east-1": {
-                		"AMI": "ami-094381c7e99e32b56"
+                		"AMI": "ami-0302f4fef326d8984"
             		},
             		"eu-west-1": {
 				"AMI": "ami-ad1a35d4"
@@ -47,7 +47,7 @@
         	},
                 "HTML5RegionMap": {
                         "us-east-1": {
-                                "AMI": "ami-01a58b62d1ae04e96"
+                                "AMI": "ami-0a022ece26b3bacff"
                         },
                         "eu-west-1": {
                                 "AMI": "ami-12345678"
@@ -161,6 +161,7 @@
 								"iam:DeleteRolePolicy",
 								"iam:DeleteInstanceProfile",
 								"iam:ListRoles",
+								"iam:ListPolicyVersions",
 								"iam:CreatePolicy",
 								"iam:ListPolicies",
 								"iam:GetPolicyVersion",
@@ -169,6 +170,8 @@
 								"iam:ListAttachedRolePolicies",
 								"iam:ListInstanceProfiles",
 								"iam:UpdateAssumeRolePolicy",
+								"guardduty:Get*",
+                				"guardduty:List*",
 								"logs:Describe*",
 								"logs:Get*",
 								"logs:FilterLogEvents",
@@ -259,7 +262,7 @@
 			"Properties" : {
 				"VpcId" : { "Ref" : "TrainingVPC" },
 				"MapPublicIpOnLaunch" : "true",
-				"CidrBlock" : "192.168.250.0/25",
+				"CidrBlock" : "192.168.250.0/24",
 				"AvailabilityZone" : "us-east-1a",
 				"Tags" : [ {"Key" : "Name", "Value" : "TrainingSubnet"} ]
 			}
@@ -268,7 +271,7 @@
 			"Type" : "AWS::EC2::DHCPOptions",
 			"Properties" : {
 				"DomainName" : "training.lab",
-				"DomainNameServers" : [ "192.168.250.14" ]
+				"DomainNameServers" : [ "192.168.250.2" ]
 			}
 		},
 		"TrainingGateway" : {
@@ -314,12 +317,12 @@
     				"DhcpOptionsId" : {"Ref" : "TrainingDHCPOptions"}
   			}
 		},
-		"Linux1Instance": {
+		"RedInstance": {
 			"Type": "AWS::EC2::Instance",
 			"Properties": {
                 		"ImageId": {
 					"Fn::FindInMap": [
-						"Linux1RegionMap", {
+						"RedRegionMap", {
 							"Ref": "AWS::Region"
 						},
 						"AMI"
@@ -329,38 +332,41 @@
 				"IamInstanceProfile" :  {"Ref" : "CloudWatchProfile"},
 				"SecurityGroupIds" : [ {"Ref" : "LinuxSecurityGroup"} ],
 				"SubnetId": { "Ref" : "TrainingSubnet" },
-				"Tags" : [{"Key" : "Name", "Value" : "linux1"}],
+				"Tags" : [{"Key" : "Name", "Value" : "red"}],
 				"PrivateIpAddress" : "192.168.250.30",
 				"UserData"       : { "Fn::Base64" : { "Fn::Join" : ["", [
              				"#!/bin/bash -xe\n",
-             				"echo linux1 > /etc/hostname\n",
-             				"echo nameserver 192.168.250.14 > /etc/resolv.conf\n",
+             				"echo red > /etc/hostname\n",
+                                        "echo 127.0.0.1 red localhost > /etc/hosts\n",
+             				"echo nameserver 192.168.250.2 > /etc/resolv.conf\n",
              				"echo search training.lab >> /etc/resolv.conf\n",
 					"hostname -F /etc/hostname\n",
 					"reboot\n"
 					]]}}			
 			}
 		},
-		"Linux2Instance": {
+		"BlueInstance": {
 			"Type": "AWS::EC2::Instance",
 			"Properties": {
                 "ImageId": {
                                 "Fn::FindInMap": [
-                                        "Linux2RegionMap", {
+                                        "BlueRegionMap", {
                                                 "Ref": "AWS::Region"
                                         },
                                         "AMI"
                                 ]
                            },
 		"InstanceType": "t2.micro",
+				"IamInstanceProfile" :  {"Ref" : "CloudWatchProfile"},
 				"SecurityGroupIds" : [ {"Ref" : "LinuxSecurityGroup"} ],
 				"SubnetId": { "Ref" : "TrainingSubnet" },
-				"Tags" : [{"Key" : "Name", "Value" : "linux2"}],
+				"Tags" : [{"Key" : "Name", "Value" : "blue"}],
 				"PrivateIpAddress" : "192.168.250.31",
                                 "UserData"       : { "Fn::Base64" : { "Fn::Join" : ["", [
                                         "#!/bin/bash -xe\n",
-                                        "echo linux2 > /etc/hostname\n",
-                                        "echo nameserver 192.168.250.14 > /etc/resolv.conf\n",
+                                        "echo blue > /etc/hostname\n",
+                                        "echo 127.0.0.1 blue localhost > /etc/hosts\n",
+                                        "echo nameserver 192.168.250.2 > /etc/resolv.conf\n",
                                         "echo search training.lab >> /etc/resolv.conf\n",
                                         "hostname -F /etc/hostname\n",
 					"reboot\n"
@@ -386,7 +392,8 @@
                                 "UserData"       : { "Fn::Base64" : { "Fn::Join" : ["", [
                                         "#!/bin/bash -xe\n",
                                         "echo html5 > /etc/hostname\n",
-                                        "echo nameserver 192.168.250.14 > /etc/resolv.conf\n",
+                                        "echo 127.0.0.1 html5 localhost > /etc/hosts\n",
+                                        "echo nameserver 192.168.250.2 > /etc/resolv.conf\n",
                                         "echo search training.lab >> /etc/resolv.conf\n",
                                         "hostname -F /etc/hostname\n",
 					"sed -i '0,/Password1!/s//",
@@ -407,6 +414,7 @@
                                 ]
                            },
 		"InstanceType": "t2.small",
+				"IamInstanceProfile" :  {"Ref" : "CloudWatchProfile"},
 				"SecurityGroupIds" : [ {"Ref" : "WindowsSecurityGroup"} ],
 				"SubnetId": { "Ref" : "TrainingSubnet" },
 				"PrivateIpAddress" : "192.168.250.14",
@@ -419,7 +427,7 @@
                                 "GroupName" : "ANYSA-LinuxSecurityGroup",
 				"GroupDescription" : "Enable SSH access via port 22 to the Linux Instance",
 				"VpcId" : { "Ref" : "TrainingVPC" },
-				"SecurityGroupIngress" : [{"IpProtocol" : "tcp", "FromPort" : "22", "ToPort" : "22", "CidrIp" : "0.0.0.0/0"}]
+				"SecurityGroupIngress" : [{"IpProtocol" : "tcp", "FromPort" : "22", "ToPort" : "22", "CidrIp" : "0.0.0.0/0"}, {"IpProtocol" : "tcp", "FromPort" : "1", "ToPort" : "65535", "CidrIp": "192.168.250.0/24"}]
 			}
 		},
                 "HTML5SecurityGroup" : {
@@ -437,8 +445,15 @@
                                 "GroupName" : "ANYSA-WindowsSecurityGroup",
 				"GroupDescription" : "Enable RDP access via port 3389 to the Windows Instance and DNS and WinRM internally",
 				"VpcId" : { "Ref" : "TrainingVPC" },
-				"SecurityGroupIngress" : [{"IpProtocol" : "tcp", "FromPort" : "3389", "ToPort" : "3389", "CidrIp" : "0.0.0.0/0"},{"IpProtocol" : "tcp", "FromPort" : "53", "ToPort" : "53", "CidrIp": "192.168.250.0/24"},{"IpProtocol" : "udp", "FromPort" : "53", "ToPort" : "53", "CidrIp": "192.168.250.0/24"}, {"IpProtocol" : "tcp", "FromPort" : "5985", "ToPort" : "5985", "CidrIp": "192.168.250.0/24"}]
+				"SecurityGroupIngress" : [{"IpProtocol" : "tcp", "FromPort" : "3389", "ToPort" : "3389", "CidrIp" : "0.0.0.0/0"}, {"IpProtocol" : "tcp", "FromPort" : "1", "ToPort" : "65535", "CidrIp": "192.168.250.0/24"}]
 			}
+		},
+		"mydetector": {
+  			"Type": "AWS::GuardDuty::Detector",
+  			"Properties": {
+    				"Enable": true,
+    				"FindingPublishingFrequency": "FIFTEEN_MINUTES"
+  			}
 		},
 		"CloudLogStack" : {
 			"Type": "AWS::CloudFormation::Stack",

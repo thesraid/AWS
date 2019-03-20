@@ -1,0 +1,108 @@
+{
+	"AWSTemplateFormatVersion" : "2010-09-09",
+
+	"Description" : "Configure Cloud Logging",
+	
+	"Parameters" : {
+		"TrainingVPC": {
+			"Description" : "VPC ID of TrainingVPC",
+			"Type": "String",
+			"ConstraintDescription" : "vpc id"
+		}
+	},
+
+	"Resources" : {
+		"S3Bucket" : {
+			"DeletionPolicy" : "Delete",
+			"Type": "AWS::S3::Bucket",
+			"Properties": {}
+		},
+		"BucketPolicy" : {
+			"Type" : "AWS::S3::BucketPolicy",
+			"Properties" : {
+				"Bucket" : {"Ref" : "S3Bucket"},
+				"PolicyDocument" : {
+					"Version": "2012-10-17",
+					"Statement": [ 
+					{
+						"Sid": "AWSCloudTrailAclCheck",
+						"Effect": "Allow",
+						"Principal": { "Service":"cloudtrail.amazonaws.com"},
+						"Action": "s3:GetBucketAcl",
+						"Resource": { "Fn::Join" : ["", ["arn:aws:s3:::", {"Ref":"S3Bucket"}]]}
+					},
+					{
+						"Sid": "AWSCloudTrailWrite",
+						"Effect": "Allow",
+						"Principal": { "Service":"cloudtrail.amazonaws.com"},
+						"Action": "s3:PutObject",
+						"Resource": { "Fn::Join" : ["", ["arn:aws:s3:::", {"Ref":"S3Bucket"}, "/AWSLogs/", {"Ref":"AWS::AccountId"}, "/*"]]},
+						"Condition": {
+							"StringEquals": {
+								"s3:x-amz-acl": "bucket-owner-full-control"
+							}
+						}
+					} ]
+				}
+			}
+		},
+		"classTrail" : {
+			"DependsOn" : ["BucketPolicy"],
+			"Type" : "AWS::CloudTrail::Trail",
+			"Properties" : {
+				"S3BucketName" : {"Ref":"S3Bucket"},
+				"IsLogging" : true
+			}
+		},
+		"FlowLogsGroup": {
+			"Type": "AWS::Logs::LogGroup",
+			"Properties": {
+			"RetentionInDays": 7
+			}
+		},
+		"FlowLogRole": {
+			"Type": "AWS::IAM::Role",
+			"Properties": {
+				"AssumeRolePolicyDocument": {
+					"Version" : "2012-10-17",
+					"Statement": [ {
+						"Effect": "Allow",
+						"Principal": {
+							"Service": [ "vpc-flow-logs.amazonaws.com" ]
+						},
+						"Action": [ "sts:AssumeRole" ]
+					} ]
+				},
+				"Path": "/",
+				"Policies": [ {
+					"PolicyName": "flowlogpolicy",
+					"PolicyDocument": {
+						"Version": "2012-10-17",
+						"Statement": [{
+							"Action": [
+								"logs:CreateLogGroup",
+								"logs:CreateLogStream",
+								"logs:DescribeLogGroups",
+								"logs:DescribeLogStreams",
+								"logs:PutLogEvents"
+							],
+							"Effect": "Allow",
+							"Resource": "*"
+						}]
+					}
+				} ]
+			}
+		},
+		"MyFlowLog" : {
+			"Type" : "AWS::EC2::FlowLog",
+			"Properties" : {
+				"DeliverLogsPermissionArn" : { "Fn::GetAtt" : ["FlowLogRole", "Arn"] },
+				"LogGroupName" : { "Ref" : "FlowLogsGroup" },
+				"ResourceId" : { "Ref" : "TrainingVPC" },
+				"ResourceType" : "VPC",
+				"TrafficType" : "ALL"
+			}
+		}
+	}
+}
+

@@ -38,6 +38,8 @@ done
 
 echo "Copying list of subOrgs to the scriptServer"
 aws organizations list-accounts-for-parent --parent-id ou-yus6-1nrdvs4m --output text --query 'Accounts[*].[Id]' > accounts.txt
+# Include the AVDev Accounts
+aws organizations list-accounts-for-parent --parent-id ou-yus6-erm3u7s2 --output text --query 'Accounts[*].[Id]' >> accounts.txt
 scp accounts.txt ubuntu@script-server.alien-training.com:.johno/awscli/accounts.txt
 
 ssh ubuntu@script-server.alien-training.com /home/ubuntu/.johno/awscli/share-ami.sh -r $region -s /home/ubuntu/.johno/awscli/accounts.txt -a $ami

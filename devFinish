@@ -385,7 +385,7 @@ do
    string=""
    for role in "${ROLES[@]}"
    do
-      if [ "$role" != "AWSServiceRoleForOrganizations" ] && [ "$role" != "OrganizationAccountAccessRole" ] && [[ "$role" != Sensor-ReadOnlyRoleWithCloudTrailManagement* ]] && [ "$role" != "AWSServiceRoleForSupport" ] && [[ "$role" != "AWSServiceRoleForTrustedAdvisor" ]]
+      if [ "$role" != "AWSServiceRoleForAmazonGuardDuty" ] && [ "$role" != "AWSServiceRoleForOrganizations" ] && [ "$role" != "OrganizationAccountAccessRole" ] && [[ "$role" != Sensor-ReadOnlyRoleWithCloudTrailManagement* ]] && [ "$role" != "AWSServiceRoleForSupport" ] && [[ "$role" != "AWSServiceRoleForTrustedAdvisor" ]]
       then
         printf "\nDeleting Role: $role\n"
         PROFS=($(aws iam list-instance-profiles-for-role --role-name $role --query InstanceProfiles[*].InstanceProfileName --output text --profile $profile))
