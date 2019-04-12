@@ -32,3 +32,14 @@ do
    i=$[$i+2]
 done
 
+# Repeat for AVDev orgs
+devArray=($(aws organizations list-accounts-for-parent --parent-id ou-yus6-erm3u7s2 --output text --query 'Accounts[*].[Name,Id]' | sort -V))
+arraySize=${#devArray[@]}
+
+i=0
+while [ $i -lt $arraySize ]
+do
+   j=$[$i+1]
+   connect ${devArray[$i]} ${devArray[$j]}
+   i=$[$i+2]
+done

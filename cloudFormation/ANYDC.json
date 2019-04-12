@@ -193,7 +193,21 @@
 									"ec2:VolumeType": "io1"
 								}
 							}
-						}
+						},
+						{
+            						"Sid": "USEast1AccessOnly",
+            						"Effect": "Deny",
+            						"Action": "*",
+            						"Resource": "*",
+            						"Condition": {
+                						"StringNotEquals": {
+                    							"aws:RequestedRegion": [
+                        						"--Global--",
+                        						"us-east-1"
+                    							]
+                						}
+           					 	}												
+        					}
 						]
 					}
 				} ]

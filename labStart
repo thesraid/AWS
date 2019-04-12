@@ -192,27 +192,27 @@ else
    # Convert the date and time into Irish time (as the server is running in Ireland)
    case $zone in
       WET )
-         onHour=08
-         #echo "WET : M: $onMonth D: $onDay H: $onHour"
-         ;;
-      CET )
          onHour=07
          #echo "WET : M: $onMonth D: $onDay H: $onHour"
          ;;
+      CET )
+         onHour=06
+         #echo "WET : M: $onMonth D: $onDay H: $onHour"
+         ;;
       EST )
-         onHour=13
+         onHour=12
          #echo "WET : M: $onMonth D: $onDay H: $onHour"
          ;;
       CST )
-         onHour=14
+         onHour=13
          #echo "WET : M: $onMonth D: $onDay H: $onHour"
          ;;
       PST )
-         onHour=16
+         onHour=15
          #echo "WET : M: $onMonth D: $onDay H: $onHour"
          ;;
       APJ )
-         onHour=21
+         onHour=20
          onDay=$prevDay
          onMonth=$prevMonth
          #echo "WET : M: $onMonth D: $onDay H: $onHour"
