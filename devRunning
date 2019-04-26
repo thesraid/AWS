@@ -3,31 +3,14 @@ function usage
 {
     echo "usage: labRunning [-h]
                                       --region [-r] 	us-east-1 - If not specified all regions will be checked
-                                      --start [-s] 10	AVStudent account to start with
-                                      --end [-e] 20     AVStudent account to end on
                                                         If start or end are not specified it will run to the end
 "
 }
-
-if [ $# -eq 0 ]
-  then
-    usage
-    exit
-fi
 
 while [ "$1" != "" ]; do
     case $1 in
         -r | --region )         shift
                                 REGIONS=$1
-                                ;;
-        -s | --start )          shift
-                                begin=$1
-                                ;;
-        -e | --end )            shift
-                                end=$1
-                                ;;
-        -c | --cli )            shift
-                                cli=true
                                 ;;
         -h | --help )           usage
                                 exit
@@ -42,27 +25,7 @@ then
    REGIONS=($(aws ec2 describe-regions --query Regions[*].RegionName --output text --profile cliaccount))
 fi
 
-
-NumberOfAccounts=()
-
-if [ -z "$begin" ] || [ -z "$end" ]
-then
-   count=$(aws organizations list-accounts-for-parent --parent-id ou-yus6-erm3u7s2 --output text --query 'Accounts[*].[Name,Id]' | wc -l)
-   #echo $count
-   ((count = count - 1))
-   NumberOfAccounts=$count
-else
-   #end=$[$end+1]
-   #while [ $begin -lt $end ]
-   for b in $(eval echo {$begin..$end})
-   do
-      #NumberOfAccounts+=($begin)
-      #begin=$[$begin+1]
-      NumberOfAccounts+=($b)
-      
-   done
-
-fi
+NumberOfAccounts=(1 2 3 4)
 
 for accounts in "${NumberOfAccounts[@]}"
 #for ((accounts=01;accounts<=count;accounts++))

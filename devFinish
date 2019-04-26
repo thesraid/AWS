@@ -227,7 +227,7 @@ do
       # This will fail if the bucket is not empty
       # So we will remove the buckets first and then the stacks
       BUCKETS=($(aws s3 ls --profile $profile | awk '{print $3}'))
-
+      
       for bucket in "${BUCKETS[@]}"
       do
          printf "\nDeleting the bucket: $bucket and its contents\n"
