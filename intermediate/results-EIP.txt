@@ -1,0 +1,45 @@
+-------------------------------------------------------------------
+EIP
+Tue Jul 16 16:39:01 IST 2019
+Students can now log into the 503823555998 account with the information below
+URL  : https://console.aws.amazon.com/console/home?region=us-east-1
+ACCID: 503823555998
+ACC  : avstudent202
+USER : avstudent202
+PASS : Password1!
+UserName	AVStudent202
+AWSAccount	AVStudent202
+HTML5	34.205.54.113
+Password	Password1!
+Sensor Internal: 192.168.250.22
+Sensor External: 18.204.4.190
+-------------------------------------------------------------------
+EIP
+Tue Jul 16 17:01:40 IST 2019
+Students can now log into the 503823555998 account with the information below
+URL  : https://console.aws.amazon.com/console/home?region=us-east-1
+ACCID: 503823555998
+ACC  : avstudent202
+USER : avstudent202
+PASS : Password1!
+UserName	AVStudent202
+AWSAccount	AVStudent202
+HTML5	3.220.50.166
+Password	Password1!
+Sensor Internal: 192.168.250.94
+Sensor External: 35.172.209.233
+-------------------------------------------------------------------
+EIP
+Wed Jul 17 09:47:24 IST 2019
+Students can now log into the 503823555998 account with the information below
+URL  : https://console.aws.amazon.com/console/home?region=us-east-1
+ACCID: 503823555998
+ACC  : avstudent202
+USER : avstudent202
+PASS : Password1!
+UserName	AVStudent202
+AWSAccount	AVStudent202
+HTML5	3.221.85.81
+Password	Password1!
+Sensor Internal: 192.168.250.52
+Sensor External: 3.220.174.212

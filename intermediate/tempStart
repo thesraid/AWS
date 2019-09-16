@@ -156,7 +156,7 @@ else
    for accName in "${accNameArray[@]}"
    do
       # Get the account ID for the Account
-      accID=$(aws organizations list-accounts-for-parent --parent-id ou-yus6-erm3u7s2 --query 'Accounts[?Name==`'$accName'`].Id' --output text)
+      accID=$(aws organizations list-accounts-for-parent --parent-id ou-yus6-1nrdvs4m --query 'Accounts[?Name==`'$accName'`].Id' --output text)
       if [ "$accID" = "" ]
       then
          printf "Invalid account $accName\n"
@@ -180,7 +180,7 @@ else
    for accName in "${accNameArray[@]}"
    do
    
-   accID=$(aws organizations list-accounts-for-parent --parent-id ou-yus6-erm3u7s2 --query 'Accounts[?Name==`'$accName'`].Id' --output text)
+   accID=$(aws organizations list-accounts-for-parent --parent-id ou-yus6-1nrdvs4m --query 'Accounts[?Name==`'$accName'`].Id' --output text)
  
    # Figure out what the previous day before the date specified is because of time zones. 
    prevDayDate=$(date -d $powerOnDate-"1 days")
@@ -246,7 +246,7 @@ sleep $[ ( $RANDOM % 59 )  + 1 ]s
 # The parent ID of the OUs is hard coded into this command. If we move to a different AWS root org it will need to be updated. 
 if [ "$accName" = "" ]
 then
-  aws organizations list-accounts-for-parent --parent-id ou-yus6-erm3u7s2 --query 'Accounts[*].Name' 
+  aws organizations list-accounts-for-parent --parent-id ou-yus6-1nrdvs4m --query 'Accounts[*].Name' 
   printf "Please enter the name of the account (with or without quotes) : "
   read accName
   # Remove quotes if entered
@@ -255,7 +255,7 @@ then
 fi
 
 # Get the account ID for the Account
-accID=$(aws organizations list-accounts-for-parent --parent-id ou-yus6-erm3u7s2 --query 'Accounts[?Name==`'$accName'`].Id' --output text)
+accID=$(aws organizations list-accounts-for-parent --parent-id ou-yus6-1nrdvs4m --query 'Accounts[?Name==`'$accName'`].Id' --output text)
 if [ "$accID" = "" ] 
 then
    printf "Invalid account\n"
@@ -453,7 +453,7 @@ deploy_template () {
 # Choose the appropriate CloudFormation json
 if [ "$course" = "ANYDC" ]
 then
-  url="https://s3-eu-west-1.amazonaws.com/deploy-student-env/ANYDC.json"
+  url="https://s3-eu-west-1.amazonaws.com/deploy-student-env/ANYDC_EIP.json"
   
   # Set the paratmer variables that need to be sent this cloud formation template
 
@@ -470,7 +470,7 @@ fi
 
 if [ "$course" = "ANYSA" ]
 then
-  url="https://deploy-student-env.s3-eu-west-1.amazonaws.com/ANYSA-Stage.template"
+  url="https://s3-eu-west-1.amazonaws.com/deploy-student-env/ANYSA.json"
 
   # Set the paratmer variables that need to be sent this cloud formation template
 

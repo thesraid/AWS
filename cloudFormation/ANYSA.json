@@ -23,7 +23,7 @@
 	"Mappings": {
 		"RedRegionMap": {
 			"us-east-1": {
-				"AMI": "ami-0d27558c87b3e359d"
+				"AMI": "ami-0065a0dcce354cadd"
 			},
 			"eu-west-1": {
 				"AMI": "ami-ec143995"
@@ -39,7 +39,7 @@
         	},
         	"WindowsRegionMap": {
             		"us-east-1": {
-                		"AMI": "ami-0302f4fef326d8984"
+                		"AMI": "ami-050b9d4f98fdcee7e"
             		},
             		"eu-west-1": {
 				"AMI": "ami-ad1a35d4"
@@ -271,7 +271,7 @@
 			"Type" : "AWS::EC2::DHCPOptions",
 			"Properties" : {
 				"DomainName" : "training.lab",
-				"DomainNameServers" : [ "192.168.250.2" ]
+				"DomainNameServers" : [ "192.168.250.14" ]
 			}
 		},
 		"TrainingGateway" : {
@@ -337,11 +337,11 @@
 				"UserData"       : { "Fn::Base64" : { "Fn::Join" : ["", [
              				"#!/bin/bash -xe\n",
              				"echo red > /etc/hostname\n",
-                                        "echo 127.0.0.1 red localhost > /etc/hosts\n",
-             				"echo nameserver 192.168.250.2 > /etc/resolv.conf\n",
+                            "echo 127.0.0.1 red localhost > /etc/hosts\n",
+             				"echo nameserver 192.168.250.14 > /etc/resolv.conf\n",
              				"echo search training.lab >> /etc/resolv.conf\n",
-					"hostname -F /etc/hostname\n",
-					"reboot\n"
+							"hostname -F /etc/hostname\n",
+							"reboot\n"
 					]]}}			
 			}
 		},
@@ -366,7 +366,7 @@
                                         "#!/bin/bash -xe\n",
                                         "echo blue > /etc/hostname\n",
                                         "echo 127.0.0.1 blue localhost > /etc/hosts\n",
-                                        "echo nameserver 192.168.250.2 > /etc/resolv.conf\n",
+                                        "echo nameserver 192.168.250.14 > /etc/resolv.conf\n",
                                         "echo search training.lab >> /etc/resolv.conf\n",
                                         "hostname -F /etc/hostname\n",
 					"reboot\n"
@@ -393,7 +393,7 @@
                                         "#!/bin/bash -xe\n",
                                         "echo html5 > /etc/hostname\n",
                                         "echo 127.0.0.1 html5 localhost > /etc/hosts\n",
-                                        "echo nameserver 192.168.250.2 > /etc/resolv.conf\n",
+                                        "echo nameserver 192.168.250.14 > /etc/resolv.conf\n",
                                         "echo search training.lab >> /etc/resolv.conf\n",
                                         "hostname -F /etc/hostname\n",
 					"sed -i '0,/Password1!/s//",
@@ -445,7 +445,7 @@
                                 "GroupName" : "ANYSA-WindowsSecurityGroup",
 				"GroupDescription" : "Enable RDP access via port 3389 to the Windows Instance and DNS and WinRM internally",
 				"VpcId" : { "Ref" : "TrainingVPC" },
-				"SecurityGroupIngress" : [{"IpProtocol" : "tcp", "FromPort" : "3389", "ToPort" : "3389", "CidrIp" : "0.0.0.0/0"}, {"IpProtocol" : "tcp", "FromPort" : "1", "ToPort" : "65535", "CidrIp": "192.168.250.0/24"}]
+				"SecurityGroupIngress" : [{"IpProtocol" : "tcp", "FromPort" : "3389", "ToPort" : "3389", "CidrIp" : "0.0.0.0/0"}, {"IpProtocol" : "tcp", "FromPort" : "53", "ToPort" : "53", "CidrIp": "192.168.250.0/24"}, {"IpProtocol" : "udp", "FromPort" : "53", "ToPort" : "53", "CidrIp": "192.168.250.0/24"}, {"IpProtocol" : "icmp", "FromPort" : "-1", "ToPort" : "-1", "CidrIp": "192.168.250.0/24"}]
 			}
 		},
 		"mydetector": {

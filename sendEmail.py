@@ -3,6 +3,7 @@
 """
 joriordan@alienvault.com
 Script to send an email
+http://naelshiab.com/tutorial-send-email-python/
 """
 import smtplib
 import os
@@ -12,7 +13,7 @@ from email.MIMEText import MIMEText
 from email.MIMEBase import MIMEBase
 import argparse
 
-sendr = "SENDER ADDRESS HERE"
+sendr = "polar@alien-training.com"
 
 """
 Get command line args from the user.
@@ -54,7 +55,6 @@ def main():
    args = get_args()
 
    recipients = args.recipient
-   
    msg = MIMEMultipart()
    msg['From'] = sendr
    msg['To'] = ", ".join(recipients)
@@ -73,10 +73,10 @@ def main():
  
       msg.attach(part)
 
-   server = smtplib.SMTP('SMTP SERVER HERE', 587)
+   server = smtplib.SMTP('email-smtp.us-east-1.amazonaws.com', 587)
    server.starttls()
-   server.set_debuglevel(1)
-   server.login("USERNAME", "PASSWORD")
+   #server.set_debuglevel(1)
+   server.login("AKIAIO3UMYK6OVJSPCTQ", "ArKLgWVpIzR25EUt2KCPU+Txb49/nIVnsj+VwuNk6HDp")
    server.sendmail(sendr, args.recipient, msg.as_string())
    server.quit()
 

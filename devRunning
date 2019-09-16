@@ -2,10 +2,15 @@
 function usage
 {
     echo "usage: labRunning [-h]
-                                      --region [-r] 	us-east-1 - If not specified all regions will be checked
-                                                        If start or end are not specified it will run to the end
+                                      --region [-r] 	us-east-1 | all 
 "
 }
+
+if [ $# -eq 0 ]
+  then
+    usage
+    exit
+fi
 
 while [ "$1" != "" ]; do
     case $1 in
@@ -19,20 +24,68 @@ while [ "$1" != "" ]; do
     shift
 done
 
-
-if [ -z "$REGIONS" ]
+if [ $REGIONS = "all" ]
 then
    REGIONS=($(aws ec2 describe-regions --query Regions[*].RegionName --output text --profile cliaccount))
 fi
 
-NumberOfAccounts=(1 2 3 4)
+NumberOfAccounts=()
+
+   #end=$[$end+1]
+   #while [ $begin -lt $end ]
+   for b in {1..9}
+   do
+      #NumberOfAccounts+=($begin)
+      #begin=$[$begin+1]
+      NumberOfAccounts+=($b)
+      
+   done
 
 for accounts in "${NumberOfAccounts[@]}"
 #for ((accounts=01;accounts<=count;accounts++))
 #for accounts in $(eval echo {$begin..$count})
 do
    profile="AVDev$accounts"
-   echo $profile
+   case "$profile" in
+	AVDev1) 
+		#printf "Owen "
+		printf "AVDev1 "
+		;;
+	AVDev2)
+                #printf "JohnÓ "
+		printf "AVDev2 "
+                ;;
+	AVDev3)
+                #printf "David "
+		printf "AVDev3 "
+                ;;
+	AVDev4)
+                #printf "JohnW "
+		printf "AVDev4 "
+                ;;
+        AVDev5)
+                #printf "JohnW "
+                printf "AVDev5 "
+                ;;
+        AVDev6)
+                #printf "JohnW "
+                printf "AVDev6 "
+                ;;
+        AVDev7)
+                #printf "JohnW "
+                printf "AVDev7 "
+                ;;
+        AVDev8)
+                #printf "JohnW "
+                printf "AVDev8 "
+                ;;
+        AVDev9)
+                #printf "JohnW "
+                printf "AVDev9 "
+                ;;
+	*)
+   esac
+   printf "$profile\n"
    users=($(aws iam list-users --output text --query 'Users[*].UserName' --profile $profile))
    if [ ! -z "$users" ]
    then
