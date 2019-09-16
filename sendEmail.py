@@ -13,7 +13,13 @@ from email.MIMEText import MIMEText
 from email.MIMEBase import MIMEBase
 import argparse
 
-sendr = "polar@alien-training.com"
+# Import config.py
+import sys
+sys.path.insert(0, '/etc/boru/')
+sys.path.append("/var/www/html/sshkeys")
+import config
+
+sendr = "boru@alien-training.com"
 
 """
 Get command line args from the user.
@@ -76,7 +82,9 @@ def main():
    server = smtplib.SMTP('email-smtp.us-east-1.amazonaws.com', 587)
    server.starttls()
    #server.set_debuglevel(1)
-   server.login("AKIAIO3UMYK6OVJSPCTQ", "ArKLgWVpIzR25EUt2KCPU+Txb49/nIVnsj+VwuNk6HDp")
+   awsSMTPuser = config.getConfig("awsSMTPuser")
+   awsSMTPpassword = config.getConfig("awsSMTPpassword")
+   server.login(str(awsSMTPuser), str(awsSMTPpassword))
    server.sendmail(sendr, args.recipient, msg.as_string())
    server.quit()
 
