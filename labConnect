@@ -15,14 +15,18 @@ aws configure set source_profile default --profile $accountName
 
 date
 
-accArray=($(aws organizations list-accounts-for-parent --parent-id ou-yus6-1nrdvs4m --output text --query 'Accounts[*].[Name,Id]' | sort -V))
-arraySize=${#accArray[@]}
-
+# Manually echo the details for the root account along with the Boru role
 echo "[default]
 output = json
 region = us-east-1
-role_arn = arn:aws:iam::745499864989:role/AVOrgCreatorRole
+role_arn = arn:aws:iam::097077863838:role/Boru
 credential_source  = Ec2InstanceMetadata" > ~/.aws/config
+
+rootOU=$(aws organizations list-roots --query 'Roots[0].[Id]' --output text)
+studentOU=$(aws organizations list-organizational-units-for-parent --parent-id $rootOU --query 'OrganizationalUnits[?Name==`Students`].[Id]' --output text)
+#accArray=($(aws organizations list-accounts-for-parent --parent-id ou-swz6-wzh2rgr9 --output text --query 'Accounts[*].[Name,Id]' | sort -V))
+accArray=($(aws organizations list-accounts-for-parent --parent-id $studentOU --output text --query 'Accounts[*].[Name,Id]' | sort -V))
+arraySize=${#accArray[@]}
 
 i=0
 while [ $i -lt $arraySize ]
@@ -33,7 +37,9 @@ do
 done
 
 # Repeat for AVDev orgs
-devArray=($(aws organizations list-accounts-for-parent --parent-id ou-yus6-erm3u7s2 --output text --query 'Accounts[*].[Name,Id]' | sort -V))
+rootOU=$(aws organizations list-roots --query 'Roots[0].[Id]' --output text)
+devOU=$(aws organizations list-organizational-units-for-parent --parent-id $rootOU --query 'OrganizationalUnits[?Name==`Core`].[Id]' --output text)
+devArray=($(aws organizations list-accounts-for-parent --parent-id $devOU --output text --query 'Accounts[*].[Name,Id]' | sort -V))
 arraySize=${#devArray[@]}
 
 i=0

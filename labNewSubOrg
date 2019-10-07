@@ -5,7 +5,7 @@ function usage
     echo "
 usage: labNewSubOrg [-h] --account_name [-n] ACCOUNT_NAME
 
-EXAMPLE: labNewSubOrg -n AVStudent30 
+EXAMPLE: labNewSubOrg -n attstudent30 
 
 You can also see which orgs already exist with labNewSubOrg --show [-s]
 	"
@@ -35,7 +35,8 @@ done
 
 if [ "$show" = 1 ]
 then
-  aws organizations list-accounts-for-parent --parent-id ou-yus6-1nrdvs4m --output text --query 'Accounts[*].[Name]' | sort -V
+  rootOU=$(aws organizations list-roots --query 'Roots[0].[Id]' --output text)
+  aws organizations list-accounts-for-parent --parent-id $rootOU --output text --query 'Accounts[*].[Name]' | sort -V
   exit
 fi
 
@@ -99,9 +100,11 @@ printf ".\n"
 printf "Giving the new account an alias of ${profile,,}\n"
 aws iam create-account-alias --account-alias ${profile,,} --profile $profile
 
+printf "Sleeping for 30 seconds to give AWS time to catch up\n"
+sleep 30
 
-# We can't list the regions from this account as it's not created yet. So we will list them from cliaccount
-regions=($(aws ec2 describe-regions --query Regions[*].RegionName --output text --profile cliaccount))
+# We can't list the regions from this account as it's not created yet. So we will list them from attstudent01
+regions=($(aws ec2 describe-regions --query Regions[*].RegionName --output text --profile attstudent01))
 
 printf "Creating the TrainingVPC in each region while deleting the default VPC\n"
 for region in "${regions[@]}"
