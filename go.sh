@@ -1,2 +1,0 @@
-#!/bin/bash
-/usr/bin/env bash /usr/local/bin/devRunning -r all > /var/log/labs/devRunning.txt && /usr/local/bin/sendEmail.py -r joriordan@alienvault.com jwalsh@alienvault.com ocreed@alienvault.com dhernandez@alienvault.com -s "List of Running Dev Labs in Boru" -b "This is a list of the Dev Labs running today. Please ensure labs that are running are required and power them off in Boru if they do not need to be running." -a /var/log/labs/devRunning.txt && /bin/rm /var/log/labs/devRunning.txt
