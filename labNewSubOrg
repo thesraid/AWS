@@ -7,7 +7,7 @@ usage: labNewSubOrg [-h] --account_name [-n] ACCOUNT_NAME
 
 EXAMPLE: labNewSubOrg -n attstudent30 
 
-You can also see which orgs already exist with labNewSubOrg --show [-s]
+You can also see which student orgs already exist with labNewSubOrg --show [-s]
 	"
 }
 
@@ -36,7 +36,8 @@ done
 if [ "$show" = 1 ]
 then
   rootOU=$(aws organizations list-roots --query 'Roots[0].[Id]' --output text)
-  aws organizations list-accounts-for-parent --parent-id $rootOU --output text --query 'Accounts[*].[Name]' | sort -V
+  destOU=$(aws organizations list-organizational-units-for-parent --parent-id $rootOU --query 'OrganizationalUnits[?Name==`'$destinationOUname'`].[Id]' --output text)
+  aws organizations list-accounts-for-parent --parent-id $destOU --output text --query 'Accounts[*].[Name]' | sort -V
   exit
 fi
 
@@ -125,6 +126,7 @@ do
       echo "Try running this command in a few minutes labVerifySubOrg -n $newAccName -i $accID"
       echo "If this doesn't work you can create a user in the account using labCreateAdmin -p <Password> -a $newAccName"
       echo "Once you've logged in visit https://aws-portal.amazon.com/gp/aws/developer/registration/index.html and choose FREE"
+      echo "If that page doesn't show you can try https://portal.aws.amazon.com/billing/signup/iam?type=resubscribe#/support"
       echo "Try running this command again labVerifySubOrg -n $newAccName -i $accID"
       echo "Still no luck? Try again in a few hours or email aws-verification@amazon.com and ask them to verify the account $accID"
       echo "Once they've verified it run labVerifySubOrg -n $newAccName -i $accID"
@@ -213,6 +215,7 @@ echo "!!! Perform a test deploy of a lab, with sensor, to this SubOrg account be
 echo "If it fails then account verification may be required."
 echo "Create a user in the account using labCreateAdmin -p <Password> -a $newAccName"
 echo "Once you've logged in visit https://aws-portal.amazon.com/gp/aws/developer/registration/index.html and choose FREE"
+echo "If that page doesn't show try https://portal.aws.amazon.com/billing/signup/iam?type=resubscribe#/support"
 echo "Still no luck? Try again in a few hours or email aws-verification@amazon.com and ask them to verify the account $accID"
 echo " "
 echo "Also don't forget to update AMI permissions with labShareAMI when all of the new accounts have been succesfully created"

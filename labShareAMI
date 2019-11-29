@@ -36,10 +36,39 @@ while [ "$1" != "" ]; do
     shift
 done
 
-echo "Copying list of subOrgs to the scriptServer"
-aws organizations list-accounts-for-parent --parent-id ou-yus6-1nrdvs4m --output text --query 'Accounts[*].[Id]' > accounts.txt
-# Include the AVDev Accounts
-aws organizations list-accounts-for-parent --parent-id ou-yus6-erm3u7s2 --output text --query 'Accounts[*].[Id]' >> accounts.txt
-scp accounts.txt ubuntu@script-server.alien-training.com:.johno/awscli/accounts.txt
+echo "Storing the student subOrg IDs to a local file before sharing"
+rootOU=$(aws organizations list-roots --query 'Roots[0].[Id]' --output text)
+destOU=$(aws organizations list-organizational-units-for-parent --parent-id $rootOU --query 'OrganizationalUnits[?Name==`Students`].[Id]' --output text)
+aws organizations list-accounts-for-parent --parent-id $destOU --output text --query 'Accounts[*].[Id]' > accounts.txt
 
-ssh ubuntu@script-server.alien-training.com /home/ubuntu/.johno/awscli/share-ami.sh -r $region -s /home/ubuntu/.johno/awscli/accounts.txt -a $ami
+echo "Storing the dev subOrg IDs to a local file before sharing"
+rootOU=$(aws organizations list-roots --query 'Roots[0].[Id]' --output text)
+destOU=$(aws organizations list-organizational-units-for-parent --parent-id $rootOU --query 'OrganizationalUnits[?Name==`Development`].[Id]' --output text)
+aws organizations list-accounts-for-parent --parent-id $destOU --output text --query 'Accounts[*].[Id]' >> accounts.txt
+
+
+
+if [ "$ami" = "all" ]
+then
+IMAGES=($(aws ec2 describe-images --owners self --query 'Images[*].[ImageId]' --output text --region $region))
+else
+IMAGES=($ami)
+fi
+
+for image in "${IMAGES[@]}"
+do
+   printf "Modifying "
+   aws ec2 describe-images --owners self --query 'Images[*].[Name,ImageId]' --output text --region $region | grep $image
+   aws ec2 modify-image-attribute --image-id $image --launch-permission "{\"Remove\": [{\"Group\":\"all\"}]}" --region $region
+
+   SUBS=($(cat accounts.txt))
+   for sub in "${SUBS[@]}"
+   do
+      printf "."
+      aws ec2 modify-image-attribute --image-id $image --launch-permission "Add=[{UserId=$sub}]" --region $region
+   done
+
+   echo " "
+done
+
+rm accounts.txt

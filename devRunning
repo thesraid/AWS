@@ -26,7 +26,7 @@ done
 
 if [ $REGIONS = "all" ]
 then
-   REGIONS=($(aws ec2 describe-regions --query Regions[*].RegionName --output text --profile cliaccount))
+   REGIONS=($(aws ec2 describe-regions --query Regions[*].RegionName --output text --profile attstudent01))
 fi
 
 NumberOfAccounts=()
@@ -45,43 +45,37 @@ for accounts in "${NumberOfAccounts[@]}"
 #for ((accounts=01;accounts<=count;accounts++))
 #for accounts in $(eval echo {$begin..$count})
 do
-   profile="AVDev$accounts"
+   profile="atttrain$accounts"
    case "$profile" in
-	AVDev1) 
-		#printf "Owen "
-		printf "AVDev1 "
+	atttrain1) 
+		printf "atttrain1 "
 		;;
-	AVDev2)
-                #printf "JohnÓ "
-		printf "AVDev2 "
+	atttrain2)
+		printf "atttrain2 "
                 ;;
-	AVDev3)
-                #printf "David "
-		printf "AVDev3 "
+	atttrain3)
+		printf "atttrain3 "
                 ;;
-	AVDev4)
-                #printf "JohnW "
-		printf "AVDev4 "
+	atttrain4)
+		printf "atttrain4 "
                 ;;
-        AVDev5)
-                #printf "JohnW "
-                printf "AVDev5 "
+        atttrain5)
+                printf "atttrain5 "
                 ;;
-        AVDev6)
-                #printf "JohnW "
-                printf "AVDev6 "
+        atttrain6)
+                printf "atttrain6 "
                 ;;
-        AVDev7)
-                #printf "JohnW "
-                printf "AVDev7 "
+        atttrain7)
+                printf "atttrain7 "
                 ;;
-        AVDev8)
-                #printf "JohnW "
-                printf "AVDev8 "
+        atttrain8)
+                printf "atttrain8 "
                 ;;
-        AVDev9)
-                #printf "JohnW "
-                printf "AVDev9 "
+        atttrain9)
+                printf "atttrain9 "
+                ;;
+        atttrain10)
+                printf "atttrain10 "
                 ;;
 	*)
    esac

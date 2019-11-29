@@ -38,7 +38,7 @@ done
 
 # Repeat for AVDev orgs
 rootOU=$(aws organizations list-roots --query 'Roots[0].[Id]' --output text)
-devOU=$(aws organizations list-organizational-units-for-parent --parent-id $rootOU --query 'OrganizationalUnits[?Name==`Core`].[Id]' --output text)
+devOU=$(aws organizations list-organizational-units-for-parent --parent-id $rootOU --query 'OrganizationalUnits[?Name==`Development`].[Id]' --output text)
 devArray=($(aws organizations list-accounts-for-parent --parent-id $devOU --output text --query 'Accounts[*].[Name,Id]' | sort -V))
 arraySize=${#devArray[@]}
 
